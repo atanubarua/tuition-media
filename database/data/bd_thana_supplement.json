@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "notes": "Supplemental metropolitan thana list for missing entries",
+    "sources": [
+      "https://www.police.gov.bd/en/dhaka_metropolitan_police",
+      "https://en.wikipedia.org/wiki/Chattogram_Metropolitan_Police",
+      "https://en.wikipedia.org/wiki/Khulna_Metropolitan_Police",
+      "https://en.wikipedia.org/wiki/Rajshahi_Metropolitan_Police"
+    ]
+  },
+  "districts": [
+    {
+      "district": "Dhaka",
+      "thanas": [
+        "Adabor", "Airport", "Badda", "Banani", "Bangshal", "Bhashantek", "Cantonment", "Chackbazar", "Dakshin Khan", "Darussalam", "Demra", "Dhanmondi", "Gandaria", "Gulshan", "Hazaribag", "Jatrabari", "Kadamtoli", "Kafrul", "Kalabagan", "Kamrangirchar", "Khilgaon", "Khilkhet", "Kotwali", "Lalbag", "Mirpur Model", "Mohammadpur", "Motijheel", "Mugda", "New Market", "Pallabi", "Paltan Model", "Ramna Model", "Rampura", "Rupnagar", "Sabujbag", "Shah Ali", "Shahbag", "Shahjahanpur", "Sher e Bangla Nagar", "Shyampur", "Sutrapur", "Tejgaon", "Tejgaon I/A", "Turag", "Uttara Model", "Uttarkhan", "Uttara West", "Vatara", "Wari"
+      ]
+    },
+    {
+      "district": "Chattogram",
+      "thanas": [
+        "Akbarshah", "Bakoliya", "Bandar", "Bayazid", "Chandgaon", "Double Mooring", "Halishahar", "Khulshi", "Kotwali", "Pahartali", "Panchlaish", "Patenga", "Chawkbazar", "Sadarghat", "EPZ", "Karnaphuli"
+      ]
+    },
+    {
+      "district": "Khulna",
+      "thanas": [
+        "Khulna Sadar", "Sonadanga", "Labanchara", "Harintana", "Khalishpur", "Daulatpur", "Khan Jahan Ali", "Aranghata"
+      ]
+    },
+    {
+      "district": "Rajshahi",
+      "thanas": [
+        "Boalia", "Rajpara", "Motihar", "Shah Makhdum", "Chandrima", "Kasiadanga", "Katakhali", "Belpukur", "Airport", "Karnahar", "Damkura", "Paba"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4439 @@
+{
+    "meta": {
+        "version": "1.2.1",
+        "country": "Bangladesh",
+        "subdistrict_types": [
+            "upazila",
+            "thana"
+        ],
+        "generated_at": "2026-05-01T16:46:09+00:00",
+        "generated_from": "bd_locations_source.json",
+        "thana_source": "raw.githubusercontent.com/mprince2k18/bangladesh-geo-district-thana/master/thanas.sql"
+    },
+    "divisions": [
+        {
+            "name": "Barishal",
+            "districts": [
+                {
+                    "name": "Barguna",
+                    "subdistricts": [
+                        {
+                            "name": "Agailjhara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Amtali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bamna",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Barguna Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Betagi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Patharghata",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Taltali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Amtali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bamna",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Barguna Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Betagi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Patharghata",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Taltali",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Barisal",
+                    "subdistricts": [
+                        {
+                            "name": "Agailjhara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Babuganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bakerganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Banaripara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Barisal Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gournadi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Hizla",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mehendiganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Muladi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Uzirpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Agailjhara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Babuganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bakerganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Banaripara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Barisal Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gournadi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Hizla",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mehendiganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Muladi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Wazirpur",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Bhola",
+                    "subdistricts": [
+                        {
+                            "name": "Borhanuddin",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Charfassion",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Daulatkhan",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Lalmohan",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Monpura",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tazumuddin",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bhola Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Borhanuddin",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Char Fasson",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Daulatkhan",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Lalmohan",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Manpura",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tazumuddin",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Jhalokathi",
+                    "subdistricts": [
+                        {
+                            "name": "Jhalokathi Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kathalia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nalchity",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rajapur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tazumuddin",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Jhalokati Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kathalia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nalchity",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rajapur",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Patuakhali",
+                    "subdistricts": [
+                        {
+                            "name": "Bauphal",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dashmina",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dumki",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Galachipa",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kalapara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mirjaganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Patuakhali Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rangabali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bauphal",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dashmina",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dumki",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Galachipa",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kalapara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mirzaganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Patuakhali Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rangabali",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Pirojpur",
+                    "subdistricts": [
+                        {
+                            "name": "Bhandaria",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kawkhali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mothbaria",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nazirpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nesarabad",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Pirojpur Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Zianagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bhandaria",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Indurkani",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kawkhali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mathbaria",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nazirpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nesarabad (Swarupkati)",
+                            "type": "thana"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Chattogram",
+            "districts": [
+                {
+                    "name": "B.baria",
+                    "subdistricts": [
+                        {
+                            "name": "Akhaura",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ashuganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "B.Baria Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bancharampur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bijoynagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kasba",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nabinagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nasirnagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sarail",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Akhaura",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ashuganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bancharampur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bijoynagar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Brahmanbaria Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kasba",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nasirnagar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sarail",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Bandarban",
+                    "subdistricts": [
+                        {
+                            "name": "Alikadam",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bandarban Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Lama",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Naikhyongchari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rowangchari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ruma",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Thanchi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ali Kadam",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bandarban Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Lama",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Naikhongchhari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rowangchhari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ruma",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Thanchi",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Chandpur",
+                    "subdistricts": [
+                        {
+                            "name": "Chandpur Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dakshin",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Faridganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Haimchar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Haziganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kachua",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shahrasti",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Uttar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chandpur Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dhakirgaon",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Faridganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Haimchar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Haziganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kachua",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Matlab Uttar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Matlab dakkhin",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shahrasti",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Chattogram",
+                    "subdistricts": [
+                        {
+                            "name": "Anwara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Banskhali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Boalkhali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chandanish",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Fatikchari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Hathazari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Karnaphuli",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Lohagara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mirsharai",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Patiya",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rangunia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Raojan",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sandwip",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Satkania",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sitakunda",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Akbarshah",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bakoliya",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bandar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bayazid",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bhujpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chandgaon",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Double Mooring",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "EPZ",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Halishahar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Karnaphuli",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Khulshi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kotwali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Pahartali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Panchlaish",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Patenga",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Cox's bazar",
+                    "subdistricts": [
+                        {
+                            "name": "Chakoria",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Cox'S Bazar Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kutubdia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Moheskhali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Pekua",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ramu",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Teknaf",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ukhiya",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Badarkhali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chakaria",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Cox's Bazar Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kutubdia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Maheshkhali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Pekua",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ramu",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Teknaf",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ukhia",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Cumilla",
+                    "subdistricts": [
+                        {
+                            "name": "Barura",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Brahmanpara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Burichong",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chandina",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chouddagram",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Cumilla Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Cumilla Sadar Daksin",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Daudkandi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Debidwar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Homna",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Laksham",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Lalmai",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Meghna",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Monohorganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Muradnagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nangalkot",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Titas",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Barura",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Brahmanpara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Burichang",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chandina",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chapitala",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chauddagram",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Comilla Adarsha Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Comilla Sadar Dakshin",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Daudkandi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Debidwar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Homna",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Laksham",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Lalmai",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Meghna",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Monohorgonj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Muradnagar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nangalkot",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Titas",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Feni",
+                    "subdistricts": [
+                        {
+                            "name": "Chhagalniya",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Daganbhuiyan",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Feni Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Fulgazi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Porshuram",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sonagazi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chhagalnaiya",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Daganbhuiyan",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Feni Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Fulgazi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Parshuram",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sonagazi",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Khagrachari",
+                    "subdistricts": [
+                        {
+                            "name": "Dighinala",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Guimara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Khagrachari Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Laxmichari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mahalchari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Manikchari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Matiranga",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Panchari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ramgarh",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dighinala",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Khagrachhari Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Lakshmichhari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mahalchhari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Manikchhari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Matiranga",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Panchhari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ramgarh",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Laxmipur",
+                    "subdistricts": [
+                        {
+                            "name": "Komol Nagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Laxmipur Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Raipur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ramganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ramgati",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kamalnagar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Lakshmipur Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Raipur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ramganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ramgati",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Noakhali",
+                    "subdistricts": [
+                        {
+                            "name": "Begumganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chatkhil",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Companiganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Hatiya",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kabir Hat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Noakhali Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Senbag",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sonaimuri",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Subarna Char",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Begumganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chatkhil",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Companiganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Hatiya",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kabirhat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Noakhali Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Senbagh",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sonaimuri",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Suborno Char",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Rangamati",
+                    "subdistricts": [
+                        {
+                            "name": "Baghaichari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Barkal",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Belaichari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Juraichari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kaptai",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kaukhali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Langadu",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nanniarchar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rajosthali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rangamati Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bagaichhari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Barkal",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Belaichhari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Juraichhari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kaptai",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kawkhali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Langadu",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Naniarchar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rajasthali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rangamati Sadar",
+                            "type": "thana"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Dhaka",
+            "districts": [
+                {
+                    "name": "Dhaka",
+                    "subdistricts": [
+                        {
+                            "name": "Dhamrai",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dohar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Keraniganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nawabganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Savar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Adabar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Azampur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Badda",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bangsal",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bhatara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bimanbandar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Cantonment",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chowkbazar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Darus Salam",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Demra",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dhanmondi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gendaria",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gulshan",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Hazaribagh",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kadamtali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kafrul",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kalabagan",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kamrangirchar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Khansama",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Khilgaon",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Khilkhet",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kotwali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Lalbagh",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mirpur Model Thana",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mohammadpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Motijheel",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "New Market",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Pallabi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Paltan",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Panthapath",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ramna",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rampura",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sabujbagh",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shahbag",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sher-e-Bangla Nagar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shyampur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sutrapur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tejgaon",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tejgaon Industrial Area",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Turag",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Uttar Khan",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Uttara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Wari",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Faridpur",
+                    "subdistricts": [
+                        {
+                            "name": "Alfadanga",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bhanga",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Boalmari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Charbhadrasan",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Faridpur Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Madhukhali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nagarkanda",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sadarpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Saltha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Alfadanga",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bhanga",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Boalmari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Charbhadrasan",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Faridpur Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Madhukhali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nagarkanda",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sadarpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Saltha",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Gazipur",
+                    "subdistricts": [
+                        {
+                            "name": "Gazipur Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kaliakoir",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kaliganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kapasia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sreepur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gazipur Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kaliakair",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kaliganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kapasia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sreepur",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Gopalganj",
+                    "subdistricts": [
+                        {
+                            "name": "Gopalganj Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kasiani",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kotwalipara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Muksudpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tungipara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gopalganj Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kashiani",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kotalipara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Muksudpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tungipara",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Kishoreganj",
+                    "subdistricts": [
+                        {
+                            "name": "Austagram",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bajitpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bhairab",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Hossainpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Itna",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Karimganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Katiadi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kishoreganj Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kuliarchar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mithamoin",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nikli",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Pakundia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tarail",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Austagram",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bajitpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bhairab",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Hossainpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Itna",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Karimganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Katiadi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kishoreganj Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kuliarchar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mithamain",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nikli",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Pakundia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tarail",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Madaripur",
+                    "subdistricts": [
+                        {
+                            "name": "Kalkini",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Madaripur Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rajoir",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shibchar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kalkini",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Madaripur Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rajoir",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shibchar",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Manikganj",
+                    "subdistricts": [
+                        {
+                            "name": "Daulatpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ghior",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Harirampur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Manikganj Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Saturia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shivalaya",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Singair",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Daulatpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ghior",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Harirampur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Manikganj Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Saturia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shivalaya",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Singair",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Munshiganj",
+                    "subdistricts": [
+                        {
+                            "name": "Gazaria",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Lauhajong",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Munshiganj Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sirajdikhan",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sreenagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tongibari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gazaria",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Lohajang",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Munshiganj Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sirajdikhan",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sreenagar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tongibari",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Narayanganj",
+                    "subdistricts": [
+                        {
+                            "name": "Araihazar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bandar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Narayanganj Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rupganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sonargaon",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Araihazar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bandar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Narayanganj Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rupganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sonargaon",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Narshingdi",
+                    "subdistricts": [
+                        {
+                            "name": "Belabo",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Monohardi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Narshingdi Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Palash",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Raipura",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shibpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Belabo",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Monohardi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Narsingdi Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Palash",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Raipura",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shibpur",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Rajbari",
+                    "subdistricts": [
+                        {
+                            "name": "Baliakandi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Goalanda",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kalukhali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Pangsha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rajbari Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Baliakandi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Goalandaghat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kalukhali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Pangsha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rajbari Sadar",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Shariatpur",
+                    "subdistricts": [
+                        {
+                            "name": "Bhedarganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Damuddya",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Goshairhat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Janjira",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Naria",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shariatpur Sadar",
+                            "type": "upazila"
+                        }
+                    ]
+                },
+                {
+                    "name": "Tangail",
+                    "subdistricts": [
+                        {
+                            "name": "Basail",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bhuapur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Delduar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dhanbari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ghatail",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gopalpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kalihati",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Madhupur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mirzapur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nagarpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shakhipur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tangail Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Basail",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bhuapur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Delduar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dhanbari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ghatail",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gopalpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kalihati",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Madhupur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mirzapur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nagarpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sakhipur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tangail Sadar",
+                            "type": "thana"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Khulna",
+            "districts": [
+                {
+                    "name": "Bagerhat",
+                    "subdistricts": [
+                        {
+                            "name": "Bagerhat Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chitalmari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Fakirhat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kachua",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mollahat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mongla",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Morrelganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rampal",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sharankhola",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bagerhat Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chitalmari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Fakirhat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kachua",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mollahat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mongla",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Morrelganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rampal",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sarankhola",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Chuadanga",
+                    "subdistricts": [
+                        {
+                            "name": "Alamdanga",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chuadanga Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Damurhuda",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Jibannagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Alamdanga",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chuadanga Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Damurhuda",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Jibannagar",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Jashore",
+                    "subdistricts": [
+                        {
+                            "name": "Abhoynagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bagherpara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chowgacha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Jashore Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Jhikargacha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Keshabpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Monirampur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sarsha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Abhaynagar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bagherpara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chaugachha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Jessore Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Jhikargacha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Keshabpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Manirampur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sharsha",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Jhenaidah",
+                    "subdistricts": [
+                        {
+                            "name": "Harinakunda",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Jhenaidah Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kaliganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kotchandpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Moheshpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shailkupa",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Harinakunda",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Jhenaidah Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kaliganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kotchandpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Maheshpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shailkupa",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Khulna",
+                    "subdistricts": [
+                        {
+                            "name": "Batiaghata",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dacope",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dighalia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dumuria",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Koira",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Paikgacha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Phultala",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rupsa",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Terokhada",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Batiaghata",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dacope",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Daulatpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dighalia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dumuria",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Harintana",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Khalishpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Khan Jahan Ali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Koyra",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Paikgachha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Phultala",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rupsa",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sonadanga",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Terokhada",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Kushtia",
+                    "subdistricts": [
+                        {
+                            "name": "Bheramara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Daulatpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Khoksha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kumarkhali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kushtia Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mirpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bheramara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Daulatpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Khoksa",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kumarkhali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kushtia Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mirpur",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Magura",
+                    "subdistricts": [
+                        {
+                            "name": "Magura Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mohammadpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Salikha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sreepur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Magura Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mohammadpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shalikha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sreepur",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Meherpur",
+                    "subdistricts": [
+                        {
+                            "name": "Gangni",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Meherpur Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mujib Nagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gangni",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Meherpur Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mujibnagar",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Narail",
+                    "subdistricts": [
+                        {
+                            "name": "Kalia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Lohagara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Narail Sadar",
+                            "type": "upazila"
+                        }
+                    ]
+                },
+                {
+                    "name": "Satkhira",
+                    "subdistricts": [
+                        {
+                            "name": "Assasuni",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Debhata",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kalaroa",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kaliganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Satkhira Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shyamnagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tala",
+                            "type": "upazila"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "MYMENSINGH",
+            "districts": [
+                {
+                    "name": "Jamalpur",
+                    "subdistricts": [
+                        {
+                            "name": "Bakshiganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dewanganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Islampur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Jamalpur Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Madarganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Melendah",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sarishabari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Baksiganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dewanganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Islampur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Jamalpur Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Madarganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Melandaha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sarishabari",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Mymensingh",
+                    "subdistricts": [
+                        {
+                            "name": "Bhaluka",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dhobaura",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Fulbaria",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gaffargaon",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gouripur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Haluaghat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ishwarganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Muktagacha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mymensingh Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nandail",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Phulpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tarakanda",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Trishal",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bhaluka",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dhobaura",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Fulbaria",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gafargaon",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gouripur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Haluaghat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ishwarganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Muktagachha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mymensingh Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nandail",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Phulpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tara Khanda",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Trishal",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Netrokona",
+                    "subdistricts": [
+                        {
+                            "name": "Atpara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Barhatta",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Durgapur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kalmakanda",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kendua",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Khaliajuri",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Madan",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mohanganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Netrakona Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Purbadhala",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Atpara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Barhatta",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Durgapur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kalmakanda",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kendua",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Khaliajuri",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Madan",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mohanganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Netrokona Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Purbadhala",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Sherpur",
+                    "subdistricts": [
+                        {
+                            "name": "Jhenaigati",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nakla",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nalitabari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sherpur Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sreebordi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Jhenaigati",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nakla",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nalitabari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sherpur Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sreebardi",
+                            "type": "thana"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Rajshahi",
+            "districts": [
+                {
+                    "name": "Bogura",
+                    "subdistricts": [
+                        {
+                            "name": "Adamdighi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bogura Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dhunot",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dhupchancia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gabtali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kahaloo",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nandigram",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sariakandi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shajahanpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sherpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shibganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sonatala",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Adamdighi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bogra Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dhunat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dhupchanchia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gabtali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kahaloo",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nandigram",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sariakandi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shajahanpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sherpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shibganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sonatala",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "C. nawabganj",
+                    "subdistricts": [
+                        {
+                            "name": "Bholahat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gomostapur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nachol",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nawabganj Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shibganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bholahat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chapai Nawabganj Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dogachi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gomostapur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nachol",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shibganj",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Joypurhat",
+                    "subdistricts": [
+                        {
+                            "name": "Akkelpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Joypurhat Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kalai",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Khetlal",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Panchbibi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Akkelpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Joypurhat Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kalai",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Khetlal",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Panchbibi",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Naogaon",
+                    "subdistricts": [
+                        {
+                            "name": "Atrai",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Badalgachi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dhamoirhat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Manda",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mohadevpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Naogaon Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Niamatpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Patnitala",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Porsha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Raninagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shapahar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Atrai",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Badalgachhi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dhamoirhat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Manda",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mohadevpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Naogaon Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Niamatpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Patnitala",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Porsha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Raninagar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sapahar",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Natore",
+                    "subdistricts": [
+                        {
+                            "name": "Bagatipara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Baraigram",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gurudaspur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Lalpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Naldanga",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Natore Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Singra",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bagatipara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Baraigram",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gurudaspur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Lalpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Naldanga",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Natore Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Singra",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Pabna",
+                    "subdistricts": [
+                        {
+                            "name": "Atghoria",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bera",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bhangura",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chatmohar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Faridpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ishwardi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Pabna Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Santhia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sujanagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Aminpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Atgharia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bera",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bhangura",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chatmohar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Faridpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ishwardi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Pabna Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Santhia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sujanagar",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Rajshahi",
+                    "subdistricts": [
+                        {
+                            "name": "Bagha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bagmara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Charghat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Durgapur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Godagari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mohanpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Paba",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Puthia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tanore",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bagha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bagmara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Boalia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Charghat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Durgapur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Godagari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mohanpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Paba",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Puthia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shah Makhdum",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tanore",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Sirajganj",
+                    "subdistricts": [
+                        {
+                            "name": "Belkuchi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chowhali",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kamarkhand",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kazipur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Raiganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Shahzadpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sirajganj Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tarash",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ullapara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Belkuchi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chauhali",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kamarkhanda",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kazipur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Raiganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Shahjadpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sirajganj Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tarash",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ullahpara",
+                            "type": "thana"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Rangpur",
+            "districts": [
+                {
+                    "name": "Dinajpur",
+                    "subdistricts": [
+                        {
+                            "name": "Birampur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Birganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Birol",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bochaganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chirirbandar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dinajpur Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Fulbari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ghoraghat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Hakimpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kaharol",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Khanshama",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nawabganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Parbatipur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Biral",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Birampur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Birganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bochaganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chirirbandar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dinajpur Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Fulbari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ghoraghat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Hakimpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kaharole",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nawabganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Parbatipur",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Gaibandha",
+                    "subdistricts": [
+                        {
+                            "name": "Fulchari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gaibandha Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gobindaganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Palashbari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sadullapur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Saghata",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sundarganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gaibandha Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gobindaganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Palashbari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Phulchhari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sadullapur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Saghata",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sundarganj",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Kurigram",
+                    "subdistricts": [
+                        {
+                            "name": "Bhurungamari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chilmari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Fulbari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kurigram Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nageswari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rajarhat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rajibpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rowmari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ulipur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bhurungamari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Char Rajibpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chilmari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kurigram Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nageshwari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Phulbari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rajarhat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Raomari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ulipur",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Lalmonirhat",
+                    "subdistricts": [
+                        {
+                            "name": "Aditmari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Hatibandha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kaliganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Lalmonirhat Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Patgram",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Aditmari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Hatibandha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kaliganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Lalmonirhat Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Patgram",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Nilphamari",
+                    "subdistricts": [
+                        {
+                            "name": "Dimla",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Domar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Jaldhaka",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kishoreganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nilphamari Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sayedpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dimla",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Domar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Jaldhaka",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kishoreganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nilphamari Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Saidpur",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Panchagarh",
+                    "subdistricts": [
+                        {
+                            "name": "Atwari",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Boda",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Debiganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Panchagarh Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tetulia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Atwari",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Boda",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Debiganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Panchagarh Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tetulia",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Rangpur",
+                    "subdistricts": [
+                        {
+                            "name": "Badarganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gangachara",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kaunia",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Mithapukur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Pirgacha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Pirganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rangpur Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Taraganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Badarganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gangachara",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kaunia",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Mithapukur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Pirgachha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Pirganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rangpur Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Taraganj",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Thakurgaon",
+                    "subdistricts": [
+                        {
+                            "name": "Baliadangi",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Haripur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Pirganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ranisankail",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Thakurgaon Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Baliadangi",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Haripur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Pirganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Ranisankail",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Thakurgaon Sadar",
+                            "type": "thana"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Sylhet",
+            "districts": [
+                {
+                    "name": "Habiganj",
+                    "subdistricts": [
+                        {
+                            "name": "Azmiriganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bahubal",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Baniachong",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chunarughat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Habiganj Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Lakhai",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Madhabpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Nabiganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sayestaganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Ajmiriganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bahubal",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Baniachong",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chunarughat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Habiganj Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Lakhai",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Madhabpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Nabiganj",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Moulvibazar",
+                    "subdistricts": [
+                        {
+                            "name": "Barlekha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Juri",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kamalganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kulaura",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Moulvibazar Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Rajnagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sreemangal",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Barlekha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Juri",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kamalganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kulaura",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Moulvibazar Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Rajnagar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sreemangal",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Sunamganj",
+                    "subdistricts": [
+                        {
+                            "name": "Biswamvarpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Chatak",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dakhin Sunamganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Derai",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dharmapasha",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Doarabazar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Jagannathpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Jamalganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sulla",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sunamganj Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Tahirpur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Bishwamvarpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Chhatak",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dakshin Sunamganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Derai",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dharamapasha",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dowarabazar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Jagannathpur",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Jamalganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sullah",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sunamganj Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Tahirpur",
+                            "type": "thana"
+                        }
+                    ]
+                },
+                {
+                    "name": "Sylhet",
+                    "subdistricts": [
+                        {
+                            "name": "Balaganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Beanibazar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Biswanath",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Companiganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Dakshin Surma",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Fenchuganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Golapganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Gowainghat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Jointiapur",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Kanaighat",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Osmaninagar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Sylhet Sadar",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Zakiganj",
+                            "type": "upazila"
+                        },
+                        {
+                            "name": "Amkuna",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Balaganj Union",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Beanibazar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Bishwanath",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Companiganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dakshin Surma",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Dayamir Union",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Fenchuganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Golapganj",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Gowainghat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Jaintiapur Upazila",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Kanaighat",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Osmani Nagar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Sylhet Sadar",
+                            "type": "thana"
+                        },
+                        {
+                            "name": "Zakiganj",
+                            "type": "thana"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
