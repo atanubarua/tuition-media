@@ -53,7 +53,7 @@ class ProfileController extends Controller
             'subject_ids.*' => ['integer', 'exists:subjects,id'],
             'preferred_location_ids' => ['required', 'array', 'min:1'],
             'preferred_location_ids.*' => ['integer', 'exists:subdistricts,id'],
-            'experience_months' => ['required', 'integer', 'min:0', 'max:600'],
+            'experience_months' => ['required', 'integer', 'min:1', 'max:600'],
             'bio' => ['nullable', 'string', 'max:1000'],
         ]);
 

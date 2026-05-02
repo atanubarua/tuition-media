@@ -23,7 +23,7 @@ type ProfileShape = {
     teachable_mediums: string[];
     subject_ids: number[];
     preferred_location_ids: number[];
-    experience_months: number;
+    experience_months: number | string;
     bio: string;
 };
 
@@ -46,7 +46,7 @@ const ACADEMIC_YEARS = [
     { value: 2, label: '2nd Year' },
     { value: 3, label: '3rd Year' },
     { value: 4, label: '4th Year' },
-    { value: 5, label: 'Passed Out' },
+    { value: 5, label: 'Graduated' },
 ];
 
 const currentYear = new Date().getFullYear();
@@ -119,7 +119,7 @@ export default function TutorProfileEdit({
         teachable_mediums: profile?.teachable_mediums ?? [],
         subject_ids: profile?.subject_ids ?? [],
         preferred_location_ids: profile?.preferred_location_ids ?? [],
-        experience_months: profile?.experience_months ?? 0,
+        experience_months: profile?.experience_months ?? '',
         bio: profile?.bio ?? '',
     });
 
@@ -130,9 +130,10 @@ export default function TutorProfileEdit({
     const subdistrictOptions = filteredSubdistricts.map((s) => ({ value: s.id, label: s.type ? `${s.name} (${s.type})` : s.name }));
 
     const experienceLabel = (() => {
-        const y = Math.floor(data.experience_months / 12);
-        const m = data.experience_months % 12;
-        if (data.experience_months === 0) return null;
+        const months = Number(data.experience_months);
+        if (!months) return null;
+        const y = Math.floor(months / 12);
+        const m = months % 12;
         return [y > 0 && `${y} yr`, m > 0 && `${m} mo`].filter(Boolean).join(' ');
     })();
 
@@ -173,10 +174,9 @@ export default function TutorProfileEdit({
                             <div className="lg:col-span-2">
                                 <Label>University <span className="text-destructive">*</span></Label>
                                 <ReactSelect
+                                    instanceId="university"
                                     isClearable
                                     isSearchable
-                                    styles={SELECT_STYLES}
-                                    options={universityOptions}
                                     value={universityOptions.find((o) => o.value === data.university_id) ?? null}
                                     onChange={(opt) => setData('university_id', opt?.value ?? null)}
                                     placeholder="Search university..."
@@ -197,6 +197,7 @@ export default function TutorProfileEdit({
                             <div>
                                 <Label>Intake Year <span className="text-destructive">*</span></Label>
                                 <ReactSelect
+                                    instanceId="intake-year"
                                     isClearable
                                     styles={SELECT_STYLES}
                                     options={INTAKE_YEAR_OPTIONS}
@@ -310,10 +311,9 @@ export default function TutorProfileEdit({
                         <div>
                             <Label>Subjects I Can Teach <span className="text-destructive">*</span></Label>
                             <ReactSelect
+                                instanceId="subjects"
                                 isMulti
                                 isSearchable
-                                styles={SELECT_STYLES}
-                                options={subjectOptions}
                                 value={subjectOptions.filter((o) => data.subject_ids.includes(o.value))}
                                 onChange={(selected) => setData('subject_ids', selected.map((o) => o.value))}
                                 placeholder="Search and select subjects..."
@@ -329,6 +329,7 @@ export default function TutorProfileEdit({
                             <div>
                                 <Label>Filter by District</Label>
                                 <ReactSelect
+                                    instanceId="district"
                                     isClearable
                                     isSearchable
                                     styles={SELECT_STYLES}
@@ -345,6 +346,7 @@ export default function TutorProfileEdit({
                             <div>
                                 <Label>Areas (Upazila / Thana) <span className="text-destructive">*</span></Label>
                                 <ReactSelect
+                                    instanceId="subdistricts"
                                     isMulti
                                     isSearchable
                                     styles={SELECT_STYLES}
@@ -368,10 +370,11 @@ export default function TutorProfileEdit({
                                 <div className="mt-1 flex items-center gap-2">
                                     <Input
                                         type="number"
-                                        min={0}
+                                        min={1}
                                         max={600}
                                         value={data.experience_months}
-                                        onChange={(e) => setData('experience_months', Number(e.target.value))}
+                                        onChange={(e) => setData('experience_months', e.target.value === '' ? '' : Number(e.target.value))}
+                                        placeholder="e.g. 6"
                                         className="w-28"
                                     />
                                     <span className="text-sm text-muted-foreground shrink-0">

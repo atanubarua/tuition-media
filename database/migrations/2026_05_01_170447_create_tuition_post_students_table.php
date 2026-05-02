@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('tuition_post_id')->constrained('tuition_posts')->cascadeOnDelete();
             $table->string('student_name');
             $table->enum('academic_level', ['primary', 'high_school', 'college', 'honors']);
-            $table->unsignedTinyInteger('class_level')->nullable();
+            $table->string('class_level', 20)->nullable();
             $table->string('honors_subject')->nullable();
             $table->enum('medium', ['bangla', 'english', 'madrasha', 'other'])->default('bangla');
             $table->timestamps();

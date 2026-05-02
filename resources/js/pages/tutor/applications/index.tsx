@@ -55,7 +55,7 @@ export default function TutorApplicationsIndex({ applications }: { applications:
 
 TutorApplicationsIndex.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
+        { title: 'Dashboard', href: dashboard.url() },
         { title: 'My Applications', href: '/tutor/applications' },
     ],
 };

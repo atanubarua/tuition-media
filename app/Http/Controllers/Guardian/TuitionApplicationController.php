@@ -16,7 +16,10 @@ class TuitionApplicationController extends Controller
         abort_unless($request->user()->role === 'guardian', 403);
         abort_unless($tuitionPost->guardian_id === $request->user()->id, 403);
 
-        $applications = TuitionApplication::with(['tutor.tutorProfile.university'])
+        $applications = TuitionApplication::with([
+            'tutor.tutorProfile.university',
+            'tutor.tutorProfile.subjects:id,name',
+        ])
             ->where('tuition_post_id', $tuitionPost->id)
             ->latest()
             ->get()
@@ -29,13 +32,19 @@ class TuitionApplicationController extends Controller
                 'tutor' => [
                     'id' => $app->tutor->id,
                     'name' => $app->tutor->name,
-                    'email' => $app->tutor->email,
-                    'phone' => $app->tutor->phone,
                     'gender' => $app->tutor->gender,
                     'profile' => $app->tutor->tutorProfile ? [
                         'university' => $app->tutor->tutorProfile->university?->name,
                         'department' => $app->tutor->tutorProfile->department,
+                        'academic_year' => $app->tutor->tutorProfile->academic_year,
+                        'intake_year' => $app->tutor->tutorProfile->intake_year,
+                        'occupation' => $app->tutor->tutorProfile->occupation,
+                        'job_title' => $app->tutor->tutorProfile->job_title,
+                        'job_organization' => $app->tutor->tutorProfile->job_organization,
+                        'teachable_levels' => $app->tutor->tutorProfile->teachable_levels ?? [],
+                        'teachable_mediums' => $app->tutor->tutorProfile->teachable_mediums ?? [],
                         'experience_months' => $app->tutor->tutorProfile->experience_months,
+                        'subjects' => $app->tutor->tutorProfile->subjects->pluck('name'),
                         'bio' => $app->tutor->tutorProfile->bio,
                     ] : null,
                 ],
@@ -54,7 +63,7 @@ class TuitionApplicationController extends Controller
         abort_unless($application->tuition_post_id === $tuitionPost->id, 403);
 
         $validated = $request->validate([
-            'status' => ['required', 'in:pending,shortlisted,rejected,hired'],
+            'status' => ['required', 'in:shortlisted,rejected'],
         ]);
 
         $application->update($validated);
@@ -62,7 +71,6 @@ class TuitionApplicationController extends Controller
         $statusLabels = [
             'shortlisted' => 'You have been shortlisted',
             'rejected'    => 'Your application was not selected',
-            'hired'       => 'Congratulations! You have been hired',
         ];
 
         if (isset($statusLabels[$validated['status']])) {

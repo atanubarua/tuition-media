@@ -60,7 +60,7 @@ export default function NotificationsIndex({ notifications }: { notifications: N
 
 NotificationsIndex.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
+        { title: 'Dashboard', href: dashboard.url() },
         { title: 'Notifications', href: '/notifications' },
     ],
 };

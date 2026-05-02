@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use App\Models\TuitionApplication;
 use App\Models\TuitionPost;
+use App\Models\TutorProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,6 +18,9 @@ class TuitionApplicationController extends Controller
     {
         abort_unless($request->user()->role === 'tutor', 403);
         abort_unless($tuitionPost->status === 'published', 404);
+
+        $hasProfile = TutorProfile::where('user_id', $request->user()->id)->exists();
+        abort_unless($hasProfile, 403, 'Please complete your tutor profile before applying.');
 
         $alreadyApplied = TuitionApplication::where('tuition_post_id', $tuitionPost->id)
             ->where('tutor_id', $request->user()->id)

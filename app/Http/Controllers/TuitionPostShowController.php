@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\TuitionApplication;
 use App\Models\TuitionPost;
+use App\Models\TutorProfile;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -33,6 +34,10 @@ class TuitionPostShowController extends Controller
                 ->exists()
             : false;
 
+        $profileIncomplete = $user && $user->role === 'tutor'
+            ? !TutorProfile::where('user_id', $user->id)->exists()
+            : false;
+
         $rawCount = TuitionApplication::where('tuition_post_id', $tuitionPost->id)->count();
         $applicantCount = match(true) {
             $rawCount === 0    => 'Be the first to apply',
@@ -48,6 +53,7 @@ class TuitionPostShowController extends Controller
             'location' => $location,
             'has_applied' => $hasApplied,
             'applicant_count' => $applicantCount,
+            'profile_incomplete' => $profileIncomplete,
         ]);
     }
 }

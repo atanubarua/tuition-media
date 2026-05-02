@@ -92,7 +92,7 @@ export default function TuitionPostForm({
 }) {
     const isEdit = Boolean(post?.id);
 
-    const { data, setData, post: submitPost, put, processing, errors } = useForm<PostShape>({
+    const { data, setData, post: submitPost, put, processing, errors: rawErrors } = useForm<PostShape>({
         title: post?.title ?? '',
         division_id: post?.division_id ?? 0,
         district_id: post?.district_id ?? 0,
@@ -121,6 +121,8 @@ export default function TuitionPostForm({
             },
         ],
     });
+
+    const errors = rawErrors as Record<string, string>;
 
     const filteredDistricts = districts.filter((d) => d.division_id === data.division_id);
     const filteredSubdistricts = subdistricts.filter((s) => s.district_id === data.district_id);
@@ -168,6 +170,7 @@ export default function TuitionPostForm({
                     <div>
                         <Label>Title</Label>
                         <Input className="mt-1" value={data.title ?? ''} onChange={(e) => setData('title', e.target.value)} />
+                        <InputError message={errors['title']} />
                     </div>
                     <div>
                         <Label>Status</Label>
@@ -199,6 +202,7 @@ export default function TuitionPostForm({
                                 <option key={d.id} value={d.id}>{d.name}</option>
                             ))}
                         </select>
+                        <InputError message={errors['division_id']} />
                     </div>
                     <div>
                         <Label>District <span className="text-destructive">*</span></Label>
@@ -215,18 +219,18 @@ export default function TuitionPostForm({
                                 <option key={d.id} value={d.id}>{d.name}</option>
                             ))}
                         </select>
+                        <InputError message={errors['district_id']} />
                     </div>
                     <div>
                         <Label>Area (Upazila/Thana) <span className="text-destructive">*</span></Label>
                         <ReactSelect
+                            instanceId="subdistrict"
                             isSearchable
-                            styles={SELECT_STYLES}
-                            options={subdistrictOptions}
-                            value={selectedSubdistrict}
                             onChange={(opt) => setData('subdistrict_id', opt?.value ?? 0)}
                             placeholder="Search area..."
                             className="mt-1"
                         />
+                        <InputError message={errors['subdistrict_id']} />
                     </div>
                 </div>
 
@@ -256,7 +260,7 @@ export default function TuitionPostForm({
                                     setData('salary_max', null);
                                 }}
                             />
-                            <InputError message={errors.salary_min} />
+                            <InputError message={errors['salary_min']} />
                         </div>
                     )}
 
@@ -270,7 +274,7 @@ export default function TuitionPostForm({
                                     value={data.salary_min ?? ''}
                                     onChange={(e) => setData('salary_min', Math.max(0, Number(e.target.value)) || null)}
                                 />
-                                <InputError message={errors.salary_min} />
+                                <InputError message={errors['salary_min']} />
                             </div>
                             <div>
                                 <Label>Salary Max <span className="text-destructive">*</span></Label>
@@ -280,7 +284,7 @@ export default function TuitionPostForm({
                                     value={data.salary_max ?? ''}
                                     onChange={(e) => setData('salary_max', Math.max(0, Number(e.target.value)) || null)}
                                 />
-                                <InputError message={errors.salary_max} />
+                                <InputError message={errors['salary_max']} />
                             </div>
                         </>
                     )}
@@ -290,12 +294,14 @@ export default function TuitionPostForm({
                     <div>
                         <Label>Days per week <span className="text-destructive">*</span></Label>
                         <ReactSelect
+                            instanceId="days-per-week"
                             styles={SELECT_STYLES}
                             options={daysOptions}
                             value={daysOptions.find((o) => o.value === data.days_per_week) ?? null}
                             onChange={(opt) => opt && setData('days_per_week', opt.value)}
                             className="mt-1"
                         />
+                        <InputError message={errors['days_per_week']} />
                     </div>
                     <div>
                         <Label>Tutor gender preference</Label>
@@ -318,9 +324,8 @@ export default function TuitionPostForm({
                 <div>
                     <Label>Preferred Time Slots</Label>
                     <ReactSelect
+                        instanceId="time-slots"
                         isMulti
-                        styles={SELECT_STYLES}
-                        options={timeSlotOptions}
                         value={timeSlotOptions.filter((o) => data.preferred_time_slots.includes(o.value))}
                         onChange={(selected) => setData('preferred_time_slots', selected.map((o) => o.value))}
                         placeholder="Select preferred time slots..."
@@ -331,10 +336,8 @@ export default function TuitionPostForm({
                 <div>
                     <Label>Preferred Universities</Label>
                     <ReactSelect
+                        instanceId="preferred-universities"
                         isMulti
-                        isSearchable
-                        styles={SELECT_STYLES}
-                        options={universityOptions}
                         value={universityOptions.filter((o) => data.preferred_university_ids.includes(o.value))}
                         onChange={(selected) => setData('preferred_university_ids', selected.map((o) => o.value))}
                         placeholder="Search and select universities..."
@@ -373,6 +376,7 @@ export default function TuitionPostForm({
                                 <div>
                                     <Label>Student Name <span className="text-destructive">*</span></Label>
                                     <Input value={student.student_name} onChange={(e) => updateStudent(index, { student_name: e.target.value })} />
+                                    <InputError message={errors[`students.${index}.student_name`]} />
                                 </div>
                                 <div>
                                     <Label>Academic Level <span className="text-destructive">*</span></Label>
@@ -422,21 +426,20 @@ export default function TuitionPostForm({
                                 <div>
                                     <Label>Honors Subject/Department</Label>
                                     <Input value={student.honors_subject ?? ''} onChange={(e) => updateStudent(index, { honors_subject: e.target.value })} />
+                                    <InputError message={errors[`students.${index}.honors_subject`]} />
                                 </div>
                             )}
 
                             <div>
                                 <Label>Subjects to Teach <span className="text-destructive">*</span></Label>
                                 <ReactSelect
+                                    instanceId={`student-subjects-${index}`}
                                     isMulti
-                                    isSearchable
-                                    styles={SELECT_STYLES}
-                                    options={subjectOptions}
-                                    value={subjectOptions.filter((o) => student.subject_ids.includes(o.value))}
                                     onChange={(selected) => updateStudent(index, { subject_ids: selected.map((o) => o.value) })}
                                     placeholder="Search and select subjects..."
                                     className="mt-1"
                                 />
+                                <InputError message={errors[`students.${index}.subject_ids`]} />
                             </div>
 
                             {data.students.length > 1 && (
@@ -452,7 +455,7 @@ export default function TuitionPostForm({
                     ))}
                 </div>
 
-                <InputError message={errors.students} />
+                <InputError message={errors['students']} />
                 <Button type="submit" disabled={processing}>{isEdit ? 'Update Post' : 'Create Post'}</Button>
             </form>
         </>

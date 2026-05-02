@@ -1,5 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import { login, register } from '@/routes';
 import { Button } from '@/components/ui/button';
@@ -97,15 +97,24 @@ export default function TuitionPostShow({
     location,
     has_applied,
     applicant_count,
+    profile_incomplete,
 }: {
     post: Post;
     location: Location;
     has_applied: boolean;
     applicant_count: string;
+    profile_incomplete: boolean;
 }) {
     const { auth } = usePage().props;
     const [open, setOpen] = useState(false);
     useFlashToast();
+
+    useEffect(() => {
+        const html = document.documentElement;
+        const hadDark = html.classList.contains('dark');
+        html.classList.remove('dark');
+        return () => { if (hadDark) html.classList.add('dark'); };
+    }, []);
 
     const { data, setData, post: submit, processing, errors, reset } = useForm({
         cover_note: '',
@@ -147,12 +156,12 @@ export default function TuitionPostShow({
                             </Link>
                         ) : (
                             <>
-                                <Link href={login()} className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                                <a href={`${login.url()}?redirect=/tuition-posts/${post.id}`} className="text-sm font-medium text-gray-600 hover:text-gray-900">
                                     Log in
-                                </Link>
-                                <Link href={register()} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                                </a>
+                                <a href={`${register.url()}?redirect=/tuition-posts/${post.id}`} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
                                     Register
-                                </Link>
+                                </a>
                             </>
                         )}
                     </div>
@@ -304,7 +313,15 @@ export default function TuitionPostShow({
 
                             {auth.user ? (
                                 auth.user.role === 'tutor' ? (
-                                    has_applied ? (
+                                    profile_incomplete ? (
+                                        <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+                                            <p className="font-medium mb-1">Profile incomplete</p>
+                                            <p className="text-xs mb-2">You need to complete your tutor profile before applying.</p>
+                                            <a href="/tutor/profile/edit" className="block w-full rounded-lg bg-amber-500 py-2 text-center text-sm font-semibold text-white hover:bg-amber-600">
+                                                Complete Profile
+                                            </a>
+                                        </div>
+                                    ) : has_applied ? (
                                         <button disabled className="w-full rounded-lg bg-green-100 py-3 font-semibold text-green-700 cursor-default">
                                             ✓ Application Sent
                                         </button>
@@ -322,18 +339,18 @@ export default function TuitionPostShow({
                             ) : (
                                 <div className="space-y-2">
                                     <p className="text-xs text-gray-500 mb-3">Login as a tutor to apply</p>
-                                    <Link
-                                        href={login()}
+                                    <a
+                                        href={`${login.url()}?redirect=/tuition-posts/${post.id}`}
                                         className="block w-full rounded-lg bg-blue-600 py-3 text-center font-semibold text-white hover:bg-blue-700"
                                     >
                                         Log in to Apply
-                                    </Link>
-                                    <Link
-                                        href={register()}
+                                    </a>
+                                    <a
+                                        href={`${register.url()}?redirect=/tuition-posts/${post.id}`}
                                         className="block w-full rounded-lg border border-blue-600 py-3 text-center font-semibold text-blue-600 hover:bg-blue-50"
                                     >
                                         Create Account
-                                    </Link>
+                                    </a>
                                 </div>
                             )}
                         </div>
