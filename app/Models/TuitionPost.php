@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\TuitionApplication;
 
 class TuitionPost extends Model
 {
@@ -40,6 +41,11 @@ class TuitionPost extends Model
     public function guardian(): BelongsTo
     {
         return $this->belongsTo(User::class, 'guardian_id');
+    }
+
+    public function applications(): HasMany
+    {
+        return $this->hasMany(TuitionApplication::class);
     }
 
     public function students(): HasMany

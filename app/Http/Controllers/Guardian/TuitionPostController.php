@@ -21,7 +21,7 @@ class TuitionPostController extends Controller
 
         $posts = TuitionPost::query()
             ->where('guardian_id', $request->user()->id)
-            ->withCount('students')
+            ->withCount(['students', 'applications'])
             ->latest()
             ->get();
 

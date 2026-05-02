@@ -1,5 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 type Post = {
     id: number;
@@ -10,6 +12,7 @@ type Post = {
     salary_max: number | null;
     days_per_week: number;
     students_count: number;
+    applications_count: number;
 };
 
 export default function TuitionPostIndex({ posts }: { posts: Post[] }) {
@@ -45,13 +48,14 @@ export default function TuitionPostIndex({ posts }: { posts: Post[] }) {
                                 <th className="px-4 py-3 text-left">Salary</th>
                                 <th className="px-4 py-3 text-left">Days/Week</th>
                                 <th className="px-4 py-3 text-left">Students</th>
+                                <th className="px-4 py-3 text-left">Applications</th>
                                 <th className="px-4 py-3 text-left">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {posts.length === 0 && (
                                 <tr>
-                                    <td className="px-4 py-6 text-muted-foreground" colSpan={6}>
+                                    <td className="px-4 py-6 text-muted-foreground" colSpan={7}>
                                         No tuition post yet.
                                     </td>
                                 </tr>
@@ -69,13 +73,47 @@ export default function TuitionPostIndex({ posts }: { posts: Post[] }) {
                                     </td>
                                     <td className="px-4 py-3">{post.days_per_week}</td>
                                     <td className="px-4 py-3">{post.students_count}</td>
-                                    <td className="space-x-2 px-4 py-3">
-                                        <Button variant="outline" size="sm" asChild>
-                                            <Link href={`/guardian/tuition-posts/${post.id}/edit`}>Edit</Link>
-                                        </Button>
-                                        <Button variant="destructive" size="sm" onClick={() => handleDelete(post.id)}>
-                                            Delete
-                                        </Button>
+                                    <td className="px-4 py-3">
+                                        <Link
+                                            href={`/guardian/tuition-posts/${post.id}/applications`}
+                                            className="text-blue-600 hover:underline font-medium"
+                                        >
+                                            {post.applications_count} application{post.applications_count !== 1 ? 's' : ''}
+                                        </Link>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center gap-1">
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" asChild>
+                                                        <Link href={`/tuition-posts/${post.id}`}>
+                                                            <Eye className="size-4" />
+                                                        </Link>
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>View details</TooltipContent>
+                                            </Tooltip>
+
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" asChild>
+                                                        <Link href={`/guardian/tuition-posts/${post.id}/edit`}>
+                                                            <Pencil className="size-4" />
+                                                        </Link>
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>Edit</TooltipContent>
+                                            </Tooltip>
+
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(post.id)}>
+                                                        <Trash2 className="size-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>Delete</TooltipContent>
+                                            </Tooltip>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

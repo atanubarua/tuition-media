@@ -4,6 +4,7 @@ export type User = {
     phone: string;
     email: string;
     role: 'admin' | 'guardian' | 'tutor';
+    gender: 'male' | 'female' | null;
     avatar?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;

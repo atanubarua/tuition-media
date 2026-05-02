@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use App\Models\User;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
@@ -40,6 +41,14 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+
+        Fortify::redirects('login', function () {
+            return request()->user()->role === User::ROLE_TUTOR ? '/' : '/dashboard';
+        });
+
+        Fortify::redirects('register', function () {
+            return request()->user()->role === User::ROLE_TUTOR ? '/' : '/dashboard';
+        });
     }
 
     /**

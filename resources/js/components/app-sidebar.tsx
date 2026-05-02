@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import { Bell, BookOpen, FolderGit2, LayoutGrid, UserCircle } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -30,7 +30,10 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { auth } = usePage().props as { auth: { user: { role: string } } };
+    const { auth, unread_notifications_count } = usePage().props as {
+        auth: { user: { role: string } | null };
+        unread_notifications_count: number;
+    };
 
     const mainNavItems: NavItem[] = [
         {
@@ -38,11 +41,36 @@ export function AppSidebar() {
             href: dashboard(),
             icon: LayoutGrid,
         },
-        ...(auth.user.role === 'guardian'
+        ...(auth.user
+            ? [
+                  {
+                      title: unread_notifications_count > 0
+                          ? `Notifications (${unread_notifications_count})`
+                          : 'Notifications',
+                      href: '/notifications',
+                      icon: Bell,
+                  } satisfies NavItem,
+              ]
+            : []),
+        ...(auth.user?.role === 'guardian'
             ? [
                   {
                       title: 'My Tuition Posts',
                       href: '/guardian/tuition-posts',
+                      icon: BookOpen,
+                  } satisfies NavItem,
+              ]
+            : []),
+        ...(auth.user?.role === 'tutor'
+            ? [
+                  {
+                      title: 'My Profile',
+                      href: '/tutor/profile/edit',
+                      icon: UserCircle,
+                  } satisfies NavItem,
+                  {
+                      title: 'My Applications',
+                      href: '/tutor/applications',
                       icon: BookOpen,
                   } satisfies NavItem,
               ]

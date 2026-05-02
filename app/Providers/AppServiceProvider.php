@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\Notification;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        Inertia::share('unread_notifications_count', function () {
+            $user = auth()->user();
+            if (! $user) return 0;
+            return Notification::where('user_id', $user->id)->whereNull('read_at')->count();
+        });
     }
 
     /**
