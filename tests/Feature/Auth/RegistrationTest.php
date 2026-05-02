@@ -17,6 +17,7 @@ test('new users can register', function () {
         'name' => 'Test User',
         'phone' => '01700000000',
         'email' => 'test@example.com',
+        'role' => 'guardian',
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
