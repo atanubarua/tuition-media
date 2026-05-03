@@ -1,19 +1,47 @@
 <?php
 
 use App\Http\Controllers\Guardian\TuitionApplicationController as GuardianApplicationController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
+use App\Http\Controllers\Admin\TuitionApplicationController as AdminTuitionApplicationController;
+use App\Http\Controllers\Admin\TuitionPostController as AdminTuitionPostController;
 use App\Http\Controllers\Guardian\TuitionPostController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TuitionPostShowController;
 use App\Http\Controllers\Tutor\ProfileController;
 use App\Http\Controllers\Tutor\TuitionApplicationController;
+use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
 Route::get('/tuition-posts/{tuitionPost}', TuitionPostShowController::class)->name('tuition-posts.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('admin/dashboard', AdminDashboardController::class)
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.dashboard');
+    Route::get('admin/tuition-posts', [AdminTuitionPostController::class, 'index'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.tuition-posts.index');
+    Route::get('admin/applications', [AdminTuitionApplicationController::class, 'index'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.applications.index');
+    Route::patch('admin/applications/{application}/contact-status', [AdminTuitionApplicationController::class, 'updateContactStatus'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.applications.contact-status');
+    Route::patch('admin/applications/{application}/hire', [AdminTuitionApplicationController::class, 'hire'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.applications.hire');
+    Route::get('admin/commissions', [AdminCommissionController::class, 'index'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.commissions.index');
+    Route::patch('admin/commissions/{application}/payment', [AdminCommissionController::class, 'updatePayment'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.commissions.payment');
+
     Route::resource('guardian/tuition-posts', TuitionPostController::class)
         ->except(['show'])
         ->names('guardian.tuition-posts');

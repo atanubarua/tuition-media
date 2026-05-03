@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\TuitionApplication;
+use Illuminate\Support\Str;
 
 class TuitionPost extends Model
 {
     protected $fillable = [
+        'tuition_code',
         'guardian_id',
         'title',
         'division_id',
@@ -36,6 +38,21 @@ class TuitionPost extends Model
             'published_at' => 'datetime',
             'preferred_time_slots' => 'array',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (TuitionPost $post): void {
+            if (! empty($post->tuition_code)) {
+                return;
+            }
+
+            do {
+                $code = 'TID' . strtoupper(Str::random(8));
+            } while (self::query()->where('tuition_code', $code)->exists());
+
+            $post->tuition_code = $code;
+        });
     }
 
     public function guardian(): BelongsTo

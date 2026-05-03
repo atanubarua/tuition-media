@@ -43,11 +43,19 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::createUsersUsing(CreateNewUser::class);
 
         Fortify::redirects('login', function () {
-            return request()->user()->role === User::ROLE_TUTOR ? '/' : '/dashboard';
+            return match (request()->user()->role) {
+                User::ROLE_ADMIN => '/admin/dashboard',
+                User::ROLE_TUTOR => '/',
+                default => '/dashboard',
+            };
         });
 
         Fortify::redirects('register', function () {
-            return request()->user()->role === User::ROLE_TUTOR ? '/' : '/dashboard';
+            return match (request()->user()->role) {
+                User::ROLE_ADMIN => '/admin/dashboard',
+                User::ROLE_TUTOR => '/',
+                default => '/dashboard',
+            };
         });
     }
 

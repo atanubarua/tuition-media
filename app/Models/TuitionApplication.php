@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TuitionApplication extends Model
 {
@@ -13,7 +14,26 @@ class TuitionApplication extends Model
         'cover_note',
         'expected_salary',
         'status',
+        'admin_contact_status',
+        'admin_note',
+        'hired_by',
+        'hired_at',
+        'commission_type',
+        'commission_value',
+        'commission_amount',
+        'commission_received_amount',
+        'commission_payment_status',
+        'commission_paid_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'hired_at' => 'datetime',
+            'commission_value' => 'decimal:2',
+            'commission_paid_at' => 'datetime',
+        ];
+    }
 
     public function tuitionPost(): BelongsTo
     {
@@ -23,5 +43,10 @@ class TuitionApplication extends Model
     public function tutor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'tutor_id');
+    }
+
+    public function commissionPayments(): HasMany
+    {
+        return $this->hasMany(CommissionPayment::class, 'tuition_application_id');
     }
 }

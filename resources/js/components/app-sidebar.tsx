@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, FolderGit2, LayoutGrid, UserCircle } from 'lucide-react';
+import { Bell, BookOpen, FolderGit2, HandCoins, LayoutGrid, UserCircle } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -35,10 +35,12 @@ export function AppSidebar() {
         unread_notifications_count: number;
     };
 
+    const dashboardHref = auth.user?.role === 'admin' ? '/admin/dashboard' : dashboard.url();
+
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
-            href: dashboard.url(),
+            href: dashboardHref,
             icon: LayoutGrid,
         },
         ...(auth.user
@@ -58,6 +60,25 @@ export function AppSidebar() {
                       title: 'My Tuition Posts',
                       href: '/guardian/tuition-posts',
                       icon: BookOpen,
+                  } satisfies NavItem,
+              ]
+            : []),
+        ...(auth.user?.role === 'admin'
+            ? [
+                  {
+                      title: 'Tuition Posts',
+                      href: '/admin/tuition-posts',
+                      icon: BookOpen,
+                  } satisfies NavItem,
+                  {
+                      title: 'Applications',
+                      href: '/admin/applications',
+                      icon: UserCircle,
+                  } satisfies NavItem,
+                  {
+                      title: 'Commissions',
+                      href: '/admin/commissions',
+                      icon: HandCoins,
                   } satisfies NavItem,
               ]
             : []),
@@ -83,7 +104,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard.url()} prefetch>
+                            <Link href={dashboardHref} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

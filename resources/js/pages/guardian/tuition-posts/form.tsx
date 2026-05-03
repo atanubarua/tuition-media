@@ -226,8 +226,12 @@ export default function TuitionPostForm({
                         <ReactSelect
                             instanceId="subdistrict"
                             isSearchable
+                            styles={SELECT_STYLES}
+                            options={subdistrictOptions}
+                            value={selectedSubdistrict}
                             onChange={(opt) => setData('subdistrict_id', opt?.value ?? 0)}
-                            placeholder="Search area..."
+                            placeholder={data.district_id ? 'Search area...' : 'Select district first'}
+                            isDisabled={!data.district_id}
                             className="mt-1"
                         />
                         <InputError message={errors['subdistrict_id']} />
@@ -435,6 +439,9 @@ export default function TuitionPostForm({
                                 <ReactSelect
                                     instanceId={`student-subjects-${index}`}
                                     isMulti
+                                    styles={SELECT_STYLES}
+                                    options={subjectOptions}
+                                    value={subjectOptions.filter((o) => student.subject_ids.includes(o.value))}
                                     onChange={(selected) => updateStudent(index, { subject_ids: selected.map((o) => o.value) })}
                                     placeholder="Search and select subjects..."
                                     className="mt-1"

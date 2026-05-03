@@ -1,28 +1,152 @@
 import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Link } from '@inertiajs/react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
 
-export default function Dashboard() {
+type GuardianDashboardData = {
+    stats: {
+        total_posts: number;
+        published_posts: number;
+        total_applications: number;
+        pending_applications: number;
+    };
+    recent_posts: Array<{
+        id: number;
+        title: string | null;
+        status: string;
+        applications_count: number;
+        created_at: string;
+    }>;
+    recent_applications: Array<{
+        id: number;
+        status: 'pending' | 'shortlisted' | 'rejected' | 'hired';
+        created_at: string;
+        post: { id: number | null; title: string | null };
+        tutor: { id: number | null; name: string | null };
+    }>;
+};
+
+type Props = {
+    role: 'guardian' | 'tutor' | 'admin';
+    guardian_dashboard?: GuardianDashboardData;
+};
+
+const STATUS_STYLES = {
+    pending: 'bg-yellow-100 text-yellow-700',
+    shortlisted: 'bg-blue-100 text-blue-700',
+    rejected: 'bg-red-100 text-red-700',
+    hired: 'bg-green-100 text-green-700',
+};
+
+export default function Dashboard({ role, guardian_dashboard }: Props) {
+    if (role === 'guardian' && guardian_dashboard) {
+        const { stats, recent_posts, recent_applications } = guardian_dashboard;
+
+        return (
+            <>
+                <Head title="Dashboard" />
+                <div className="space-y-6 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h1 className="text-2xl font-semibold">Guardian Dashboard</h1>
+                            <p className="text-sm text-muted-foreground">Track your tuition posts and incoming applications.</p>
+                        </div>
+                        <Button asChild>
+                            <Link href="/guardian/tuition-posts/create">Post New Tuition</Link>
+                        </Button>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <StatCard title="Total Posts" value={stats.total_posts} />
+                        <StatCard title="Published Posts" value={stats.published_posts} />
+                        <StatCard title="All Applications" value={stats.total_applications} />
+                        <StatCard title="Pending Applications" value={stats.pending_applications} />
+                    </div>
+
+                    <div className="grid gap-4 xl:grid-cols-2">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Recent Tuition Posts</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {recent_posts.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">No posts yet. Create your first tuition post.</p>
+                                ) : (
+                                    recent_posts.map((post) => (
+                                        <div key={post.id} className="flex items-center justify-between rounded-md border p-3">
+                                            <div>
+                                                <Link href={`/guardian/tuition-posts/${post.id}/edit`} className="text-sm font-medium hover:text-blue-600">
+                                                    {post.title ?? `Tuition Post #${post.id}`}
+                                                </Link>
+                                                <p className="text-xs text-muted-foreground capitalize">
+                                                    {post.status} · {post.applications_count} application{post.applications_count !== 1 ? 's' : ''}
+                                                </p>
+                                            </div>
+                                            <Button variant="outline" size="sm" asChild>
+                                                <Link href={`/guardian/tuition-posts/${post.id}/applications`}>View</Link>
+                                            </Button>
+                                        </div>
+                                    ))
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Recent Applications</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {recent_applications.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">No applications received yet.</p>
+                                ) : (
+                                    recent_applications.map((application) => (
+                                        <div key={application.id} className="flex items-center justify-between gap-3 rounded-md border p-3">
+                                            <div>
+                                                <p className="text-sm font-medium">{application.tutor.name ?? 'Unknown Tutor'}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Applied to {application.post.title ?? `Post #${application.post.id}`}
+                                                </p>
+                                            </div>
+                                            <span
+                                                className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[application.status]}`}
+                                            >
+                                                {application.status}
+                                            </span>
+                                        </div>
+                                    ))
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
     return (
         <>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+            <div className="space-y-4 p-4">
+                <h1 className="text-2xl font-semibold">Dashboard</h1>
+                <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+                    {role === 'admin'
+                        ? 'Open the admin dashboard from the sidebar for platform-wide stats.'
+                        : 'Use the sidebar to manage your account activity.'}
                 </div>
             </div>
         </>
+    );
+}
+
+function StatCard({ title, value }: { title: string; value: number }) {
+    return (
+        <Card>
+            <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+            </CardHeader>
+            <CardContent className="text-3xl font-semibold">{value}</CardContent>
+        </Card>
     );
 }
 

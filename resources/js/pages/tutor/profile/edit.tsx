@@ -177,6 +177,8 @@ export default function TutorProfileEdit({
                                     instanceId="university"
                                     isClearable
                                     isSearchable
+                                    styles={SELECT_STYLES}
+                                    options={universityOptions}
                                     value={universityOptions.find((o) => o.value === data.university_id) ?? null}
                                     onChange={(opt) => setData('university_id', opt?.value ?? null)}
                                     placeholder="Search university..."
@@ -314,6 +316,8 @@ export default function TutorProfileEdit({
                                 instanceId="subjects"
                                 isMulti
                                 isSearchable
+                                styles={SELECT_STYLES}
+                                options={subjectOptions}
                                 value={subjectOptions.filter((o) => data.subject_ids.includes(o.value))}
                                 onChange={(selected) => setData('subject_ids', selected.map((o) => o.value))}
                                 placeholder="Search and select subjects..."
