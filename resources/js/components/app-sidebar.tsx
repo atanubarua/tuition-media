@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, FolderGit2, HandCoins, LayoutGrid, UserCircle } from 'lucide-react';
+import { Bell, BookOpen, FolderGit2, HandCoins, LayoutGrid, Users, UserCircle } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -63,25 +63,30 @@ export function AppSidebar() {
                   } satisfies NavItem,
               ]
             : []),
-        ...(auth.user?.role === 'admin'
-            ? [
-                  {
-                      title: 'Tuition Posts',
-                      href: '/admin/tuition-posts',
-                      icon: BookOpen,
-                  } satisfies NavItem,
-                  {
-                      title: 'Applications',
-                      href: '/admin/applications',
-                      icon: UserCircle,
-                  } satisfies NavItem,
-                  {
-                      title: 'Commissions',
-                      href: '/admin/commissions',
-                      icon: HandCoins,
-                  } satisfies NavItem,
-              ]
-            : []),
+         ...(auth.user?.role === 'admin'
+             ? [
+                   {
+                       title: 'Tuition Posts',
+                       href: '/admin/tuition-posts',
+                       icon: BookOpen,
+                   } satisfies NavItem,
+                   {
+                       title: 'Tutors',
+                       href: '/admin/tutors',
+                       icon: Users,
+                   } satisfies NavItem,
+                   {
+                       title: 'Applications',
+                       href: '/admin/applications',
+                       icon: UserCircle,
+                   } satisfies NavItem,
+                   {
+                       title: 'Commissions',
+                       href: '/admin/commissions',
+                       icon: HandCoins,
+                   } satisfies NavItem,
+               ]
+             : []),
         ...(auth.user?.role === 'tutor'
             ? [
                   {

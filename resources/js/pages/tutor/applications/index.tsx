@@ -6,7 +6,7 @@ type Application = {
     status: 'pending' | 'shortlisted' | 'rejected' | 'hired';
     expected_salary: number | null;
     created_at: string;
-    post: { id: number; title: string | null };
+    post: { id: number | null; title: string | null; status: string | null };
 };
 
 const STATUS_STYLES: Record<Application['status'], string> = {
@@ -30,15 +30,20 @@ export default function TutorApplicationsIndex({ applications }: { applications:
                         {applications.map((app) => (
                             <div key={app.id} className="rounded-lg border bg-card p-4 flex items-center justify-between gap-4">
                                 <div>
-                                    <Link
-                                        href={`/tuition-posts/${app.post.id}`}
-                                        className="font-medium text-sm hover:text-blue-600"
-                                    >
-                                        {app.post.title ?? `Tuition #${app.post.id}`}
-                                    </Link>
+                                    {app.post.id && app.post.status === 'published' ? (
+                                        <Link
+                                            href={`/tuition-posts/${app.post.id}`}
+                                            className="font-medium text-sm hover:text-blue-600"
+                                        >
+                                            {app.post.title ?? `Tuition #${app.post.id}`}
+                                        </Link>
+                                    ) : (
+                                        <p className="font-medium text-sm">{app.post.title ?? `Tuition #${app.post.id ?? app.id}`}</p>
+                                    )}
                                     <p className="text-xs text-muted-foreground mt-0.5">
                                         Applied {new Date(app.created_at).toLocaleDateString('en-BD', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                        {app.expected_salary ? ` · Expected ৳${app.expected_salary.toLocaleString()}` : ''}
+                                        {app.expected_salary ? ` - Expected salary ${app.expected_salary.toLocaleString()}` : ''}
+                                        {app.post.status && app.post.status !== 'published' ? ` - Post is ${app.post.status}` : ''}
                                     </p>
                                 </div>
                                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize shrink-0 ${STATUS_STYLES[app.status]}`}>

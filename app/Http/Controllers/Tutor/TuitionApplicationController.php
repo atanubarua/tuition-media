@@ -71,8 +71,9 @@ class TuitionApplicationController extends Controller
                 'expected_salary' => $app->expected_salary,
                 'created_at' => $app->created_at,
                 'post' => [
-                    'id' => $app->tuitionPost->id,
-                    'title' => $app->tuitionPost->title,
+                    'id' => $app->tuitionPost?->id,
+                    'title' => $app->tuitionPost?->title,
+                    'status' => $app->tuitionPost?->status,
                 ],
             ]);
 

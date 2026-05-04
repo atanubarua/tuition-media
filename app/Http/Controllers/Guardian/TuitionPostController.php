@@ -115,11 +115,22 @@ class TuitionPostController extends Controller
 
     private function formProps(): array
     {
+        $universities = University::query()
+            ->select('id', 'name', 'type', 'is_active')
+            ->orderBy('name')
+            ->get();
+
         return [
             'divisions' => DB::table('divisions')->select('id', 'name')->orderBy('name')->get(),
             'districts' => DB::table('districts')->select('id', 'division_id', 'name')->orderBy('name')->get(),
             'subdistricts' => DB::table('subdistricts')->select('id', 'district_id', 'name', 'type')->orderBy('name')->get(),
-            'universities' => University::query()->where('is_active', true)->select('id', 'name', 'type')->orderBy('name')->get(),
+            'universities' => ($universities->where('is_active', true)->isNotEmpty()
+                ? $universities->where('is_active', true)
+                : $universities)->values()->map(fn ($u) => [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'type' => $u->type,
+                ]),
             'subjects' => Subject::query()->where('is_active', true)->select('id', 'name', 'group_name')->orderBy('name')->get(),
             'academicLevels' => ['primary', 'high_school', 'college', 'honors'],
             'mediums' => ['bangla', 'english', 'madrasha', 'other'],
@@ -149,7 +160,7 @@ class TuitionPostController extends Controller
             'preferred_university_ids' => ['array'],
             'preferred_university_ids.*' => ['integer', 'exists:universities,id'],
             'students' => ['required', 'array', 'min:1'],
-            'students.*.student_name' => ['required', 'string', 'max:255'],
+            'students.*.student_name' => ['nullable', 'string', 'max:255'],
             'students.*.academic_level' => ['required', 'in:primary,high_school,college,honors'],
             'students.*.class_level' => ['nullable', 'string', 'max:20'],
             'students.*.honors_subject' => ['nullable', 'string', 'max:255'],
@@ -173,7 +184,6 @@ class TuitionPostController extends Controller
             'status.in' => 'Please select a valid status.',
             'students.required' => 'Please add at least one student.',
             'students.min' => 'Please add at least one student.',
-            'students.*.student_name.required' => 'Please enter the student\'s name.',
             'students.*.student_name.max' => 'Student name must not exceed 255 characters.',
             'students.*.academic_level.required' => 'Please select an academic level for the student.',
             'students.*.academic_level.in' => 'Please select a valid academic level.',
@@ -187,14 +197,27 @@ class TuitionPostController extends Controller
 
         if ($validated['salary_type'] === 'fixed' && empty($validated['salary_min'])) {
             throw ValidationException::withMessages([
-                'salary_min' => 'Fixed salary requires a salary minimum.',
+                'salary_min' => 'Salary amount is required.',
             ]);
         }
 
         if ($validated['salary_type'] === 'range') {
-            if (empty($validated['salary_min']) || empty($validated['salary_max'])) {
+            if (empty($validated['salary_min']) && empty($validated['salary_max'])) {
                 throw ValidationException::withMessages([
                     'salary_min' => 'Salary range requires both minimum and maximum.',
+                    'salary_max' => 'Salary range requires both minimum and maximum.',
+                ]);
+            }
+
+            if (empty($validated['salary_min'])) {
+                throw ValidationException::withMessages([
+                    'salary_min' => 'Salary range requires both minimum and maximum.',
+                ]);
+            }
+
+            if (empty($validated['salary_max'])) {
+                throw ValidationException::withMessages([
+                    'salary_max' => 'Salary range requires both minimum and maximum.',
                 ]);
             }
 
@@ -212,7 +235,10 @@ class TuitionPostController extends Controller
                 ]);
             }
 
-            if ($student['academic_level'] !== 'honors' && ! isset($student['class_level'])) {
+            if (
+                $student['academic_level'] !== 'honors'
+                && blank($student['class_level'] ?? null)
+            ) {
                 throw ValidationException::withMessages([
                     "students.{$index}.class_level" => 'Class level is required for this academic level.',
                 ]);
@@ -247,7 +273,7 @@ class TuitionPostController extends Controller
     {
         foreach ($students as $studentData) {
             $student = $post->students()->create([
-                'student_name' => $studentData['student_name'],
+                'student_name' => $studentData['student_name'] ?? '',
                 'academic_level' => $studentData['academic_level'],
                 'class_level' => $studentData['class_level'] ?? null,
                 'honors_subject' => $studentData['honors_subject'] ?? null,

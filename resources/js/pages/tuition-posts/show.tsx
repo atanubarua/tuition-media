@@ -1,7 +1,6 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import { useFlashToast } from '@/hooks/use-flash-toast';
-import { login, register } from '@/routes';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -12,7 +11,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import InputError from '@/components/input-error';
+import { useFlashToast } from '@/hooks/use-flash-toast';
+import { login, register } from '@/routes';
 
 type Subject = { id: number; name: string };
 
@@ -68,18 +68,38 @@ const MEDIUM_LABELS: Record<string, string> = {
 };
 
 function classLabel(student: Student): string {
-    if (student.academic_level === 'honors') return student.honors_subject ?? 'Honors';
-    if (student.class_level === 'nursery') return 'Nursery';
-    if (student.class_level === 'kg') return 'KG';
-    if (student.class_level) return `Class ${student.class_level}`;
+    if (student.academic_level === 'honors') {
+return student.honors_subject ?? 'Honors';
+}
+
+    if (student.class_level === 'nursery') {
+return 'Nursery';
+}
+
+    if (student.class_level === 'kg') {
+return 'KG';
+}
+
+    if (student.class_level) {
+return `Class ${student.class_level}`;
+}
+
     return LEVEL_LABELS[student.academic_level] ?? student.academic_level;
 }
 
 function salaryText(post: Post): string {
-    if (post.salary_type === 'negotiable') return 'Negotiable';
-    if (post.salary_type === 'range' && post.salary_min && post.salary_max)
-        return `৳${post.salary_min.toLocaleString()} – ৳${post.salary_max.toLocaleString()} /month`;
-    if (post.salary_min) return `৳${post.salary_min.toLocaleString()} /month`;
+    if (post.salary_type === 'negotiable') {
+return 'Negotiable';
+}
+
+    if (post.salary_type === 'range' && post.salary_min && post.salary_max) {
+return `৳${post.salary_min.toLocaleString()} – ৳${post.salary_max.toLocaleString()} /month`;
+}
+
+    if (post.salary_min) {
+return `৳${post.salary_min.toLocaleString()} /month`;
+}
+
     return 'Negotiable';
 }
 
@@ -113,7 +133,12 @@ export default function TuitionPostShow({
         const html = document.documentElement;
         const hadDark = html.classList.contains('dark');
         html.classList.remove('dark');
-        return () => { if (hadDark) html.classList.add('dark'); };
+
+        return () => {
+ if (hadDark) {
+html.classList.add('dark');
+} 
+};
     }, []);
 
     const { data, setData, post: submit, processing, errors, reset } = useForm({
@@ -123,7 +148,9 @@ export default function TuitionPostShow({
 
     function handleApply() {
         submit(`/tuition-posts/${post.id}/apply`, {
-            onSuccess: () => { setOpen(false); reset(); },
+            onSuccess: () => {
+ setOpen(false); reset(); 
+},
         });
     }
 

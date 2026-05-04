@@ -42,4 +42,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(TutorProfile::class);
     }
+
+    public function tuitionApplications()
+    {
+        return $this->hasMany(TuitionApplication::class, 'tutor_id');
+    }
 }

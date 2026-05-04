@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use App\Models\TuitionApplication;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,7 @@ class TuitionApplicationController extends Controller
     public function index(Request $request): Response
     {
         $status = $request->string('status')->toString();
+        $tutorId = $request->integer('tutor_id');
         $tuitionCode = strtoupper(str_replace('-', '', trim($request->string('tuition_code')->toString())));
 
         $applications = TuitionApplication::query()
@@ -26,6 +28,7 @@ class TuitionApplicationController extends Controller
                 'tuitionPost.guardian:id,name,email',
             ])
             ->when($status !== '', fn ($query) => $query->where('status', $status))
+            ->when($tutorId > 0, fn ($query) => $query->where('tutor_id', $tutorId))
             ->when($tuitionCode !== '', function ($query) use ($tuitionCode) {
                 $query->whereHas('tuitionPost', function ($postQuery) use ($tuitionCode): void {
                     $postQuery->whereRaw('REPLACE(UPPER(tuition_code), "-", "") = ?', [$tuitionCode]);
@@ -71,10 +74,21 @@ class TuitionApplicationController extends Controller
             'applications' => $applications,
             'filters' => [
                 'status' => $status,
+                'tutor_id' => $tutorId > 0 ? (string) $tutorId : '',
                 'tuition_code' => $tuitionCode !== '' ? $tuitionCode : '',
             ],
             'statuses' => ['pending', 'shortlisted', 'rejected', 'hired'],
             'contactStatuses' => ['new', 'contacted', 'interested', 'not_interested'],
+            'tutors' => User::query()
+                ->where('role', 'tutor')
+                ->whereHas('tuitionApplications')
+                ->orderBy('name')
+                ->get(['id', 'name', 'email'])
+                ->map(fn (User $tutor) => [
+                    'id' => $tutor->id,
+                    'name' => $tutor->name,
+                    'email' => $tutor->email,
+                ]),
         ]);
     }
 

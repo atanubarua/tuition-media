@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
+import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -10,7 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { useMemo, useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 type Application = {
     id: number;
@@ -57,6 +57,7 @@ export default function AdminCommissionsIndex({ applications }: { applications: 
         const total = selectedApplication.commission_amount ?? 0;
         const currentReceived = selectedApplication.commission_received_amount ?? 0;
         const incoming = Number(receivedAmountInput || 0);
+
         if (Number.isNaN(incoming) || incoming < 0) {
             return null;
         }
@@ -69,9 +70,11 @@ export default function AdminCommissionsIndex({ applications }: { applications: 
         if (!selectedApplication) {
             return false;
         }
+
         if (selectedApplication.commission_due_amount <= 0) {
             return false;
         }
+
         if (Number.isNaN(incomingAmount) || incomingAmount <= 0) {
             return false;
         }
@@ -80,8 +83,14 @@ export default function AdminCommissionsIndex({ applications }: { applications: 
     }, [incomingAmount, selectedApplication]);
 
     const paymentStatusBadgeClass = (status: Application['commission_payment_status']) => {
-        if (status === 'paid') return 'bg-green-100 text-green-800 border-green-200';
-        if (status === 'partial') return 'bg-blue-100 text-blue-800 border-blue-200';
+        if (status === 'paid') {
+return 'bg-green-100 text-green-800 border-green-200';
+}
+
+        if (status === 'partial') {
+return 'bg-blue-100 text-blue-800 border-blue-200';
+}
+
         return 'bg-amber-100 text-amber-800 border-amber-200';
     };
 
@@ -89,18 +98,24 @@ export default function AdminCommissionsIndex({ applications }: { applications: 
         if (!selectedApplication) {
             return;
         }
+
         if (selectedApplication.commission_due_amount <= 0) {
             alert('Commission is already fully paid.');
+
             return;
         }
 
         const received = Number(receivedAmountInput);
+
         if (Number.isNaN(received) || received <= 0) {
             alert('Please enter a valid amount.');
+
             return;
         }
+
         if (received > selectedApplication.commission_due_amount) {
             alert(`Received amount cannot exceed due amount (BDT ${selectedApplication.commission_due_amount}).`);
+
             return;
         }
 

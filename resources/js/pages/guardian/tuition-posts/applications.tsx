@@ -1,5 +1,7 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
 
 type TutorProfile = {
@@ -61,14 +63,19 @@ const MEDIUM_LABELS: Record<string, string> = {
 const YEAR_LABELS: Record<number, string> = { 1: '1st Year', 2: '2nd Year', 3: '3rd Year', 4: '4th Year', 5: 'Graduated' };
 
 function experienceLabel(months: number): string {
-    if (months === 0) return 'No experience';
+    if (months === 0) {
+return 'No experience';
+}
+
     const y = Math.floor(months / 12);
     const m = months % 12;
+
     return [y > 0 && `${y}yr`, m > 0 && `${m}mo`].filter(Boolean).join(' ');
 }
 
 function TutorModal({ app, onClose }: { app: Application; onClose: () => void }) {
     const p = app.tutor.profile;
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
             <div className="absolute inset-0 bg-black/40" />
@@ -225,12 +232,17 @@ export default function GuardianApplicationsIndex({
             <Head title="Applications" />
             {selectedApp && <TutorModal app={selectedApp} onClose={() => setSelectedApp(null)} />}
             <div className="p-4 md:p-6 space-y-5 max-w-3xl">
-                <div>
+                <div className="flex items-center gap-3">
+                    <Button type="button" variant="outline" size="icon" asChild>
+                        <Link href="/guardian/tuition-posts" aria-label="Back to My Tuition Posts">
+                            <ArrowLeft className="size-4" />
+                        </Link>
+                    </Button>
                     <h1 className="text-2xl font-semibold">Applications</h1>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                        {post.title ?? `Tuition Post #${post.id}`}
-                    </p>
                 </div>
+                <p className="text-sm text-muted-foreground -mt-3">
+                    {post.title ?? `Tuition Post #${post.id}`}
+                </p>
 
                 {/* Filters */}
                 <div className="flex flex-wrap items-center gap-3">
@@ -321,7 +333,11 @@ export default function GuardianApplicationsIndex({
                                             Shortlist
                                         </button>
                                         <button
-                                            onClick={() => { if (confirm('Reject this application?')) updateStatus(app.id, 'rejected'); }}
+                                            onClick={() => {
+ if (confirm('Reject this application?')) {
+updateStatus(app.id, 'rejected');
+} 
+}}
                                             className="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50"
                                         >
                                             Reject

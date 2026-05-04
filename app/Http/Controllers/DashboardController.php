@@ -73,6 +73,43 @@ class DashboardController extends Controller
             ]);
         }
 
+        if ($role === User::ROLE_TUTOR) {
+            $applicationsQuery = TuitionApplication::query()->where('tutor_id', $user->id);
+
+            $stats = [
+                'total_applications' => (clone $applicationsQuery)->count(),
+                'pending_applications' => (clone $applicationsQuery)->where('status', 'pending')->count(),
+                'shortlisted_applications' => (clone $applicationsQuery)->where('status', 'shortlisted')->count(),
+                'hired_applications' => (clone $applicationsQuery)->where('status', 'hired')->count(),
+            ];
+
+            $recentApplications = TuitionApplication::query()
+                ->where('tutor_id', $user->id)
+                ->with('tuitionPost:id,title,status')
+                ->latest()
+                ->limit(8)
+                ->get()
+                ->map(fn (TuitionApplication $application) => [
+                    'id' => $application->id,
+                    'status' => $application->status,
+                    'expected_salary' => $application->expected_salary,
+                    'created_at' => $application->created_at,
+                    'post' => [
+                        'id' => $application->tuitionPost?->id,
+                        'title' => $application->tuitionPost?->title,
+                        'status' => $application->tuitionPost?->status,
+                    ],
+                ]);
+
+            return Inertia::render('dashboard', [
+                'role' => $role,
+                'tutor_dashboard' => [
+                    'stats' => $stats,
+                    'recent_applications' => $recentApplications,
+                ],
+            ]);
+        }
+
         return Inertia::render('dashboard', [
             'role' => $role,
         ]);

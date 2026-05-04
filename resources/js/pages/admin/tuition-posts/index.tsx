@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 
 type Post = {
@@ -40,6 +41,19 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Props) {
     const formatDate = (value: string) => new Date(value).toISOString().slice(0, 10);
+    const [status, setStatus] = useState(filters.status);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            router.get(
+                '/admin/tuition-posts',
+                { status: status || undefined },
+                { preserveState: true, replace: true }
+            );
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [status]);
 
     return (
         <>
@@ -59,10 +73,8 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
                         id="status"
                         list="tuition-post-statuses"
                         placeholder="All statuses"
-                        value={filters.status}
-                        onChange={(event) => {
-                            router.get('/admin/tuition-posts', { status: event.target.value || undefined }, { preserveState: true, replace: true });
-                        }}
+                        value={status}
+                        onChange={(event) => setStatus(event.target.value)}
                     />
                     <datalist id="tuition-post-statuses">
                         {statuses.map((status) => (

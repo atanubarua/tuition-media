@@ -1,7 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { useMemo, useState, useEffect } from 'react';
+import Select from 'react-select';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -10,7 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { useMemo, useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 type Application = {
     id: number;
@@ -40,18 +41,50 @@ type Application = {
 
 type Props = {
     applications: Application[];
-    filters: { status: string; tuition_code: string };
+    filters: { status: string; tutor_id: string; tuition_code: string };
     statuses: Application['status'][];
     contactStatuses: Application['admin_contact_status'][];
+    tutors: { id: number; name: string; email: string }[];
 };
 
-export default function AdminApplicationsIndex({ applications, filters, statuses }: Props) {
+const SELECT_STYLES = {
+    control: (base: object) => ({ ...base, backgroundColor: 'var(--background)', borderColor: 'var(--border)', minHeight: '40px' }),
+    menu: (base: object) => ({ ...base, backgroundColor: 'var(--background)', zIndex: 50 }),
+    option: (base: object, state: { isFocused: boolean }) => ({
+        ...base,
+        backgroundColor: state.isFocused ? 'var(--accent)' : 'var(--background)',
+        color: 'var(--foreground)',
+    }),
+    singleValue: (base: object) => ({ ...base, color: 'var(--foreground)' }),
+    input: (base: object) => ({ ...base, color: 'var(--foreground)' }),
+};
+
+export default function AdminApplicationsIndex({ applications, filters, statuses, tutors }: Props) {
     const formatDate = (value: string) => new Date(value).toISOString().slice(0, 10);
     const [isHireModalOpen, setIsHireModalOpen] = useState(false);
     const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
     const [commissionType, setCommissionType] = useState<'fixed' | 'percentage'>('fixed');
     const [commissionValue, setCommissionValue] = useState('');
     const [commissionBaseAmount, setCommissionBaseAmount] = useState('');
+    const [status, setStatus] = useState(filters.status);
+    const [tutorId, setTutorId] = useState(filters.tutor_id ?? '');
+    const [tuition_code, setTuitionCode] = useState(filters.tuition_code ?? '');
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            router.get(
+                '/admin/applications',
+                {
+                    status: status || undefined,
+                    tutor_id: tutorId || undefined,
+                    tuition_code: tuition_code || undefined,
+                },
+                { preserveState: true, replace: true }
+            );
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [status, tutorId, tuition_code]);
 
     const updateContactStatus = (applicationId: number, nextStatus: Application['admin_contact_status']) => {
         router.patch(
@@ -75,12 +108,15 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
         }
 
         const { salary_type: salaryType, salary_min: salaryMin, salary_max: salaryMax } = selectedApplication.post;
+
         if (salaryType === 'fixed' && salaryMin) {
             return `BDT ${salaryMin}`;
         }
+
         if (salaryType === 'range' && salaryMin && salaryMax) {
             return `BDT ${salaryMin} - ${salaryMax}`;
         }
+
         if (salaryType === 'negotiable') {
             return 'Negotiable';
         }
@@ -90,14 +126,17 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
 
     const derivedCommissionAmount = useMemo(() => {
         const value = Number(commissionValue);
+
         if (Number.isNaN(value) || value <= 0) {
             return null;
         }
+
         if (commissionType === 'fixed') {
             return Math.round(value);
         }
 
         const base = Number(commissionBaseAmount);
+
         if (Number.isNaN(base) || base <= 0) {
             return null;
         }
@@ -106,10 +145,35 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
     }, [commissionBaseAmount, commissionType, commissionValue]);
 
     const statusBadgeClass = (status: Application['status']) => {
-        if (status === 'hired') return 'bg-green-100 text-green-800 border-green-200';
-        if (status === 'shortlisted') return 'bg-blue-100 text-blue-800 border-blue-200';
-        if (status === 'rejected') return 'bg-red-100 text-red-800 border-red-200';
+        if (status === 'hired') {
+return 'bg-green-100 text-green-800 border-green-200';
+}
+
+        if (status === 'shortlisted') {
+return 'bg-blue-100 text-blue-800 border-blue-200';
+}
+
+        if (status === 'rejected') {
+return 'bg-red-100 text-red-800 border-red-200';
+}
+
         return 'bg-amber-100 text-amber-800 border-amber-200';
+    };
+
+    const commissionStatusBadgeClass = (commissionStatus: Application['commission_payment_status']) => {
+        if (commissionStatus === 'paid') {
+            return 'bg-green-100 text-green-800 border-green-200';
+        }
+
+        if (commissionStatus === 'partial') {
+            return 'bg-blue-100 text-blue-800 border-blue-200';
+        }
+
+        if (commissionStatus === 'unpaid') {
+            return 'bg-amber-100 text-amber-800 border-amber-200';
+        }
+
+        return 'bg-muted text-muted-foreground border-border';
     };
 
     const confirmHire = () => {
@@ -118,8 +182,10 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
         }
 
         const value = Number(commissionValue);
+
         if (Number.isNaN(value) || value <= 0) {
             alert('Enter a valid commission value.');
+
             return;
         }
 
@@ -130,10 +196,13 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
 
         if (commissionType === 'percentage') {
             const base = Number(commissionBaseAmount);
+
             if (Number.isNaN(base) || base <= 0) {
                 alert('Enter a valid tuition/base amount for percentage commission.');
+
                 return;
             }
+
             payload.commission_base_amount = Math.round(base);
         }
 
@@ -153,32 +222,53 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                     <p className="text-sm text-muted-foreground">All tutor applications across the platform.</p>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-3">
                     <div>
                         <label htmlFor="status" className="mb-2 block text-sm font-medium">
                             Filter by status
                         </label>
-                        <Input
+                        <select
                             id="status"
-                            list="application-statuses"
-                            placeholder="All statuses"
-                            value={filters.status}
-                            onChange={(event) => {
-                                router.get(
-                                    '/admin/applications',
-                                    {
-                                        status: event.target.value || undefined,
-                                        tuition_code: filters.tuition_code || undefined,
-                                    },
-                                    { preserveState: true, replace: true },
-                                );
-                            }}
-                        />
-                        <datalist id="application-statuses">
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={status}
+                            onChange={(event) => setStatus(event.target.value)}
+                        >
+                            <option value="">All statuses</option>
                             {statuses.map((status) => (
-                                <option key={status} value={status} />
+                                <option key={status} value={status}>
+                                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                                </option>
                             ))}
-                        </datalist>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label htmlFor="tutor_id" className="mb-2 block text-sm font-medium">
+                            Filter by tutor
+                        </label>
+                        <Select
+                            inputId="tutor_id"
+                            value={
+                                tutorId
+                                    ? (() => {
+                                          const selected = tutors.find((tutor) => String(tutor.id) === tutorId);
+
+                                          return selected
+                                              ? { value: String(selected.id), label: `${selected.name} (${selected.email})` }
+                                              : null;
+                                      })()
+                                    : null
+                            }
+                            onChange={(selected) => setTutorId(selected?.value ?? '')}
+                            options={tutors.map((tutor) => ({
+                                value: String(tutor.id),
+                                label: `${tutor.name} (${tutor.email})`,
+                            }))}
+                            placeholder="All tutors"
+                            isClearable
+                            isSearchable
+                            styles={SELECT_STYLES}
+                        />
                     </div>
 
                     <div>
@@ -188,18 +278,8 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                         <Input
                             id="tuition_code"
                             placeholder="e.g. TID7K9M2Q"
-                            value={filters.tuition_code ?? ''}
-                            onChange={(event) => {
-                                const nextCode = event.target.value || undefined;
-                                router.get(
-                                    '/admin/applications',
-                                    {
-                                        status: filters.status || undefined,
-                                        tuition_code: nextCode,
-                                    },
-                                    { preserveState: true, replace: true },
-                                );
-                            }}
+                            value={tuition_code}
+                            onChange={(event) => setTuitionCode(event.target.value)}
                         />
                     </div>
                 </div>
@@ -216,6 +296,7 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                                 <th className="px-4 py-3 text-left">Contact</th>
                                 <th className="px-4 py-3 text-left">Expected Salary</th>
                                 <th className="px-4 py-3 text-left">Commission</th>
+                                <th className="px-4 py-3 text-left">Commission Status</th>
                                 <th className="px-4 py-3 text-left">Applied</th>
                                 <th className="px-4 py-3 text-left">Actions</th>
                             </tr>
@@ -223,7 +304,7 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                         <tbody>
                             {applications.length === 0 && (
                                 <tr>
-                                    <td className="px-4 py-6 text-muted-foreground" colSpan={10}>
+                                    <td className="px-4 py-6 text-muted-foreground" colSpan={11}>
                                         No applications found.
                                     </td>
                                 </tr>
@@ -276,6 +357,11 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                                         {application.commission_amount
                                             ? `BDT ${application.commission_amount}`
                                             : '-'}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <Badge variant="outline" className={commissionStatusBadgeClass(application.commission_payment_status)}>
+                                            {application.commission_payment_status ?? '-'}
+                                        </Badge>
                                     </td>
                                     <td className="px-4 py-3">{formatDate(application.created_at)}</td>
                                     <td className="px-4 py-3">

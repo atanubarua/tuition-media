@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { dashboard } from '@/routes';
 
 type GuardianDashboardData = {
@@ -27,9 +27,26 @@ type GuardianDashboardData = {
     }>;
 };
 
+type TutorDashboardData = {
+    stats: {
+        total_applications: number;
+        pending_applications: number;
+        shortlisted_applications: number;
+        hired_applications: number;
+    };
+    recent_applications: Array<{
+        id: number;
+        status: 'pending' | 'shortlisted' | 'rejected' | 'hired';
+        expected_salary: number | null;
+        created_at: string;
+        post: { id: number | null; title: string | null; status: string | null };
+    }>;
+};
+
 type Props = {
     role: 'guardian' | 'tutor' | 'admin';
     guardian_dashboard?: GuardianDashboardData;
+    tutor_dashboard?: TutorDashboardData;
 };
 
 const STATUS_STYLES = {
@@ -39,7 +56,7 @@ const STATUS_STYLES = {
     hired: 'bg-green-100 text-green-700',
 };
 
-export default function Dashboard({ role, guardian_dashboard }: Props) {
+export default function Dashboard({ role, guardian_dashboard, tutor_dashboard }: Props) {
     if (role === 'guardian' && guardian_dashboard) {
         const { stats, recent_posts, recent_applications } = guardian_dashboard;
 
@@ -119,6 +136,81 @@ export default function Dashboard({ role, guardian_dashboard }: Props) {
                             </CardContent>
                         </Card>
                     </div>
+                </div>
+            </>
+        );
+    }
+
+    if (role === 'tutor' && tutor_dashboard) {
+        const { stats, recent_applications } = tutor_dashboard;
+
+        return (
+            <>
+                <Head title="Dashboard" />
+                <div className="space-y-6 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h1 className="text-2xl font-semibold">Tutor Portal</h1>
+                            <p className="text-sm text-muted-foreground">Track your applications and keep your profile ready for new opportunities.</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <Button variant="outline" asChild>
+                                <Link href="/tutor/profile/edit">Edit Profile</Link>
+                            </Button>
+                            <Button asChild>
+                                <Link href="/tutor/applications">View All Applications</Link>
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <StatCard title="Total Applications" value={stats.total_applications} />
+                        <StatCard title="Pending Review" value={stats.pending_applications} />
+                        <StatCard title="Shortlisted" value={stats.shortlisted_applications} />
+                        <StatCard title="Hired" value={stats.hired_applications} />
+                    </div>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Recent Applications</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            {recent_applications.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">You have not applied yet. Explore current tuition posts and apply to relevant ones.</p>
+                            ) : (
+                                recent_applications.map((application) => (
+                                    <div key={application.id} className="flex items-center justify-between gap-3 rounded-md border p-3">
+                                        <div>
+                                            {application.post.id && application.post.status === 'published' ? (
+                                                <Link
+                                                    href={`/tuition-posts/${application.post.id}`}
+                                                    className="text-sm font-medium hover:text-blue-600"
+                                                >
+                                                    {application.post.title ?? `Tuition Post #${application.post.id}`}
+                                                </Link>
+                                            ) : (
+                                                <p className="text-sm font-medium">
+                                                    {application.post.title ?? `Tuition Post #${application.post.id ?? application.id}`}
+                                                </p>
+                                            )}
+                                            <p className="text-xs text-muted-foreground">
+                                                Applied {new Date(application.created_at).toLocaleDateString('en-BD', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                {application.expected_salary ? ` - Expected salary ${application.expected_salary.toLocaleString()}` : ''}
+                                                {application.post.status && application.post.status !== 'published'
+                                                    ? ` - Post is ${application.post.status}`
+                                                    : ''}
+                                            </p>
+                                        </div>
+                                        <span
+                                            className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[application.status]}`}
+                                        >
+                                            {application.status}
+                                        </span>
+                                    </div>
+                                ))
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
             </>
         );
