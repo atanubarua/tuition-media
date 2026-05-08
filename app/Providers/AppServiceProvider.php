@@ -32,6 +32,19 @@ class AppServiceProvider extends ServiceProvider
             if (! $user) return 0;
             return Notification::where('user_id', $user->id)->whereNull('read_at')->count();
         });
+
+        Inertia::share('latest_notifications', function () {
+            $user = auth()->user();
+
+            if (! $user) {
+                return [];
+            }
+
+            return Notification::where('user_id', $user->id)
+                ->latest()
+                ->limit(5)
+                ->get(['id', 'title', 'message', 'link', 'read_at', 'created_at']);
+        });
     }
 
     /**

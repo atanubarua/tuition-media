@@ -1,11 +1,21 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login, logout, register } from '@/routes';
+import { toast } from 'sonner';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
     BookOpen,
     MapPin,
     Calendar,
     User,
+    ChevronDown,
+    LogOut,
+    LayoutDashboard,
     Search,
     GraduationCap,
     ArrowRight,
@@ -62,11 +72,11 @@ function TuitionCard({ post }: { post: Post }) {
             href={`/tuition-posts/${post.id}`}
             className="group flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-md"
         >
-            <div className="flex items-start justify-between gap-4">
-                <h3 className="font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                <h3 className="w-full min-w-0 font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">
                     {post.title || `Tuition in ${post.subdistrict_name}`}
                 </h3>
-                <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+                <span className="max-w-full shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 break-words">
                     {salaryLabel(post)}
                 </span>
             </div>
@@ -87,20 +97,20 @@ function TuitionCard({ post }: { post: Post }) {
             <div className="mt-auto pt-4 border-t border-slate-100 flex flex-wrap gap-y-3 gap-x-5 text-sm text-slate-500">
                 <div className="flex items-center gap-1.5 w-full sm:w-auto">
                     <MapPin className="h-4 w-4 text-slate-400" />
-                    <span className="truncate">{post.subdistrict_name}, {post.district_name}</span>
+                    <span className="min-w-0 break-words sm:truncate">{post.subdistrict_name}, {post.district_name}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 w-full sm:w-auto">
                     <GraduationCap className="h-4 w-4 text-slate-400" />
-                    <span className="truncate">{levels.join(', ')}</span>
+                    <span className="min-w-0 break-words sm:truncate">{levels.join(', ')}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                     <Calendar className="h-4 w-4 text-slate-400" />
                     <span>{post.days_per_week}d/wk</span>
                 </div>
                 {post.tutor_gender_preference !== 'any' && (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
                         <User className="h-4 w-4 text-slate-400" />
-                        <span className="capitalize">{post.tutor_gender_preference} Tutor</span>
+                        <span className="min-w-0 break-words capitalize">{post.tutor_gender_preference} Tutor</span>
                     </div>
                 )}
             </div>
@@ -118,36 +128,37 @@ export default function Welcome({
     stats?: { total_posts: number; total_tutors: number };
 }) {
     const { auth } = usePage().props as any;
-    const [search, setSearch] = useState('');
+    const [location, setLocation] = useState('');
+    const [subject, setSubject] = useState('');
     const [searchMode, setSearchMode] = useState<'tutor' | 'job'>('tutor');
-
-    // Only filter jobs if search mode is 'job'
-    const filtered = (search.trim() && searchMode === 'job')
-        ? posts.filter((p) => {
-              const q = search.toLowerCase();
-
-              return (
-                  p.district_name.toLowerCase().includes(q) ||
-                  p.subdistrict_name.toLowerCase().includes(q) ||
-                  (p.title ?? '').toLowerCase().includes(q) ||
-                  p.students.some((s) => s.subjects.some((sub) => sub.name.toLowerCase().includes(q)))
-              );
-          })
-        : posts;
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!location.trim() && !subject.trim()) {
+            toast.error('Please enter an Area or Subject to begin your search.');
+            return; // Prevent empty searches
+        }
+
         if (searchMode === 'tutor') {
-            // Redirect to Find Tutors page with query
-            window.location.href = `/find-tutors?q=${encodeURIComponent(search)}`;
+            // Redirect to Find Tutors page with query params
+            const params = new URLSearchParams();
+            if (location.trim()) params.append('location', location.trim());
+            if (subject.trim()) params.append('subject', subject.trim());
+
+            const queryString = params.toString();
+            window.location.href = `/find-tutors${queryString ? '?' + queryString : ''}`;
         } else {
-            // Smooth scroll to jobs section
-            document.getElementById('recent-jobs')?.scrollIntoView({ behavior: 'smooth' });
+            const params = new URLSearchParams();
+            if (location.trim()) params.append('location', location.trim());
+            if (subject.trim()) params.append('subject', subject.trim());
+            const queryString = params.toString();
+            window.location.href = `/tuition-jobs${queryString ? '?' + queryString : ''}`;
         }
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-200 selection:text-blue-900">
+        <div className="min-h-screen overflow-x-hidden bg-white font-sans text-slate-900 selection:bg-blue-200 selection:text-blue-900">
             <Head title="Tuition Media – Find Tutors & Tuition Jobs in Bangladesh" />
 
             {/* Navbar */}
@@ -160,7 +171,7 @@ export default function Welcome({
                             </div>
                             Tuition<span className="text-amber-500">Media</span>
                         </Link>
-                        
+
                         <div className="hidden md:flex items-center gap-6">
                             <Link href="/find-tutors" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition">
                                 Find Tutors
@@ -173,9 +184,35 @@ export default function Welcome({
 
                     <div className="flex items-center gap-4">
                         {auth.user ? (
-                            <Link href={dashboard.url()} className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-                                Dashboard
-                            </Link>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button
+                                        type="button"
+                                        aria-label="Open user menu"
+                                        className="inline-flex h-10 items-center gap-1.5 rounded-full border border-blue-300 bg-white px-2.5 text-blue-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50"
+                                    >
+                                        <User className="h-4 w-4" />
+                                        <span className="hidden max-w-28 truncate text-sm font-semibold sm:inline">
+                                            {auth.user.name}
+                                        </span>
+                                        <ChevronDown className="h-4 w-4" />
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-44">
+                                    <DropdownMenuItem asChild>
+                                        <Link href={dashboard.url()} className="w-full cursor-pointer">
+                                            <LayoutDashboard className="h-4 w-4" />
+                                            Dashboard
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link href={logout()} as="button" className="w-full cursor-pointer">
+                                            <LogOut className="h-4 w-4" />
+                                            Log out
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         ) : (
                             <>
                                 <Link href={login()} className="text-sm font-semibold text-slate-600 transition hover:text-blue-600">
@@ -205,7 +242,7 @@ export default function Welcome({
                         <rect width="404" height="404" fill="url(#85737c0e-0916-41d7-917f-596dc7edfa27)"></rect>
                     </svg>
                 </div>
-                
+
                 <div className="absolute left-0 bottom-0 translate-y-1/3 -translate-x-1/3">
                     <svg width="404" height="404" fill="none" viewBox="0 0 404 404" aria-hidden="true" className="text-amber-100 opacity-50">
                         <defs>
@@ -254,18 +291,28 @@ export default function Welcome({
                         </div>
 
                         {/* Search Bar */}
-                        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-3 rounded-2xl bg-white p-2 shadow-xl shadow-blue-900/5 ring-1 ring-slate-200">
-                            <div className="flex w-full items-center pl-4 pr-2">
-                                <Search className="h-6 w-6 text-slate-400" />
+                        <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-2 rounded-2xl bg-white p-3 shadow-xl shadow-blue-900/5 ring-1 ring-slate-200">
+                            <div className="flex w-full items-center pl-4 pr-2 border-b md:border-b-0 md:border-r border-slate-200 py-2 md:py-0">
+                                <MapPin className="h-5 w-5 text-slate-400 shrink-0" />
                                 <input
                                     type="text"
-                                    placeholder={searchMode === 'tutor' ? "Search for Math, Class 9, Mirpur..." : "Search available tuition jobs..."}
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="w-full bg-transparent px-4 py-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-lg"
+                                    placeholder="Area or District..."
+                                    value={location}
+                                    onChange={(e) => setLocation(e.target.value)}
+                                    className="w-full bg-transparent px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-base"
                                 />
                             </div>
-                            <button type="submit" className="w-full sm:w-auto shrink-0 rounded-xl bg-blue-600 px-8 py-4 font-bold text-white transition hover:bg-blue-700 shadow-md hover:shadow-lg">
+                            <div className="flex w-full items-center pl-4 pr-2 py-2 md:py-0">
+                                <BookOpen className="h-5 w-5 text-slate-400 shrink-0" />
+                                <input
+                                    type="text"
+                                    placeholder={searchMode === 'tutor' ? "Subject (e.g. Math)" : "Subject or Class"}
+                                    value={subject}
+                                    onChange={(e) => setSubject(e.target.value)}
+                                    className="w-full bg-transparent px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-base"
+                                />
+                            </div>
+                            <button type="submit" className="w-full md:w-auto shrink-0 rounded-xl bg-blue-600 px-8 py-4 font-bold text-white transition hover:bg-blue-700 shadow-md hover:shadow-lg mt-2 md:mt-0">
                                 {searchMode === 'tutor' ? 'Find Tutors' : 'Find Tuitions'}
                             </button>
                         </form>
@@ -306,7 +353,7 @@ export default function Welcome({
                                 <ShieldCheck className="h-7 w-7" />
                             </div>
                             <h3 className="mb-3 text-xl font-bold text-slate-900">Verified Quality</h3>
-                            <p className="text-slate-600 leading-relaxed">Tutor profiles can be carefully reviewed to ensure academic excellence and safety for your child.</p>
+                            <p className="text-slate-600 leading-relaxed">Tutor profiles are carefully reviewed to ensure academic excellence and safety for your child.</p>
                         </div>
                         <div className="rounded-2xl bg-white p-8 border border-slate-200 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
                             <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
@@ -327,39 +374,29 @@ export default function Welcome({
             </section>
 
             {/* Tuition List */}
-            <section id="recent-jobs" className="bg-white py-20 border-t border-slate-200">
-                <div className="mx-auto max-w-6xl px-4">
+            <section id="recent-jobs" className="bg-white py-14 sm:py-20 border-t border-slate-200">
+                <div className="mx-auto max-w-6xl px-5 sm:px-6">
                     <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                         <div>
-                            <h2 className="text-3xl font-bold text-slate-900">Recent Tuition Jobs</h2>
-                            <p className="mt-2 text-slate-600">Browse the latest requirements posted by guardians.</p>
+                            <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">Recent Tuition Jobs</h2>
+                            <p className="mt-2 text-slate-600">Latest 6 posts. View all jobs for complete listings.</p>
                         </div>
-                        <span className="inline-flex items-center rounded-full bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-700 border border-blue-100">
-                            {filtered.length} posts available
-                        </span>
+                        <Link href="/tuition-jobs" className="inline-flex self-start items-center rounded-full bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-700 border border-blue-100 hover:bg-blue-100">
+                            View All Jobs
+                        </Link>
                     </div>
 
-                    {filtered.length === 0 ? (
+                    {posts.length === 0 ? (
                         <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 py-24 text-center">
                             <div className="rounded-full bg-white p-5 shadow-sm mb-5">
                                 <Search className="h-8 w-8 text-slate-400" />
                             </div>
                             <h3 className="text-xl font-bold text-slate-900">No jobs found</h3>
-                            <p className="mt-2 text-slate-600 max-w-sm">
-                                {search && searchMode === 'job' ? "We couldn't find any posts matching your search criteria. Try using different keywords." : "There are no tuition posts available at the moment."}
-                            </p>
-                            {search && searchMode === 'job' && (
-                                <button 
-                                    onClick={() => setSearch('')}
-                                    className="mt-6 font-semibold text-blue-600 hover:text-blue-700"
-                                >
-                                    Clear search filters
-                                </button>
-                            )}
+                            <p className="mt-2 text-slate-600 max-w-sm">There are no tuition posts available at the moment.</p>
                         </div>
                     ) : (
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {filtered.map((post) => (
+                            {posts.map((post) => (
                                 <TuitionCard key={post.id} post={post} />
                             ))}
                         </div>
@@ -374,7 +411,7 @@ export default function Welcome({
                         <h2 className="text-3xl font-bold text-slate-900 md:text-4xl">How It Works</h2>
                         <p className="mt-4 text-slate-600 text-lg">A transparent, easy-to-use platform for everyone.</p>
                     </div>
-                    
+
                     <div className="grid gap-8 lg:grid-cols-2">
                         {/* Guardians */}
                         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm lg:p-12 relative overflow-hidden">
@@ -384,7 +421,7 @@ export default function Welcome({
                                     <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
                                         <Users className="h-7 w-7" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-slate-900">For Guardians</h3>
+                                    <h3 className="text-2xl font-bold text-slate-900">For Guardians / Students</h3>
                                 </div>
                                 <ul className="space-y-6">
                                     {[
@@ -448,7 +485,7 @@ export default function Welcome({
                             <rect width="100%" height="100%" fill="url(#grid)" />
                         </svg>
                     </div>
-                    
+
                     <div className="relative mx-auto max-w-4xl px-4 text-center">
                         <h2 className="mb-6 text-4xl font-extrabold text-white md:text-5xl">Ready to get started?</h2>
                         <p className="mb-10 text-xl text-blue-200">Join thousands of students and educators building a brighter future.</p>
@@ -485,3 +522,4 @@ export default function Welcome({
         </div>
     );
 }
+

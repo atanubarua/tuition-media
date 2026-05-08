@@ -22,7 +22,7 @@ class HomeController extends Controller
             ->join('subdistricts', 'tuition_posts.subdistrict_id', '=', 'subdistricts.id')
             ->select('tuition_posts.*', 'districts.name as district_name', 'subdistricts.name as subdistrict_name')
             ->latest('tuition_posts.published_at')
-            ->limit(12)
+            ->limit(6)
             ->get();
 
         $stats = [

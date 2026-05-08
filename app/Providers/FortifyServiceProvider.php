@@ -44,7 +44,7 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::redirects('login', function () {
             return match (request()->user()->role) {
-                User::ROLE_ADMIN => '/admin/dashboard',
+                User::ROLE_ADMIN => '/dashboard',
                 User::ROLE_TUTOR => '/',
                 default => '/dashboard',
             };
@@ -52,7 +52,7 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::redirects('register', function () {
             return match (request()->user()->role) {
-                User::ROLE_ADMIN => '/admin/dashboard',
+                User::ROLE_ADMIN => '/dashboard',
                 User::ROLE_TUTOR => '/',
                 default => '/dashboard',
             };

@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Guardian\TuitionApplicationController as GuardianApplicationController;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\GuardianController as AdminGuardianController;
 use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
 use App\Http\Controllers\Admin\TuitionApplicationController as AdminTuitionApplicationController;
 use App\Http\Controllers\Admin\TuitionPostController as AdminTuitionPostController;
@@ -11,6 +11,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TuitionPostShowController;
+use App\Http\Controllers\FindTutorController;
+use App\Http\Controllers\TuitionJobController;
 use App\Http\Controllers\Tutor\ProfileController;
 use App\Http\Controllers\Tutor\TuitionApplicationController;
 use App\Http\Middleware\EnsureUserIsAdmin;
@@ -22,14 +24,18 @@ Route::bind('tutor', function ($value) {
     return User::where('id', $value)->where('role', 'tutor')->firstOrFail();
 });
 
+// Bind 'guardian' route parameter to User model with role='guardian'
+Route::bind('guardian', function ($value) {
+    return User::where('id', $value)->where('role', 'guardian')->firstOrFail();
+});
+
 Route::get('/', HomeController::class)->name('home');
+Route::get('/find-tutors', [FindTutorController::class, 'index'])->name('find-tutors');
+Route::get('/tuition-jobs', [TuitionJobController::class, 'index'])->name('tuition-jobs.index');
 Route::get('/tuition-posts/{tuitionPost}', TuitionPostShowController::class)->name('tuition-posts.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
-    Route::get('admin/dashboard', AdminDashboardController::class)
-        ->middleware(EnsureUserIsAdmin::class)
-        ->name('admin.dashboard');
     Route::get('admin/tuition-posts', [AdminTuitionPostController::class, 'index'])
         ->middleware(EnsureUserIsAdmin::class)
         ->name('admin.tuition-posts.index');
@@ -54,6 +60,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
      Route::get('admin/tutors/{tutor}', [AdminTutorController::class, 'show'])
          ->middleware(EnsureUserIsAdmin::class)
          ->name('admin.tutors.show');
+     Route::get('admin/guardians', [AdminGuardianController::class, 'index'])
+         ->middleware(EnsureUserIsAdmin::class)
+         ->name('admin.guardians.index');
+     Route::post('admin/guardians', [AdminGuardianController::class, 'store'])
+         ->middleware(EnsureUserIsAdmin::class)
+         ->name('admin.guardians.store');
+     Route::put('admin/guardians/{guardian}', [AdminGuardianController::class, 'update'])
+         ->middleware(EnsureUserIsAdmin::class)
+         ->name('admin.guardians.update');
+     Route::delete('admin/guardians/{guardian}', [AdminGuardianController::class, 'destroy'])
+         ->middleware(EnsureUserIsAdmin::class)
+         ->name('admin.guardians.destroy');
 
     Route::resource('guardian/tuition-posts', TuitionPostController::class)
         ->except(['show'])

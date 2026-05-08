@@ -116,8 +116,14 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
                                     <td className="px-4 py-3">
                                         {post.guardian ? (
                                             <div>
-                                                <p>{post.guardian.name}</p>
-                                                <p className="text-xs text-muted-foreground">{post.guardian.email}</p>
+                                                <Link href={`/admin/guardians?email=${encodeURIComponent(post.guardian.email)}`} className="font-medium hover:underline">
+                                                    {post.guardian.name}
+                                                </Link>
+                                                <p className="text-xs text-muted-foreground">
+                                                    <Link href={`/admin/guardians?email=${encodeURIComponent(post.guardian.email)}`} className="hover:underline">
+                                                        {post.guardian.email}
+                                                    </Link>
+                                                </p>
                                             </div>
                                         ) : (
                                             '-'
