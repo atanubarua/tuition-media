@@ -65,6 +65,9 @@ class TuitionJobController extends Controller
             ->paginate(12)
             ->withQueryString();
 
+        $locale = session('locale', config('app.locale'));
+        app()->setLocale($locale);
+
         return Inertia::render('tuition-jobs/index', [
             'posts' => $posts,
             'filters' => [
@@ -75,6 +78,7 @@ class TuitionJobController extends Controller
                 'min_salary' => $minSalary > 0 ? $minSalary : null,
                 'max_days' => $maxDays > 0 ? $maxDays : null,
             ],
+            'locale' => $locale,
         ]);
     }
 }

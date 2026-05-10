@@ -1,7 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type Post = {
     id: number;
@@ -47,8 +49,10 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
     const [status, setStatus] = useState(filters.status);
     const [tuitionCode, setTuitionCode] = useState(filters.tuition_code);
     const [guardianName, setGuardianName] = useState(filters.guardian_name);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        setLoading(true);
         const timeout = setTimeout(() => {
             router.get(
                 '/admin/tuition-posts',
@@ -57,7 +61,7 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
                     tuition_code: tuitionCode || undefined,
                     guardian_name: guardianName || undefined,
                 },
-                { preserveState: true, replace: true }
+                { preserveState: true, replace: true, onFinish: () => setLoading(false) }
             );
         }, 300);
 
@@ -74,7 +78,8 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
                     <p className="text-sm text-muted-foreground">All tuition posts across the platform.</p>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="flex items-end gap-4">
+                <div className="grid flex-1 gap-4 md:grid-cols-3">
                     <div>
                         <label htmlFor="tuition_code" className="mb-2 block text-sm font-medium">
                             Filter by tuition code
@@ -116,6 +121,18 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
                         </Select>
                     </div>
                 </div>
+                    {(tuitionCode || guardianName || status) && (
+                        <button
+                            type="button"
+                            onClick={() => { setTuitionCode(''); setGuardianName(''); setStatus(''); }}
+                            className="mb-0.5 flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border px-3 text-sm text-muted-foreground hover:bg-muted"
+                            title="Clear filters"
+                        >
+                            <X className="h-4 w-4" />
+                            Clear
+                        </button>
+                    )}
+                </div>
 
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="w-full text-sm">
@@ -132,14 +149,23 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
                             </tr>
                         </thead>
                         <tbody>
-                            {posts.data.length === 0 && (
+                            {loading && Array.from({ length: 8 }).map((_, i) => (
+                                <tr key={i} className="border-t">
+                                    {Array.from({ length: 8 }).map((_, j) => (
+                                        <td key={j} className="px-4 py-3">
+                                            <Skeleton className="h-4 w-full" />
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                            {!loading && posts.data.length === 0 && (
                                 <tr>
                                     <td className="px-4 py-6 text-muted-foreground" colSpan={8}>
                                         No posts found.
                                     </td>
                                 </tr>
                             )}
-                            {posts.data.map((post) => (
+                            {!loading && posts.data.map((post) => (
                                 <tr key={post.id} className="border-t">
                                     <td className="px-4 py-3 font-mono text-xs">
                                         <Link href={`/admin/tuition-posts/${post.id}`} className="font-medium hover:underline">

@@ -1,8 +1,7 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { Eye, UserCircle, SearchX } from 'lucide-react';
-import { useEffect, useState, useTransition } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Eye, UserCircle, SearchX, X } from 'lucide-react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import Select from 'react-select';
@@ -26,7 +25,13 @@ type Tutor = {
 };
 
 type Props = {
-    tutors: Tutor[];
+    tutors: {
+        data: Tutor[];
+        links: { url: string | null; label: string; active: boolean }[];
+        from: number | null;
+        to: number | null;
+        total: number;
+    };
     filters: { search: string; gender: string; university: string };
     universities: { id: number; name: string }[];
     genders: string[];
@@ -51,14 +56,16 @@ const SELECT_STYLES = {
     input: (base: object) => ({ ...base, color: 'var(--foreground)' }),
 };
 
-export default function AdminTutorsIndex({ tutors: initialTutors, filters, universities, genders }: Props) {
+export default function AdminTutorsIndex({ tutors, filters, universities, genders }: Props) {
+    const { url } = usePage();
     const formatDate = (value: string) => new Date(value).toISOString().slice(0, 10);
     const [search, setSearch] = useState(filters.search);
     const [gender, setGender] = useState(filters.gender);
     const [university, setUniversity] = useState(filters.university);
-    const [tutors, setTutors] = useState(initialTutors);
     const [isLoading, setIsLoading] = useState(false);
-    const [isPending, startTransition] = useTransition();
+    const [, startTransition] = useTransition();
+    const hasMountedRef = useRef(false);
+    const returnTo = typeof window !== 'undefined' ? `${window.location.pathname}${window.location.search}` : url;
 
     const clearAllFilters = () => {
         setSearch('');
@@ -67,6 +74,18 @@ export default function AdminTutorsIndex({ tutors: initialTutors, filters, unive
     };
 
     useEffect(() => {
+        const hasFilterChanged = search !== filters.search || gender !== filters.gender || university !== filters.university;
+
+        if (!hasMountedRef.current) {
+            hasMountedRef.current = true;
+
+            return;
+        }
+
+        if (!hasFilterChanged) {
+            return;
+        }
+
         // Only trigger search if search term is 3+ characters or empty
         if (search.length > 0 && search.length < 3) {
             return;
@@ -95,10 +114,6 @@ export default function AdminTutorsIndex({ tutors: initialTutors, filters, unive
         return () => clearTimeout(timeout);
     }, [search, gender, university]);
 
-    useEffect(() => {
-        setTutors(initialTutors);
-    }, [initialTutors]);
-
     return (
         <>
             <Head title="Admin Tutors" />
@@ -106,19 +121,11 @@ export default function AdminTutorsIndex({ tutors: initialTutors, filters, unive
             <div className="space-y-6 p-4">
                 <div>
                     <h1 className="text-2xl font-semibold">Tutor Management</h1>
-                    <p className="text-sm text-muted-foreground">Manage all tutors on the platform.</p>
                 </div>
 
-                <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                        Showing {tutors.length} tutor{tutors.length !== 1 ? 's' : ''}
-                    </div>
-                    <Button variant="outline" size="sm" onClick={clearAllFilters}>
-                        Clear All Filters
-                    </Button>
-                </div>
 
-                <div className="grid gap-4 md:grid-cols-4">
+                <div className="flex items-end gap-4">
+                <div className="grid flex-1 gap-4 md:grid-cols-4">
                     <div>
                         <label htmlFor="search" className="mb-2 block text-sm font-medium">
                             Search {search.length > 0 && search.length < 3 && (
@@ -169,6 +176,18 @@ export default function AdminTutorsIndex({ tutors: initialTutors, filters, unive
                             styles={SELECT_STYLES}
                         />
                     </div>
+                </div>
+                    {(search || gender || university) && (
+                        <button
+                            type="button"
+                            onClick={clearAllFilters}
+                            className="mb-0.5 flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border px-3 text-sm text-muted-foreground hover:bg-muted"
+                            title="Clear filters"
+                        >
+                            <X className="h-4 w-4" />
+                            Clear
+                        </button>
+                    )}
                 </div>
 
                 <div className="overflow-x-auto rounded-lg border">
@@ -221,7 +240,7 @@ export default function AdminTutorsIndex({ tutors: initialTutors, filters, unive
                                         </td>
                                     </tr>
                                 ))
-                            ) : tutors.length === 0 ? (
+                            ) : tutors.data.length === 0 ? (
                                 <tr>
                                     <td className="px-4 py-6 text-muted-foreground" colSpan={8}>
                                         <div className="flex flex-col items-center justify-center gap-2">
@@ -231,7 +250,7 @@ export default function AdminTutorsIndex({ tutors: initialTutors, filters, unive
                                     </td>
                                 </tr>
                             ) : (
-                                tutors.map((tutor) => (
+                                tutors.data.map((tutor) => (
                                     <tr key={tutor.id} className="border-t">
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-3">
@@ -263,7 +282,7 @@ export default function AdminTutorsIndex({ tutors: initialTutors, filters, unive
                                         <td className="px-4 py-3">
                                             <div className="flex flex-wrap gap-2">
                                                 <Link
-                                                    href={`/admin/tutors/${tutor.id}`}
+                                                    href={`/admin/tutors/${tutor.id}?return_to=${encodeURIComponent(returnTo)}`}
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                                                     aria-label={`View profile of ${tutor.name}`}
                                                     title="View Profile"
@@ -278,6 +297,21 @@ export default function AdminTutorsIndex({ tutors: initialTutors, filters, unive
                         </tbody>
                     </table>
                 </div>
+
+                {tutors.links.length > 3 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        {tutors.links.map((link, index) => (
+                            <Link
+                                key={`${link.label}-${index}`}
+                                href={link.url ?? '#'}
+                                preserveState
+                                preserveScroll
+                                className={`rounded border px-3 py-1 text-sm ${link.active ? 'bg-primary text-primary-foreground' : 'bg-background'} ${!link.url ? 'pointer-events-none opacity-50' : ''}`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
         </>
     );

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Guardian\ApplicationsController as GuardianAllApplicationsController;
 use App\Http\Controllers\Guardian\TuitionApplicationController as GuardianApplicationController;
 use App\Http\Controllers\Admin\GuardianController as AdminGuardianController;
 use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TuitionPostShowController;
 use App\Http\Controllers\FindTutorController;
 use App\Http\Controllers\TuitionJobController;
+use App\Http\Controllers\LocationSuggestController;
+use App\Http\Controllers\SubjectSuggestController;
 use App\Http\Controllers\Tutor\ProfileController;
 use App\Http\Controllers\Tutor\TuitionApplicationController;
 use App\Http\Middleware\EnsureUserIsAdmin;
@@ -30,8 +33,17 @@ Route::bind('guardian', function ($value) {
 });
 
 Route::get('/', HomeController::class)->name('home');
+Route::post('/lang', function (\Illuminate\Http\Request $request) {
+    $locale = $request->input('locale');
+    if (in_array($locale, ['en', 'bn'], true)) {
+        session(['locale' => $locale]);
+    }
+    return back();
+})->name('lang.switch');
 Route::get('/find-tutors', [FindTutorController::class, 'index'])->name('find-tutors');
 Route::get('/tuition-jobs', [TuitionJobController::class, 'index'])->name('tuition-jobs.index');
+Route::get('/api/locations', LocationSuggestController::class)->name('api.locations');
+Route::get('/api/subjects', SubjectSuggestController::class)->name('api.subjects');
 Route::get('/tuition-posts/{tuitionPost}', TuitionPostShowController::class)->name('tuition-posts.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -63,6 +75,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
      Route::get('admin/tutors', [AdminTutorController::class, 'index'])
          ->middleware(EnsureUserIsAdmin::class)
          ->name('admin.tutors.index');
+     Route::get('admin/tutors/search', [AdminTutorController::class, 'search'])
+         ->middleware(EnsureUserIsAdmin::class)
+         ->name('admin.tutors.search');
      Route::get('admin/tutors/{tutor}', [AdminTutorController::class, 'show'])
          ->middleware(EnsureUserIsAdmin::class)
          ->name('admin.tutors.show');
@@ -83,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->except(['show'])
         ->names('guardian.tuition-posts');
 
+    Route::get('guardian/applications', GuardianAllApplicationsController::class)->name('guardian.applications.all');
     Route::get('guardian/tuition-posts/{tuitionPost}/applications', [GuardianApplicationController::class, 'index'])->name('guardian.applications.index');
     Route::patch('guardian/tuition-posts/{tuitionPost}/applications/{application}', [GuardianApplicationController::class, 'updateStatus'])->name('guardian.applications.update');
 

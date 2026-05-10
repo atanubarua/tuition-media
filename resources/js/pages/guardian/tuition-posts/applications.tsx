@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, Info } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ArrowLeft, Info, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { dashboard } from '@/routes';
@@ -95,8 +96,22 @@ export default function GuardianApplicationsIndex({
     const [search, setSearch] = useState(filters.search ?? '');
     const [university, setUniversity] = useState(filters.university ?? '');
     const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const hasMountedRef = useRef(false);
+
+    const clearFilters = () => {
+        setStatus('');
+        setSearch('');
+        setUniversity('');
+    };
 
     useEffect(() => {
+        if (!hasMountedRef.current) {
+            hasMountedRef.current = true;
+            return;
+        }
+
+        setIsLoading(true);
         const timeout = setTimeout(() => {
             router.get(
                 `/guardian/tuition-posts/${post.id}/applications`,
@@ -105,7 +120,7 @@ export default function GuardianApplicationsIndex({
                     search: search || undefined,
                     university: university || undefined,
                 },
-                { preserveState: true, replace: true }
+                { preserveState: true, replace: true, onFinish: () => setIsLoading(false) }
             );
         }, 300);
 
@@ -218,7 +233,8 @@ export default function GuardianApplicationsIndex({
                     </div>
                 </section>
 
-                <div className="grid gap-3 md:grid-cols-3">
+                <div className="flex items-end gap-4">
+                <div className="grid flex-1 gap-3 md:grid-cols-3">
                     <div>
                         <label htmlFor="search" className="mb-2 block text-sm font-medium">
                             Search tutor
@@ -270,6 +286,18 @@ export default function GuardianApplicationsIndex({
                         </select>
                     </div>
                 </div>
+                    {(search || status || university) && (
+                        <button
+                            type="button"
+                            onClick={clearFilters}
+                            className="mb-0.5 flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border px-3 text-sm text-muted-foreground hover:bg-muted"
+                            title="Clear filters"
+                        >
+                            <X className="h-4 w-4" />
+                            Clear
+                        </button>
+                    )}
+                </div>
 
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="w-full text-sm">
@@ -286,15 +314,21 @@ export default function GuardianApplicationsIndex({
                             </tr>
                         </thead>
                         <tbody>
-                            {applications.data.length === 0 && (
+                            {isLoading ? (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <tr key={i} className="border-t">
+                                        {Array.from({ length: 8 }).map((_, j) => (
+                                            <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>
+                                        ))}
+                                    </tr>
+                                ))
+                            ) : applications.data.length === 0 ? (
                                 <tr>
                                     <td colSpan={8} className="px-4 py-6 text-muted-foreground">
                                         No applications found.
                                     </td>
                                 </tr>
-                            )}
-
-                            {applications.data.map((app) => (
+                            ) : applications.data.map((app) => (
                                 <tr key={app.id} className="border-t align-top">
                                     <td className="px-4 py-3">
                                         <button

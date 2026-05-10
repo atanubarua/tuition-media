@@ -9,20 +9,21 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        $email = env('ADMIN_EMAIL');
-        $password = env('ADMIN_PASSWORD');
+        $email    = config('admin.email');
+        $password = config('admin.password');
 
         if (! $email || ! $password) {
+            $this->command->warn('ADMIN_EMAIL or ADMIN_PASSWORD not set. Skipping.');
             return;
         }
 
         User::updateOrCreate(
             ['email' => $email],
             [
-                'name' => env('ADMIN_NAME', 'Admin User'),
-                'phone' => env('ADMIN_PHONE', '01700000000'),
-                'role' => User::ROLE_ADMIN,
-                'gender' => null,
+                'name'     => config('admin.name'),
+                'phone'    => config('admin.phone'),
+                'role'     => User::ROLE_ADMIN,
+                'gender'   => null,
                 'password' => $password,
             ],
         );

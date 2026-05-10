@@ -1,6 +1,7 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState, FormEvent } from 'react';
 import PublicNavbar from '@/components/public-navbar';
+import AutocompleteInput from '@/components/autocomplete-input';
 import {
     BookOpen,
     MapPin,
@@ -18,6 +19,16 @@ import {
     Loader2
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+
+type T = Record<string, any>;
+
+function str(value: unknown, fallback = ''): string {
+    return typeof value === 'string' ? value : fallback;
+}
+
+function replaceVars(template: string, vars: Record<string, string | number>) {
+    return Object.entries(vars).reduce((r, [k, v]) => r.replace(`:${k}`, String(v)), template);
+}
 
 type Subject = { id: number; name: string };
 type Subdistrict = { id: number; name: string; type: string };
@@ -46,15 +57,15 @@ function isGraduated(academicYear: number | null) {
     return Number(academicYear) === 5;
 }
 
-function currentYearLabel(academicYear: number | null) {
+function currentYearLabel(academicYear: number | null, t: T) {
     const year = Number(academicYear);
-    if (!year || year < 1 || year > 4) return 'Not specified';
-    return `Year ${year}`;
+    if (!year || year < 1 || year > 4) return str(t?.find_tutors?.modal_not_specified, 'Not specified');
+    return replaceVars(str(t?.find_tutors?.modal_year, 'Year :n'), { n: year });
 }
 
-function graduatedYearLabel(intakeYear: number | null) {
-    if (!intakeYear) return 'Not specified';
-    return String(intakeYear + 4);
+function graduatedYearLabel(intakeYear: number | null, t: T) {
+    if (!intakeYear) return str(t?.find_tutors?.modal_not_specified, 'Not specified');
+    return replaceVars(str(t?.find_tutors?.modal_graduated, 'Graduated :year'), { year: intakeYear + 4 });
 }
 
 type Tutor = {
@@ -79,7 +90,7 @@ type Filters = {
     university: string;
 };
 
-function TutorCard({ tutor, onViewProfile }: { tutor: Tutor; onViewProfile: (tutor: Tutor) => void }) {
+function TutorCard({ tutor, onViewProfile, t }: { tutor: Tutor; onViewProfile: (tutor: Tutor) => void; t: T }) {
     const profile = tutor.tutor_profile;
     const subjects = profile.subjects.map(s => s.name);
     const locations = profile.preferred_locations.map(l => l.name);
@@ -124,7 +135,9 @@ function TutorCard({ tutor, onViewProfile }: { tutor: Tutor; onViewProfile: (tut
                             {profile.university.name}
                         </p>
                     ) : (
-                        <p className="mt-0.5 text-sm text-slate-500 capitalize">{tutor.gender} Tutor</p>
+                        <p className="mt-0.5 text-sm text-slate-500 capitalize">
+                            {replaceVars(str(t?.find_tutors?.gender_tutor, ':gender Tutor'), { gender: tutor.gender })}
+                        </p>
                     )}
                     
                     {profile.department && (
@@ -142,7 +155,7 @@ function TutorCard({ tutor, onViewProfile }: { tutor: Tutor; onViewProfile: (tut
                 ))}
                 {subjects.length > 3 && (
                     <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 border border-slate-200">
-                        +{subjects.length - 3} more
+                        {replaceVars(str(t?.find_tutors?.more_subjects, '+:count more'), { count: subjects.length - 3 })}
                     </span>
                 )}
             </div>
@@ -151,13 +164,15 @@ function TutorCard({ tutor, onViewProfile }: { tutor: Tutor; onViewProfile: (tut
                 <div className="flex items-start gap-2">
                     <MapPin className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
                     <span className="line-clamp-1 leading-tight">
-                        {locations.length > 0 ? locations.join(', ') : 'Any location'}
+                        {locations.length > 0 ? locations.join(', ') : str(t?.find_tutors?.any_location, 'Any location')}
                     </span>
                 </div>
                 <div className="flex items-center gap-2">
                     <GraduationCap className="h-4 w-4 text-slate-400 shrink-0" />
                     <span className="truncate">
-                        {profile.experience_months ? `${Math.floor(profile.experience_months / 12)} yrs ${profile.experience_months % 12} mos exp.` : 'New Tutor'}
+                        {profile.experience_months
+                            ? replaceVars(str(t?.find_tutors?.experience, ':yrs yrs :mos mos exp.'), { yrs: Math.floor(profile.experience_months / 12), mos: profile.experience_months % 12 })
+                            : str(t?.find_tutors?.new_tutor, 'New Tutor')}
                     </span>
                 </div>
             </div>
@@ -166,7 +181,7 @@ function TutorCard({ tutor, onViewProfile }: { tutor: Tutor; onViewProfile: (tut
                 onClick={() => onViewProfile(tutor)}
                 className="mt-1.5 w-full rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition group-hover:border-blue-400 hover:border-blue-600 hover:text-blue-800"
             >
-                View Profile
+                {str(t?.find_tutors?.view_profile, 'View Profile')}
             </button>
         </div>
     );
@@ -183,6 +198,7 @@ export default function FindTutors({
     universities: University[];
     canRegister?: boolean;
 }) {
+    const { translations: t } = usePage().props as any;
     // Local state for the filter form
     const [location, setLocation] = useState(filters.location || '');
     const [subject, setSubject] = useState(filters.subject || '');
@@ -221,12 +237,12 @@ export default function FindTutors({
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-blue-200 selection:text-blue-900 flex flex-col">
-            <Head title="Find Tutors – Tuition Media" />
+            <Head title={str(t?.find_tutors?.page_title, 'Find Tutors – Tuition Media')} />
             {isFiltering && (
                 <div className="fixed inset-0 z-[90] flex items-center justify-center bg-white/75 backdrop-blur-sm">
                     <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-lg">
                         <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-                        <p className="text-sm font-semibold text-slate-700">Applying filters...</p>
+                        <p className="text-sm font-semibold text-slate-700">{str(t?.find_tutors?.applying_filters, 'Applying filters...')}</p>
                     </div>
                 </div>
             )}
@@ -236,9 +252,9 @@ export default function FindTutors({
             {/* Page Header */}
             <div className="bg-white border-b border-slate-200 pt-12 pb-12">
                 <div className="mx-auto max-w-7xl px-4 lg:px-8">
-                    <h1 className="text-3xl font-extrabold text-slate-900 md:text-4xl">Find the Perfect Tutor</h1>
+                    <h1 className="text-3xl font-extrabold text-slate-900 md:text-4xl">{str(t?.find_tutors?.heading, 'Find the Perfect Tutor')}</h1>
                     <p className="mt-3 text-lg text-slate-600">
-                        Browse through our directory of {tutors.total} qualified and verified educators across Bangladesh.
+                        {replaceVars(str(t?.find_tutors?.subheading, 'Browse through our directory of :count qualified and verified educators across Bangladesh.'), { count: tutors.total })}
                     </p>
                 </div>
             </div>
@@ -251,43 +267,43 @@ export default function FindTutors({
                     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sticky top-24">
                         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
                             <Filter className="h-5 w-5 text-blue-600" />
-                            <h2 className="text-lg font-bold text-slate-900">Filters</h2>
+                            <h2 className="text-lg font-bold text-slate-900">{str(t?.find_tutors?.filters_heading, 'Filters')}</h2>
                         </div>
 
                         <form onSubmit={handleFilterSubmit} className="space-y-6">
                             {/* Area */}
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Area / Location</label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Dhanmondi, Mirpur..."
-                                        value={location}
-                                        onChange={(e) => setLocation(e.target.value)}
-                                        className="w-full rounded-xl border border-slate-300 pl-10 py-2.5 text-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900"
-                                    />
-                                </div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">{str(t?.find_tutors?.label_area, 'Area / Location')}</label>
+                                <AutocompleteInput
+                                    value={location}
+                                    onChange={setLocation}
+                                    fetchUrl={(q) => `/api/locations?q=${encodeURIComponent(q)}`}
+                                    mapLabel={(s) => s.label}
+                                    mapValue={(s) => s.name}
+                                    placeholder={str(t?.find_tutors?.placeholder_area, 'e.g. Dhanmondi, Mirpur...')}
+                                    icon={<MapPin className="h-4 w-4 text-slate-400" />}
+                                    className="w-full rounded-xl border border-slate-300 pl-10 py-2.5 text-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900"
+                                />
                             </div>
 
                             {/* Subject */}
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Subject Expertise</label>
-                                <div className="relative">
-                                    <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Physics, English..."
-                                        value={subject}
-                                        onChange={(e) => setSubject(e.target.value)}
-                                        className="w-full rounded-xl border border-slate-300 pl-10 py-2.5 text-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900"
-                                    />
-                                </div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">{str(t?.find_tutors?.label_subject, 'Subject Expertise')}</label>
+                                <AutocompleteInput
+                                    value={subject}
+                                    onChange={setSubject}
+                                    fetchUrl={(q) => `/api/subjects?q=${encodeURIComponent(q)}`}
+                                    mapLabel={(s) => s}
+                                    mapValue={(s) => s}
+                                    placeholder={str(t?.find_tutors?.placeholder_subject, 'e.g. Physics, English...')}
+                                    icon={<BookOpen className="h-4 w-4 text-slate-400" />}
+                                    className="w-full rounded-xl border border-slate-300 pl-10 py-2.5 text-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900"
+                                />
                             </div>
 
                             {/* University */}
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">University / Institution</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">{str(t?.find_tutors?.label_university, 'University / Institution')}</label>
                                 <div className="relative">
                                     <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <select
@@ -295,7 +311,7 @@ export default function FindTutors({
                                         onChange={(e) => setUniversity(e.target.value)}
                                         className="w-full rounded-xl border border-slate-300 pl-10 py-2.5 text-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 appearance-none bg-white"
                                     >
-                                        <option value="">Any University</option>
+                                        <option value="">{str(t?.find_tutors?.any_university, 'Any University')}</option>
                                         {universities.map(u => (
                                             <option key={u.id} value={u.name}>{u.name}</option>
                                         ))}
@@ -305,7 +321,7 @@ export default function FindTutors({
 
                             {/* Gender */}
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Tutor Gender Preference</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">{str(t?.find_tutors?.label_gender, 'Tutor Gender Preference')}</label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <select
@@ -313,9 +329,9 @@ export default function FindTutors({
                                         onChange={(e) => setGender(e.target.value)}
                                         className="w-full rounded-xl border border-slate-300 pl-10 py-2.5 text-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 appearance-none bg-white"
                                     >
-                                        <option value="any">Any Gender</option>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
+                                        <option value="any">{str(t?.find_tutors?.any_gender, 'Any Gender')}</option>
+                                        <option value="male">{str(t?.find_tutors?.gender_male, 'Male')}</option>
+                                        <option value="female">{str(t?.find_tutors?.gender_female, 'Female')}</option>
                                     </select>
                                 </div>
                             </div>
@@ -326,7 +342,7 @@ export default function FindTutors({
                                     disabled={isFiltering}
                                     className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 shadow-sm disabled:cursor-not-allowed disabled:opacity-70"
                                 >
-                                    {isFiltering ? 'Applying Filters...' : 'Apply Filters'}
+                                    {isFiltering ? str(t?.find_tutors?.applying_filters, 'Applying Filters...') : str(t?.find_tutors?.apply_filters, 'Apply Filters')}
                                 </button>
                                 
                                 {(filters.location || filters.subject || filters.university || filters.gender !== 'any') && (
@@ -335,7 +351,7 @@ export default function FindTutors({
                                         onClick={clearFilters}
                                         className="w-full rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-200"
                                     >
-                                        Clear All
+                                        {str(t?.find_tutors?.clear_all, 'Clear All')}
                                     </button>
                                 )}
                             </div>
@@ -348,7 +364,7 @@ export default function FindTutors({
                     {/* Active Filters Display */}
                     {(filters.location || filters.subject || filters.university || filters.gender !== 'any') && (
                         <div className="mb-6 flex flex-wrap gap-2 items-center text-sm">
-                            <span className="text-slate-500">Showing results for:</span>
+                            <span className="text-slate-500">{str(t?.find_tutors?.showing_results_for, 'Showing results for:')}</span>
                             {filters.location && (
                                 <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 font-medium text-amber-800">
                                     {filters.location}
@@ -366,7 +382,7 @@ export default function FindTutors({
                             )}
                             {filters.gender !== 'any' && (
                                 <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 font-medium text-emerald-800 capitalize">
-                                    {filters.gender} Only
+                                    {replaceVars(str(t?.find_tutors?.gender_only, ':gender Only'), { gender: filters.gender })}
                                 </span>
                             )}
                         </div>
@@ -377,21 +393,21 @@ export default function FindTutors({
                             <div className="rounded-full bg-slate-50 p-5 shadow-sm mb-5 border border-slate-100">
                                 <Search className="h-8 w-8 text-slate-400" />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900">No tutors found</h3>
+                            <h3 className="text-xl font-bold text-slate-900">{str(t?.find_tutors?.no_tutors_title, 'No tutors found')}</h3>
                             <p className="mt-2 text-slate-600 max-w-sm">
-                                We couldn't find any tutors matching your exact criteria. Try broadening your search filters.
+                                {str(t?.find_tutors?.no_tutors_body, "We couldn't find any tutors matching your exact criteria. Try broadening your search filters.")}
                             </p>
                             <button 
                                 onClick={clearFilters}
                                 className="mt-6 font-semibold text-blue-600 hover:text-blue-700"
                             >
-                                Clear search filters
+                                {str(t?.find_tutors?.clear_search, 'Clear search filters')}
                             </button>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-6">
                             {tutors.data.map((tutor) => (
-                                <TutorCard key={tutor.id} tutor={tutor} onViewProfile={setSelectedTutor} />
+                                <TutorCard key={tutor.id} tutor={tutor} onViewProfile={setSelectedTutor} t={t} />
                             ))}
                         </div>
                     )}
@@ -469,16 +485,16 @@ export default function FindTutors({
                                         <div className={`mt-6 grid gap-3 ${isGraduated(selectedTutor.tutor_profile.academic_year) ? 'sm:grid-cols-2' : ''}`}>
                                             {isGraduated(selectedTutor.tutor_profile.academic_year) && (
                                                 <div className="rounded-xl border border-slate-300 bg-white/90 p-3">
-                                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Experience</p>
+                                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">{str(t?.find_tutors?.modal_experience, 'Experience')}</p>
                                                     <p className="mt-1 text-sm font-semibold text-slate-800">
                                                         {selectedTutor.tutor_profile.experience_months
-                                                            ? `${Math.floor(selectedTutor.tutor_profile.experience_months / 12)} years ${selectedTutor.tutor_profile.experience_months % 12} months`
-                                                            : 'New Tutor'}
+                                                            ? replaceVars(str(t?.find_tutors?.modal_experience_value, ':years years :months months'), { years: Math.floor(selectedTutor.tutor_profile.experience_months / 12), months: selectedTutor.tutor_profile.experience_months % 12 })
+                                                            : str(t?.find_tutors?.new_tutor, 'New Tutor')}
                                                     </p>
                                                 </div>
                                             )}
                                             <div className="rounded-xl border border-slate-300 bg-white/90 p-3">
-                                                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Gender</p>
+                                                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">{str(t?.find_tutors?.modal_gender, 'Gender')}</p>
                                                 <p className="mt-1 text-sm font-semibold text-slate-800">
                                                     <span className="inline-flex items-center gap-1.5">
                                                         <User className="h-3.5 w-3.5" />
@@ -489,7 +505,7 @@ export default function FindTutors({
                                         </div>
                                         {selectedTutor.tutor_profile.occupation === 'employed' && (
                                             <div className="mt-3 rounded-xl border border-slate-300 bg-white/90 p-3">
-                                                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Employment</p>
+                                                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">{str(t?.find_tutors?.modal_employment, 'Employment')}</p>
                                                 <div className="mt-2 space-y-1.5 text-sm font-semibold text-slate-800">
                                                     <p className="flex items-start gap-2 leading-snug">
                                                         <User className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
@@ -497,7 +513,7 @@ export default function FindTutors({
                                                     </p>
                                                     <p className="flex items-start gap-2 leading-snug">
                                                         <Building2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
-                                                        <span>{selectedTutor.tutor_profile.job_organization || 'Not specified'}</span>
+                                                        <span>{selectedTutor.tutor_profile.job_organization || str(t?.find_tutors?.modal_not_specified, 'Not specified')}</span>
                                                     </p>
                                                 </div>
                                             </div>
@@ -509,16 +525,16 @@ export default function FindTutors({
                                     <div className="space-y-6">
                                         {selectedTutor.tutor_profile.bio && (
                                             <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                                                <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">About</h3>
+                                                <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_about, 'About')}</h3>
                                                 <p className="mt-3 text-sm leading-7 text-slate-700">{selectedTutor.tutor_profile.bio}</p>
                                             </section>
                                         )}
 
                                         <section className="space-y-4">
                                             <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                                                <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">Education</h3>
-                                                <p className="mt-3 text-lg font-bold leading-7 text-slate-900" title={selectedTutor.tutor_profile.university?.name || 'Not specified'}>
-                                                    {selectedTutor.tutor_profile.university?.name || 'Not specified'}
+                                                <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_education, 'Education')}</h3>
+                                                <p className="mt-3 text-lg font-bold leading-7 text-slate-900" title={selectedTutor.tutor_profile.university?.name || str(t?.find_tutors?.modal_not_specified, 'Not specified')}>
+                                                    {selectedTutor.tutor_profile.university?.name || str(t?.find_tutors?.modal_not_specified, 'Not specified')}
                                                 </p>
                                                 {selectedTutor.tutor_profile.department && (
                                                     <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-medium text-slate-600">
@@ -529,15 +545,15 @@ export default function FindTutors({
                                                         <span className="inline-flex items-center gap-1.5">
                                                             <CalendarDays className="h-3.5 w-3.5 text-slate-500" />
                                                             {isGraduated(selectedTutor.tutor_profile.academic_year)
-                                                                ? `Graduated ${graduatedYearLabel(selectedTutor.tutor_profile.intake_year)}`
-                                                                : currentYearLabel(selectedTutor.tutor_profile.academic_year)}
+                                                                ? graduatedYearLabel(selectedTutor.tutor_profile.intake_year, t)
+                                                                : currentYearLabel(selectedTutor.tutor_profile.academic_year, t)}
                                                         </span>
                                                     </div>
                                                 )}
                                             </div>
 
                                             <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                                <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">Subjects</h3>
+                                                <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_subjects, 'Subjects')}</h3>
                                                 <div className="mt-2.5 flex flex-wrap gap-1.5">
                                                     {selectedTutor.tutor_profile.subjects.map((s) => (
                                                         <span key={s.id} className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-800">
@@ -555,7 +571,7 @@ export default function FindTutors({
                                             onClick={() => setSelectedTutor(null)}
                                             className="rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800"
                                         >
-                                            Close
+                                            {str(t?.find_tutors?.modal_close, 'Close')}
                                         </button>
                                     </div>
                                 </div>
@@ -573,12 +589,12 @@ export default function FindTutors({
                         Tuition<span className="text-amber-500">Media</span>
                     </div>
                     <p className="text-sm">
-                        © {new Date().getFullYear()} TuitionMedia. All rights reserved.
+                        {replaceVars(str(t?.find_tutors?.footer_copyright, '© :year TuitionMedia. All rights reserved.'), { year: new Date().getFullYear() })}
                     </p>
                     <div className="flex gap-6 text-sm font-medium">
-                        <Link href="#" className="hover:text-white transition">Terms</Link>
-                        <Link href="#" className="hover:text-white transition">Privacy</Link>
-                        <Link href="#" className="hover:text-white transition">Contact</Link>
+                        <Link href="#" className="hover:text-white transition">{str(t?.find_tutors?.footer_terms, 'Terms')}</Link>
+                        <Link href="#" className="hover:text-white transition">{str(t?.find_tutors?.footer_privacy, 'Privacy')}</Link>
+                        <Link href="#" className="hover:text-white transition">{str(t?.find_tutors?.footer_contact, 'Contact')}</Link>
                     </div>
                 </div>
             </footer>

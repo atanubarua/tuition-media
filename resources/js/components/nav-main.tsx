@@ -30,7 +30,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     : 'text-sidebar-foreground/75 hover:text-sidebar-foreground'
                             }
                         >
-                            <Link href={item.href} prefetch>
+                            <Link href={item.href}>
                                 {item.icon && <item.icon />}
                                 <span>{item.title}</span>
                             </Link>

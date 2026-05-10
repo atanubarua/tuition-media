@@ -48,12 +48,17 @@ class TuitionPostShowController extends Controller
             default           => '50+',
         };
 
+        $locale = session('locale', config('app.locale'));
+        app()->setLocale($locale);
+
         return Inertia::render('tuition-posts/show', [
             'post' => $tuitionPost,
             'location' => $location,
             'has_applied' => $hasApplied,
             'applicant_count' => $applicantCount,
             'profile_incomplete' => $profileIncomplete,
+            'locale' => $locale,
+            'translations' => trans($locale),
         ]);
     }
 }

@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\TuitionApplication;
-use Illuminate\Support\Str;
 
 class TuitionPost extends Model
 {
@@ -47,11 +46,14 @@ class TuitionPost extends Model
                 return;
             }
 
-            do {
-                $code = 'TID' . strtoupper(Str::random(8));
-            } while (self::query()->where('tuition_code', $code)->exists());
+            $last = self::query()
+                ->where('tuition_code', 'like', 'TID%')
+                ->orderByDesc('tuition_code')
+                ->value('tuition_code');
 
-            $post->tuition_code = $code;
+            $next = $last ? (int) substr($last, 3) + 1 : 1;
+
+            $post->tuition_code = 'TID' . str_pad($next, 8, '0', STR_PAD_LEFT);
         });
     }
 

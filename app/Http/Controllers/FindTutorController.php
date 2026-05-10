@@ -102,6 +102,9 @@ class FindTutorController extends Controller
 
         $universities = \App\Models\University::orderBy('name')->get(['id', 'name']);
 
+        $locale = session('locale', config('app.locale'));
+        app()->setLocale($locale);
+
         return Inertia::render('FindTutors', [
             'tutors' => $tutors,
             'universities' => $universities,
@@ -110,7 +113,9 @@ class FindTutorController extends Controller
                 'subject' => $request->subject ?? '',
                 'gender' => $request->gender ?? 'any',
                 'university' => $request->university ?? '',
-            ]
+            ],
+            'locale' => $locale,
+            'translations' => trans($locale),
         ]);
     }
 }

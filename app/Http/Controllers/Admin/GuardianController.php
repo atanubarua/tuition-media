@@ -24,8 +24,9 @@ class GuardianController extends Controller
             ->when($email !== '', fn ($query) => $query->where('email', 'like', "%{$email}%"))
             ->when($phone !== '', fn ($query) => $query->where('phone', 'like', "%{$phone}%"))
             ->latest()
-            ->get()
-            ->map(fn (User $guardian) => [
+            ->paginate(20)
+            ->withQueryString()
+            ->through(fn (User $guardian) => [
                 'id' => $guardian->id,
                 'name' => $guardian->name,
                 'email' => $guardian->email,

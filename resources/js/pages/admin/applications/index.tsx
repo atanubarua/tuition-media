@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useMemo, useState, useEffect } from 'react';
-import Select from 'react-select';
-import { CircleDollarSign } from 'lucide-react';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import AsyncSelect from 'react-select/async';
+import { CircleDollarSign, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -12,6 +12,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 type Application = {
@@ -40,10 +41,12 @@ type Application = {
 };
 
 type Props = {
-    applications: Application[];
-    filters: { status: string; tutor_id: string; university: string; tuition_code: string };
+    applications: {
+        data: Application[];
+        links: { url: string | null; label: string; active: boolean }[];
+    };
+    filters: { status: string; tutor_id: string; tutor_label: string; university: string; tuition_code: string };
     statuses: Application['status'][];
-    tutors: { id: number; name: string; email: string }[];
     universities: string[];
 };
 
@@ -59,7 +62,7 @@ const SELECT_STYLES = {
     input: (base: object) => ({ ...base, color: 'var(--foreground)' }),
 };
 
-export default function AdminApplicationsIndex({ applications, filters, statuses, tutors, universities }: Props) {
+export default function AdminApplicationsIndex({ applications, filters, statuses, universities }: Props) {
     const formatDate = (value: string) => new Date(value).toISOString().slice(0, 10);
     const [isHireModalOpen, setIsHireModalOpen] = useState(false);
     const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
@@ -69,10 +72,33 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
     const [commissionReceivedAmount, setCommissionReceivedAmount] = useState('');
     const [status, setStatus] = useState(filters.status);
     const [tutorId, setTutorId] = useState(filters.tutor_id ?? '');
+    const [tutorOption, setTutorOption] = useState<{ value: string; label: string } | null>(
+        filters.tutor_id ? { value: filters.tutor_id, label: filters.tutor_label ?? filters.tutor_id } : null
+    );
     const [university, setUniversity] = useState(filters.university ?? '');
     const [tuition_code, setTuitionCode] = useState(filters.tuition_code ?? '');
+    const [loading, setLoading] = useState(false);
+    const hasMountedRef = useRef(false);
 
     useEffect(() => {
+        const startHandler = router.on('start', () => setLoading(true));
+        const finishHandler = router.on('finish', () => setLoading(false));
+        return () => {
+            startHandler();
+            finishHandler();
+        };
+    }, []);
+
+    const hasFilters = !!(status || tutorId || university || tuition_code);
+
+    const clearFilters = () => { setStatus(''); setTutorId(''); setTutorOption(null); setUniversity(''); setTuitionCode(''); };
+
+    useEffect(() => {
+        if (!hasMountedRef.current) {
+            hasMountedRef.current = true;
+            return;
+        }
+
         const timeout = setTimeout(() => {
             router.get(
                 '/admin/applications',
@@ -88,6 +114,10 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
 
         return () => clearTimeout(timeout);
     }, [status, tutorId, university, tuition_code]);
+
+    const loadTutorOptions = (inputValue: string) =>
+        fetch(`/admin/tutors/search?q=${encodeURIComponent(inputValue)}`)
+            .then((res) => res.json());
 
     const updateApplicationStatus = (
         applicationId: number,
@@ -253,10 +283,10 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
             <div className="space-y-6 p-4">
                 <div>
                     <h1 className="text-2xl font-semibold">Applications</h1>
-                    <p className="text-sm text-muted-foreground">All tutor applications across the platform.</p>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-4">
+                <div className="flex items-end gap-4">
+                <div className="grid flex-1 gap-4 md:grid-cols-4">
                     <div>
                         <label htmlFor="status" className="mb-2 block text-sm font-medium">
                             Filter by status
@@ -280,28 +310,17 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                         <label htmlFor="tutor_id" className="mb-2 block text-sm font-medium">
                             Filter by tutor
                         </label>
-                        <Select
+                        <AsyncSelect
                             instanceId="admin-applications-tutor-filter"
                             inputId="tutor_id"
-                            value={
-                                tutorId
-                                    ? (() => {
-                                          const selected = tutors.find((tutor) => String(tutor.id) === tutorId);
-
-                                          return selected
-                                              ? { value: String(selected.id), label: `${selected.name} (${selected.email})` }
-                                              : null;
-                                      })()
-                                    : null
-                            }
-                            onChange={(selected) => setTutorId(selected?.value ?? '')}
-                            options={tutors.map((tutor) => ({
-                                value: String(tutor.id),
-                                label: `${tutor.name} (${tutor.email})`,
-                            }))}
-                            placeholder="All tutors"
+                            value={tutorOption}
+                            onChange={(selected) => {
+                                setTutorOption(selected);
+                                setTutorId(selected?.value ?? '');
+                            }}
+                            loadOptions={loadTutorOptions}
+                            placeholder="Search tutor..."
                             isClearable
-                            isSearchable
                             styles={SELECT_STYLES}
                         />
                     </div>
@@ -337,6 +356,18 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                         </select>
                     </div>
                 </div>
+                    {hasFilters && (
+                        <button
+                            type="button"
+                            onClick={clearFilters}
+                            className="mb-0.5 flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border px-3 text-sm text-muted-foreground hover:bg-muted"
+                            title="Clear filters"
+                        >
+                            <X className="h-4 w-4" />
+                            Clear
+                        </button>
+                    )}
+                </div>
 
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="w-full text-sm">
@@ -348,21 +379,46 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                                 <th className="px-4 py-3 text-left">University</th>
                                 <th className="px-4 py-3 text-left">Guardian</th>
                                 <th className="px-4 py-3 text-left">Guardian Phone</th>
-                                <th className="px-4 py-3 text-left">Contact</th>
                                 <th className="px-4 py-3 text-left">Expected Salary</th>
                                 <th className="px-4 py-3 text-left">Applied</th>
                                 <th className="px-4 py-3 text-left">Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {applications.length === 0 && (
+                            {loading ? (
+                                Array.from({ length: 8 }).map((_, i) => (
+                                    <tr key={i} className="border-t">
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
+                                        <td className="px-4 py-3">
+                                            <div className="space-y-1.5">
+                                                <Skeleton className="h-4 w-32" />
+                                                <Skeleton className="h-3 w-40" />
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td>
+                                        <td className="px-4 py-3">
+                                            <div className="space-y-1.5">
+                                                <Skeleton className="h-4 w-32" />
+                                                <Skeleton className="h-3 w-40" />
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-8 w-36 rounded-md" /></td>
+                                    </tr>
+                                ))
+                            ) : (
+                            <>
+                            {applications.data.length === 0 && (
                                 <tr>
-                                    <td className="px-4 py-6 text-muted-foreground" colSpan={10}>
+                                    <td className="px-4 py-6 text-muted-foreground" colSpan={9}>
                                         No applications found.
                                     </td>
                                 </tr>
                             )}
-                            {applications.map((application) => {
+                            {applications.data.map((application) => {
                                 return (
                                 <tr key={application.id} className="border-t">
                                     <td className="px-4 py-3 font-mono text-xs">{application.post?.tuition_code ?? '-'}</td>
@@ -389,11 +445,6 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                                         )}
                                     </td>
                                     <td className="px-4 py-3">{application.guardian?.phone ?? '-'}</td>
-                                    <td className="px-4 py-3 capitalize">
-                                        {['interested', 'not_interested'].includes(application.status)
-                                            ? application.status.replace('_', ' ')
-                                            : '-'}
-                                    </td>
                                     <td className="px-4 py-3">
                                         {application.expected_salary ? `BDT ${application.expected_salary}` : '-'}
                                     </td>
@@ -401,7 +452,7 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-2">
                                             <select
-                                                className={`h-9 min-w-[150px] rounded-md border bg-white px-3 text-sm font-medium capitalize shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 ${statusSelectToneClass(application.status)}`}
+                                                className={`h-9 w-auto rounded-md border bg-white px-3 text-sm font-medium capitalize shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 ${statusSelectToneClass(application.status)}`}
                                                 value={application.status}
                                                 onChange={(event) => {
                                                     const nextStatus = event.target.value as Application['status'];
@@ -451,9 +502,26 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                                 </tr>
                                 );
                             })}
+                            </>
+                            )}
                         </tbody>
                     </table>
                 </div>
+
+                {applications.links.length > 3 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        {applications.links.map((link, index) => (
+                            <Link
+                                key={`${link.label}-${index}`}
+                                href={link.url ?? '#'}
+                                preserveState
+                                preserveScroll
+                                className={`rounded border px-3 py-1 text-sm ${link.active ? 'bg-primary text-primary-foreground' : 'bg-background'} ${!link.url ? 'pointer-events-none opacity-50' : ''}`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
 
             <Dialog open={isHireModalOpen} onOpenChange={setIsHireModalOpen}>

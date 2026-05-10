@@ -8,6 +8,7 @@ use App\Models\TuitionApplication;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,6 +16,8 @@ class CommissionController extends Controller
 {
     public function index(Request $request): Response
     {
+        $hasCommissionPaymentsTable = Schema::hasTable('commission_payments');
+
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'payment_status' => ['nullable', 'in:unpaid,partial,paid'],
@@ -50,15 +53,16 @@ class CommissionController extends Controller
                             });
                     });
             })
-            ->with([
+            ->with(array_values(array_filter([
                 'tutor:id,name,email,phone',
                 'tuitionPost:id,tuition_code,title,guardian_id,salary_type,salary_min,salary_max',
                 'tuitionPost.guardian:id,name,email,phone',
-                'commissionPayments',
-            ])
+                $hasCommissionPaymentsTable ? 'commissionPayments' : null,
+            ])))
             ->latest('hired_at')
-            ->get()
-            ->map(function (TuitionApplication $application) {
+            ->paginate(50)
+            ->withQueryString()
+            ->through(function (TuitionApplication $application) use ($hasCommissionPaymentsTable) {
                 $due = max(0, (int) ($application->commission_amount ?? 0) - (int) ($application->commission_received_amount ?? 0));
                 $tuitionAmount = null;
 
@@ -80,16 +84,18 @@ class CommissionController extends Controller
                     'commission_due_amount' => $due,
                     'commission_due_date' => $application->commission_due_date?->toDateString(),
                     'tuition_amount' => $tuitionAmount,
-                    'payment_history' => $application->commissionPayments
-                        ->sortByDesc('received_at')
-                        ->values()
-                        ->map(fn (CommissionPayment $payment) => [
-                            'id' => $payment->id,
-                            'amount' => $payment->amount,
-                            'note' => $payment->note,
-                            'received_at' => $payment->received_at,
-                            'due_on' => $payment->due_on?->toDateString(),
-                        ]),
+                    'payment_history' => $hasCommissionPaymentsTable
+                        ? $application->commissionPayments
+                            ->sortByDesc('received_at')
+                            ->values()
+                            ->map(fn (CommissionPayment $payment) => [
+                                'id' => $payment->id,
+                                'amount' => $payment->amount,
+                                'note' => $payment->note,
+                                'received_at' => $payment->received_at,
+                                'due_on' => $payment->due_on?->toDateString(),
+                            ])
+                        : collect(),
                     'post' => $application->tuitionPost ? [
                         'id' => $application->tuitionPost->id,
                         'tuition_code' => $application->tuitionPost->tuition_code,
@@ -121,6 +127,12 @@ class CommissionController extends Controller
 
     public function updatePayment(Request $request, TuitionApplication $application): RedirectResponse
     {
+        if (! Schema::hasTable('commission_payments')) {
+            return back()->withErrors([
+                'received_amount' => 'Commission payment table is missing. Please run database migrations.',
+            ]);
+        }
+
         $validated = $request->validate([
             'received_amount' => ['required', 'integer', 'min:1'],
             'note' => ['nullable', 'string', 'max:500'],

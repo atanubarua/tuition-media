@@ -1,7 +1,10 @@
 ﻿import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { Spinner } from '@/components/ui/spinner';
+import AutocompleteInput from '@/components/autocomplete-input';
 import { login, register } from '@/routes';
 import { toast } from 'sonner';
+import PublicNavbar from '@/components/public-navbar';
 import {
     BookOpen,
     MapPin,
@@ -13,17 +16,8 @@ import {
     Users,
     BookMarked,
     Lightbulb,
-    ChevronDown,
-    LayoutDashboard,
-    LogOut,
     ShieldCheck,
 } from 'lucide-react';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 type Subject = { id: number; name: string };
 type Student = { id: number; academic_level: string; class_level: string | null; medium: string; subjects: Subject[] };
@@ -49,7 +43,7 @@ type WelcomeProps = {
     posts?: Post[];
     stats?: { total_posts: number; total_tutors: number };
     locale?: 'en' | 'bn';
-    translations: WelcomeTranslations;
+    translations?: WelcomeTranslations;
 };
 
 function str(value: unknown, fallback = ''): string {
@@ -145,18 +139,15 @@ export default function Welcome({
     locale = 'en',
     translations,
 }: WelcomeProps) {
-    const { auth, unread_notifications_count } = usePage().props as any;
+    const { auth } = usePage().props as any;
     const [location, setLocation] = useState('');
     const [subject, setSubject] = useState('');
     const [searchMode, setSearchMode] = useState<'tutor' | 'job'>('tutor');
+    const [searching, setSearching] = useState(false);
 
     const t = translations ?? {};
     const stepsGuardians: string[] = Array.isArray(t?.how?.guardians_steps) ? t.how.guardians_steps : [];
     const stepsTutors: string[] = Array.isArray(t?.how?.tutors_steps) ? t.how.tutors_steps : [];
-
-    const switchLanguage = (target: 'en' | 'bn') => {
-        router.get('/', { lang: target }, { preserveScroll: true });
-    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -168,13 +159,14 @@ export default function Welcome({
 
         const url = searchMode === 'tutor' ? '/find-tutors' : '/tuition-jobs';
 
+        setSearching(true);
         router.get(
             url,
             {
                 location: location.trim() || undefined,
                 subject: subject.trim() || undefined,
             },
-            { preserveScroll: true }
+            { preserveScroll: true, onFinish: () => setSearching(false) }
         );
     };
 
@@ -182,105 +174,9 @@ export default function Welcome({
         <div className="min-h-screen overflow-x-hidden bg-white font-sans text-slate-900 selection:bg-blue-200 selection:text-blue-900">
             <Head title={str(t?.meta_title, 'Tuition Media - Find Tutors & Tuition Jobs in Bangladesh')} />
 
-            <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md transition-all">
-                <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 lg:px-8">
-                    <div className="flex items-center gap-10">
-                        <Link href="/" className="flex items-center gap-2 text-2xl font-bold tracking-tight text-blue-900">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-                                <BookOpen className="h-5 w-5" />
-                            </div>
-                            {str(t?.brand?.tuition, 'Tuition')}<span className="text-amber-500">{str(t?.brand?.media, 'Media')}</span>
-                        </Link>
+            <PublicNavbar canRegister={canRegister} position="fixed" maxWidthClass="max-w-6xl" />
 
-                        <div className="hidden md:flex items-center gap-6">
-                            <Link href="/find-tutors" className="text-sm font-semibold text-slate-600 transition hover:text-blue-600">
-                                {str(t?.nav?.find_tutors, 'Find Tutors')}
-                            </Link>
-                            <Link href="/tuition-jobs" className="text-sm font-semibold text-slate-600 transition hover:text-blue-600">
-                                {str(t?.nav?.tuition_jobs, 'Tuition Jobs')}
-                            </Link>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-1">
-                            <button
-                                type="button"
-                                onClick={() => switchLanguage('en')}
-                                className={`rounded-md px-2.5 py-1 text-xs font-semibold ${locale === 'en' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600'}`}
-                            >
-                                {str(t?.language?.en, 'EN')}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => switchLanguage('bn')}
-                                className={`rounded-md px-2.5 py-1 text-xs font-semibold ${locale === 'bn' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600'}`}
-                            >
-                                {str(t?.language?.bn, 'বাংলা')}
-                            </button>
-                        </div>
-
-                        {auth.user ? (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <button
-                                        type="button"
-                                        aria-label="Open user menu"
-                                        className="inline-flex h-10 items-center gap-1.5 rounded-full border border-blue-300 bg-white px-2.5 text-blue-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50"
-                                    >
-                                        <User className="h-4 w-4" />
-                                        <span className="hidden max-w-28 truncate text-sm font-semibold sm:inline">{auth.user.name}</span>
-                                        {unread_notifications_count > 0 && (
-                                            <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
-                                                {unread_notifications_count > 99 ? '99+' : unread_notifications_count}
-                                            </span>
-                                        )}
-                                        <ChevronDown className="h-4 w-4" />
-                                    </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44">
-                                    <DropdownMenuItem asChild>
-                                        <Link href="/dashboard" className="w-full cursor-pointer">
-                                            <LayoutDashboard className="h-4 w-4" />
-                                            <span>{str(t?.nav?.dashboard, 'Dashboard')}</span>
-                                            {unread_notifications_count > 0 && (
-                                                <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
-                                                    {unread_notifications_count > 99 ? '99+' : unread_notifications_count}
-                                                </span>
-                                            )}
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                        <Link href="/logout" method="post" as="button" className="w-full cursor-pointer">
-                                            <LogOut className="h-4 w-4" />
-                                            {str(t?.nav?.log_out, 'Log out')}
-                                        </Link>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        ) : (
-                            <>
-                                <Link
-                                    href={login()}
-                                    className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                >
-                                    {str(t?.nav?.log_in, 'Log in')}
-                                </Link>
-                                {canRegister && (
-                                    <Link
-                                        href={register()}
-                                        className="hidden sm:inline-flex items-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/30 transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                    >
-                                        {str(t?.nav?.register, 'Register')}
-                                    </Link>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-            </nav>
-
-            <section className="relative overflow-hidden bg-slate-50 pt-32 pb-10 lg:pt-40 lg:pb-14">
+            <section className="relative bg-slate-50 pt-32 pb-10 lg:pt-40 lg:pb-14">
                 <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3">
                     <svg width="404" height="404" fill="none" viewBox="0 0 404 404" aria-hidden="true" className="text-blue-100 opacity-50"><defs><pattern id="85737c0e-0916-41d7-917f-596dc7edfa27" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="4" height="4" fill="currentColor"></rect></pattern></defs><rect width="404" height="404" fill="url(#85737c0e-0916-41d7-917f-596dc7edfa27)"></rect></svg>
                 </div>
@@ -295,7 +191,7 @@ export default function Welcome({
                         <span>{str(t?.hero?.badge)}</span>
                     </div>
 
-                    <h1 className="mb-6 text-5xl font-extrabold tracking-tight text-slate-900 md:text-7xl lg:leading-[1.1]">{str(t?.hero?.title)}</h1>
+                    <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 md:text-6xl lg:leading-[1.1]">{str(t?.hero?.title)}</h1>
                     <p className="mx-auto mb-10 max-w-2xl text-lg text-slate-600 md:text-xl">{str(t?.hero?.description)}</p>
 
                     <div className="mx-auto max-w-2xl">
@@ -307,15 +203,31 @@ export default function Welcome({
                         </div>
 
                         <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-2 rounded-2xl bg-white p-3 shadow-xl shadow-blue-900/5 ring-1 ring-slate-200">
-                            <div className="flex w-full items-center pl-4 pr-2 border-b md:border-b-0 md:border-r border-slate-200 py-2 md:py-0">
+                            <div className="relative flex w-full items-center pl-4 pr-2 border-b md:border-b-0 md:border-r border-slate-200 py-2 md:py-0">
                                 <MapPin className="h-5 w-5 text-slate-400 shrink-0" />
-                                <input type="text" placeholder={str(t?.hero?.location_placeholder)} value={location} onChange={(e) => setLocation(e.target.value)} className="w-full bg-transparent px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-base" />
+                                <AutocompleteInput
+                                    value={location}
+                                    onChange={setLocation}
+                                    fetchUrl={(q) => `/api/locations?q=${encodeURIComponent(q)}`}
+                                    mapLabel={(s) => s.label}
+                                    mapValue={(s) => s.name}
+                                    placeholder={str(t?.hero?.location_placeholder)}
+                                    className="w-full bg-transparent px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-base"
+                                />
                             </div>
-                            <div className="flex w-full items-center pl-4 pr-2 py-2 md:py-0">
+                            <div className="relative flex w-full items-center pl-4 pr-2 py-2 md:py-0">
                                 <BookOpen className="h-5 w-5 text-slate-400 shrink-0" />
-                                <input type="text" placeholder={searchMode === 'tutor' ? str(t?.hero?.subject_placeholder_tutor) : str(t?.hero?.subject_placeholder_job)} value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full bg-transparent px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-base" />
+                                <AutocompleteInput
+                                    value={subject}
+                                    onChange={setSubject}
+                                    fetchUrl={(q) => `/api/subjects?q=${encodeURIComponent(q)}`}
+                                    mapLabel={(s) => s}
+                                    mapValue={(s) => s}
+                                    placeholder={searchMode === 'tutor' ? str(t?.hero?.subject_placeholder_tutor) : str(t?.hero?.subject_placeholder_job)}
+                                    className="w-full bg-transparent px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-base"
+                                />
                             </div>
-                            <button type="submit" className="w-full md:w-auto shrink-0 rounded-xl bg-blue-600 px-8 py-4 font-bold text-white transition hover:bg-blue-700 shadow-md hover:shadow-lg mt-2 md:mt-0">{searchMode === 'tutor' ? str(t?.hero?.find_tutors) : str(t?.hero?.find_tuitions)}</button>
+                            <button type="submit" disabled={searching} className="w-full md:w-auto shrink-0 rounded-xl bg-blue-600 px-8 py-4 font-bold text-white transition hover:bg-blue-700 shadow-md hover:shadow-lg mt-2 md:mt-0 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">{searching && <Spinner className="text-white" />}{searchMode === 'tutor' ? str(t?.hero?.find_tutors) : str(t?.hero?.find_tuitions)}</button>
                         </form>
                     </div>
                 </div>

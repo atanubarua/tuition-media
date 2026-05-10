@@ -63,12 +63,13 @@ type ApplicationSummary = {
 };
 
 type Props = {
+    back_url: string;
     tutor: Tutor;
     recent_applications: RecentApplication[];
     application_summary: ApplicationSummary;
 };
 
-export default function AdminTutorShow({ tutor, recent_applications, application_summary }: Props) {
+export default function AdminTutorShow({ back_url, tutor, recent_applications, application_summary }: Props) {
     const formatDate = (value: string) => new Date(value).toISOString().slice(0, 10);
 
     return (
@@ -81,7 +82,7 @@ export default function AdminTutorShow({ tutor, recent_applications, application
                         <h1 className="text-2xl font-semibold">{tutor.name}</h1>
                         <p className="text-sm text-muted-foreground">{tutor.email}</p>
                     </div>
-                    <Link href={`/admin/tutors`}>
+                    <Link href={back_url}>
                         <Button variant="outline">Back to Tutors</Button>
                     </Link>
                 </div>

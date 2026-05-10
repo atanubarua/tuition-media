@@ -33,6 +33,15 @@ class AppServiceProvider extends ServiceProvider
             return Notification::where('user_id', $user->id)->whereNull('read_at')->count();
         });
 
+        Inertia::share('locale', function () {
+            return session('locale', config('app.locale'));
+        });
+
+        Inertia::share('translations', function () {
+            $locale = session('locale', config('app.locale'));
+            return trans($locale);
+        });
+
         Inertia::share('latest_notifications', function () {
             $user = auth()->user();
 

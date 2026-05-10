@@ -1,11 +1,12 @@
-import { Head, router, useForm } from '@inertiajs/react';
-import { Pencil, Plus, SearchX, Trash2 } from 'lucide-react';
-import { FormEvent, useEffect, useState } from 'react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Pencil, Plus, SearchX, Trash2, X } from 'lucide-react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type Guardian = {
     id: number;
@@ -17,7 +18,11 @@ type Guardian = {
 };
 
 type Props = {
-    guardians: Guardian[];
+    guardians: {
+        data: Guardian[];
+        links: { url: string | null; label: string; active: boolean }[];
+        total: number;
+    };
     filters: { name: string; email: string; phone: string };
 };
 
@@ -25,8 +30,10 @@ export default function AdminGuardiansIndex({ guardians, filters }: Props) {
     const [name, setName] = useState(filters.name);
     const [email, setEmail] = useState(filters.email);
     const [phone, setPhone] = useState(filters.phone);
+    const [loading, setLoading] = useState(false);
     const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
     const [editingGuardianId, setEditingGuardianId] = useState<number | null>(null);
+    const hasMountedRef = useRef(false);
 
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
         name: '',
@@ -99,6 +106,12 @@ export default function AdminGuardiansIndex({ guardians, filters }: Props) {
     };
 
     useEffect(() => {
+        if (!hasMountedRef.current) {
+            hasMountedRef.current = true;
+            return;
+        }
+
+        setLoading(true);
         const timeout = setTimeout(() => {
             router.get(
                 '/admin/guardians',
@@ -107,7 +120,7 @@ export default function AdminGuardiansIndex({ guardians, filters }: Props) {
                     email: email || undefined,
                     phone: phone || undefined,
                 },
-                { preserveState: true, replace: true }
+                { preserveState: true, replace: true, onFinish: () => setLoading(false) }
             );
         }, 250);
 
@@ -120,26 +133,15 @@ export default function AdminGuardiansIndex({ guardians, filters }: Props) {
 
             <div className="space-y-6 p-4">
                 <div className="flex items-start justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-semibold">Guardian Management</h1>
-                        <p className="text-sm text-muted-foreground">Create, update, and manage all guardians.</p>
-                    </div>
+                    <h1 className="text-2xl font-semibold">Guardian Management</h1>
                     <Button onClick={openCreateModal}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add Guardian
                     </Button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                        Showing {guardians.length} guardian{guardians.length !== 1 ? 's' : ''}
-                    </div>
-                    <Button variant="outline" size="sm" onClick={clearFilters}>
-                        Clear All Filters
-                    </Button>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="flex items-end gap-4">
+                <div className="grid flex-1 gap-4 md:grid-cols-3">
                     <div>
                         <label htmlFor="name" className="mb-2 block text-sm font-medium">
                             Filter by name
@@ -159,6 +161,18 @@ export default function AdminGuardiansIndex({ guardians, filters }: Props) {
                         <Input id="phone" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="e.g. 017XXXXXXXX" />
                     </div>
                 </div>
+                    {(name || email || phone) && (
+                        <button
+                            type="button"
+                            onClick={clearFilters}
+                            className="mb-0.5 flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border px-3 text-sm text-muted-foreground hover:bg-muted"
+                            title="Clear filters"
+                        >
+                            <X className="h-4 w-4" />
+                            Clear
+                        </button>
+                    )}
+                </div>
 
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="w-full text-sm">
@@ -173,7 +187,15 @@ export default function AdminGuardiansIndex({ guardians, filters }: Props) {
                             </tr>
                         </thead>
                         <tbody>
-                            {guardians.length === 0 ? (
+                            {loading ? (
+                                Array.from({ length: 6 }).map((_, i) => (
+                                    <tr key={i} className="border-t">
+                                        {Array.from({ length: 6 }).map((_, j) => (
+                                            <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>
+                                        ))}
+                                    </tr>
+                                ))
+                            ) : guardians.data.length === 0 ? (
                                 <tr>
                                     <td className="px-4 py-6 text-muted-foreground" colSpan={6}>
                                         <div className="flex flex-col items-center justify-center gap-2">
@@ -183,7 +205,7 @@ export default function AdminGuardiansIndex({ guardians, filters }: Props) {
                                     </td>
                                 </tr>
                             ) : (
-                                guardians.map((guardian) => (
+                                guardians.data.map((guardian) => (
                                     <tr key={guardian.id} className="border-t">
                                         <td className="px-4 py-3 font-medium">{guardian.name}</td>
                                         <td className="px-4 py-3">{guardian.email}</td>
@@ -216,6 +238,21 @@ export default function AdminGuardiansIndex({ guardians, filters }: Props) {
                         </tbody>
                     </table>
                 </div>
+
+                {guardians.links.length > 3 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        {guardians.links.map((link, index) => (
+                            <Link
+                                key={`${link.label}-${index}`}
+                                href={link.url ?? '#'}
+                                preserveState
+                                preserveScroll
+                                className={`rounded border px-3 py-1 text-sm ${link.active ? 'bg-primary text-primary-foreground' : 'bg-background'} ${!link.url ? 'pointer-events-none opacity-50' : ''}`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
 
             <Dialog open={isModalOpen} onOpenChange={(open) => !open && closeModal()}>

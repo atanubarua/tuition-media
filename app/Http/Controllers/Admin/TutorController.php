@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\University;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -49,8 +50,9 @@ class TutorController extends Controller
                 }
             })
             ->latest()
-            ->get()
-            ->map(fn (User $tutor) => [
+            ->paginate(20)
+            ->withQueryString()
+            ->through(fn (User $tutor) => [
                 'id' => $tutor->id,
                 'name' => $tutor->name,
                 'email' => $tutor->email,
@@ -80,9 +82,50 @@ class TutorController extends Controller
         ]);
     }
 
-    public function show(User $tutor): Response
+    public function search(Request $request): JsonResponse
+    {
+        $q = trim($request->string('q')->toString());
+
+        $tutors = User::query()
+            ->where('role', 'tutor')
+            ->whereHas('tuitionApplications')
+            ->when($q !== '', function ($query) use ($q) {
+                $query->where(function ($inner) use ($q) {
+                    $inner->where('name', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%")
+                        ->orWhere('phone', 'like', "%{$q}%");
+                });
+            })
+            ->orderBy('name')
+            ->limit(20)
+            ->get(['id', 'name', 'email'])
+            ->map(fn (User $tutor) => [
+                'value' => (string) $tutor->id,
+                'label' => "{$tutor->name} ({$tutor->email})",
+            ]);
+
+        return response()->json($tutors);
+    }
+
+    public function show(Request $request, User $tutor): Response
     {
         abort_unless($tutor->role === 'tutor', 404);
+
+        $backUrl = '/admin/tutors';
+        $returnTo = trim((string) $request->query('return_to', ''));
+        if ($returnTo !== '') {
+            if (str_starts_with($returnTo, '/admin/tutors')) {
+                $backUrl = $returnTo;
+            } else {
+                $parsed = parse_url($returnTo);
+                $path = $parsed['path'] ?? '';
+                $query = isset($parsed['query']) ? ('?' . $parsed['query']) : '';
+
+                if (str_starts_with($path, '/admin/tutors')) {
+                    $backUrl = $path . $query;
+                }
+            }
+        }
 
         $tutor->load([
             'tutorProfile' => fn ($query) => $query->with(['university:id,name', 'subjects:id,name', 'preferredLocations:id,district_id,name,type']),
@@ -92,6 +135,7 @@ class TutorController extends Controller
         $profile = $tutor->tutorProfile;
 
         return Inertia::render('admin/tutors/show', [
+            'back_url' => $backUrl,
             'tutor' => [
                 'id' => $tutor->id,
                 'name' => $tutor->name,

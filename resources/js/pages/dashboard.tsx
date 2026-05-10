@@ -106,20 +106,6 @@ export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, a
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                             <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-                            <p className="text-sm text-muted-foreground">
-                                Platform snapshot with hiring and commission pipeline.
-                            </p>
-                        </div>
-                        <div className="flex gap-2">
-                            <Button variant="outline" asChild>
-                                <Link href="/admin/tuition-posts">Tuition Posts</Link>
-                            </Button>
-                            <Button variant="outline" asChild>
-                                <Link href="/admin/applications">Applications</Link>
-                            </Button>
-                            <Button variant="outline" asChild>
-                                <Link href="/admin/commissions">Commissions</Link>
-                            </Button>
                         </div>
                     </div>
 
@@ -247,10 +233,10 @@ export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, a
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                        <StatCard title="Total Posts" value={stats.total_posts} />
-                        <StatCard title="Published Posts" value={stats.published_posts} />
-                        <StatCard title="All Applications" value={stats.total_applications} />
-                        <StatCard title="Pending Applications" value={stats.pending_applications} />
+                        <StatCard title="Total Posts" value={stats.total_posts} href="/guardian/tuition-posts" colorClassName="bg-violet-50 border-violet-200" />
+                        <StatCard title="Published Posts" value={stats.published_posts} href="/guardian/tuition-posts?status=published" colorClassName="bg-teal-50 border-teal-200" />
+                        <StatCard title="All Applications" value={stats.total_applications} href="/guardian/applications" colorClassName="bg-amber-50 border-amber-200" />
+                        <StatCard title="Pending Applications" value={stats.pending_applications} href="/guardian/applications?status=pending" colorClassName="bg-yellow-50 border-yellow-200" />
                     </div>
 
                     <div className="grid gap-4 xl:grid-cols-2">
@@ -328,10 +314,10 @@ export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, a
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                        <StatCard title="Total Applications" value={stats.total_applications} />
-                        <StatCard title="Pending Review" value={stats.pending_applications} />
-                        <StatCard title="Shortlisted" value={stats.shortlisted_applications} />
-                        <StatCard title="Hired" value={stats.hired_applications} />
+                        <StatCard title="Total Applications" value={stats.total_applications} href="/tutor/applications" colorClassName="bg-sky-50 border-sky-200" />
+                        <StatCard title="Pending Review" value={stats.pending_applications} href="/tutor/applications?status=pending" colorClassName="bg-yellow-50 border-yellow-200" />
+                        <StatCard title="Shortlisted" value={stats.shortlisted_applications} href="/tutor/applications?status=shortlisted" colorClassName="bg-blue-50 border-blue-200" />
+                        <StatCard title="Hired" value={stats.hired_applications} href="/tutor/applications?status=hired" colorClassName="bg-green-50 border-green-200" />
                     </div>
 
                     <Card>

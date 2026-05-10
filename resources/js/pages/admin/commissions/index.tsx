@@ -1,7 +1,9 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
     Dialog,
     DialogContent,
@@ -37,7 +39,10 @@ type Application = {
 };
 
 type Props = {
-    applications: Application[];
+    applications: {
+        data: Application[];
+        links: { url: string | null; label: string; active: boolean }[];
+    };
     filters: { search: string; payment_status: string };
 };
 
@@ -46,7 +51,11 @@ export default function AdminCommissionsIndex({ applications, filters }: Props) 
     const formatCurrency = (value: number | null | undefined) => `BDT ${value ?? 0}`;
     const [search, setSearch] = useState(filters.search ?? '');
     const [paymentStatus, setPaymentStatus] = useState(filters.payment_status ?? '');
+    const [loading, setLoading] = useState(false);
     const hasMounted = useRef(false);
+
+    const hasFilters = !!(search || paymentStatus);
+    const clearFilters = () => { setSearch(''); setPaymentStatus(''); };
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
     const [receivedAmountInput, setReceivedAmountInput] = useState('');
@@ -100,6 +109,7 @@ export default function AdminCommissionsIndex({ applications, filters }: Props) 
             return;
         }
 
+        setLoading(true);
         const timeout = setTimeout(() => {
             router.get(
                 '/admin/commissions',
@@ -107,11 +117,11 @@ export default function AdminCommissionsIndex({ applications, filters }: Props) 
                     search: search || undefined,
                     payment_status: paymentStatus || undefined,
                 },
-                { preserveState: true, replace: true },
+                { preserveState: true, replace: true, onFinish: () => setLoading(false) },
             );
         }, 300);
 
-        return () => clearTimeout(timeout);
+        return () => { clearTimeout(timeout); setLoading(false); };
     }, [search, paymentStatus]);
 
     const paymentStatusBadgeClass = (status: Application['commission_payment_status']) => {
@@ -174,7 +184,8 @@ return 'bg-blue-100 text-blue-800 border-blue-200';
                     <p className="text-sm text-muted-foreground">Track commission collection from hired placements.</p>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="flex items-end gap-4">
+                <div className="grid flex-1 gap-3 md:grid-cols-2">
                     <div>
                         <label htmlFor="search" className="mb-2 block text-sm font-medium">
                             Search
@@ -203,6 +214,18 @@ return 'bg-blue-100 text-blue-800 border-blue-200';
                         </select>
                     </div>
                 </div>
+                    {hasFilters && (
+                        <button
+                            type="button"
+                            onClick={clearFilters}
+                            className="mb-0.5 flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border px-3 text-sm text-muted-foreground hover:bg-muted"
+                            title="Clear filters"
+                        >
+                            <X className="h-4 w-4" />
+                            Clear
+                        </button>
+                    )}
+                </div>
 
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="w-full text-sm">
@@ -223,14 +246,33 @@ return 'bg-blue-100 text-blue-800 border-blue-200';
                             </tr>
                         </thead>
                         <tbody>
-                            {applications.length === 0 && (
+                            {loading ? (
+                                Array.from({ length: 8 }).map((_, i) => (
+                                    <tr key={i} className="border-t">
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-5 w-16 rounded-full" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                                        <td className="px-4 py-3"><Skeleton className="h-8 w-20 rounded-md" /></td>
+                                    </tr>
+                                ))
+                            ) : (
+                            <>
+                            {applications.data.length === 0 && (
                                 <tr>
                                     <td className="px-4 py-6 text-muted-foreground" colSpan={12}>
                                         No hired placements yet.
                                     </td>
                                 </tr>
                             )}
-                            {applications.map((application) => (
+                            {applications.data.map((application) => (
                                 <tr key={application.id} className="border-t">
                                     <td className="px-4 py-3 font-mono text-xs">{application.post?.tuition_code ?? '-'}</td>
                                     <td className="px-4 py-3">{application.tutor?.name ?? '-'}</td>
@@ -264,9 +306,26 @@ return 'bg-blue-100 text-blue-800 border-blue-200';
                                     </td>
                                 </tr>
                             ))}
+                            </>
+                            )}
                         </tbody>
                     </table>
                 </div>
+
+                {applications.links.length > 3 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        {applications.links.map((link, index) => (
+                            <Link
+                                key={`${link.label}-${index}`}
+                                href={link.url ?? '#'}
+                                preserveState
+                                preserveScroll
+                                className={`rounded border px-3 py-1 text-sm ${link.active ? 'bg-primary text-primary-foreground' : 'bg-background'} ${!link.url ? 'pointer-events-none opacity-50' : ''}`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
 
             <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>

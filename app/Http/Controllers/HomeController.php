@@ -49,7 +49,6 @@ class HomeController extends Controller
             'posts' => $posts,
             'stats' => $stats,
             'locale' => $locale,
-            'translations' => trans($locale),
         ]);
     }
 }

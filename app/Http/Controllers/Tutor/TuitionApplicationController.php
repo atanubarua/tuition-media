@@ -61,25 +61,38 @@ class TuitionApplicationController extends Controller
     {
         abort_unless($request->user()->role === 'tutor', 403);
 
-        $applications = TuitionApplication::with(['tuitionPost'])
+        $query = TuitionApplication::with(['tuitionPost'])
             ->where('tutor_id', $request->user()->id)
-            ->latest()
-            ->get()
-            ->map(fn($app) => [
-                'id' => $app->id,
-                'status' => $app->status,
-                'expected_salary' => $app->expected_salary,
-                'created_at' => $app->created_at,
-                'post' => [
-                    'id' => $app->tuitionPost?->id,
-                    'tuition_code' => $app->tuitionPost?->tuition_code,
-                    'title' => $app->tuitionPost?->title,
-                    'status' => $app->tuitionPost?->status,
-                ],
-            ]);
+            ->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('tuitionPost', fn ($q) => $q
+                ->where('title', 'like', "%{$search}%")
+                ->orWhere('tuition_code', 'like', "%{$search}%")
+            );
+        }
+
+        $applications = $query->paginate(20)->through(fn ($app) => [
+            'id' => $app->id,
+            'status' => $app->status,
+            'expected_salary' => $app->expected_salary,
+            'created_at' => $app->created_at,
+            'post' => [
+                'id' => $app->tuitionPost?->id,
+                'tuition_code' => $app->tuitionPost?->tuition_code,
+                'title' => $app->tuitionPost?->title,
+                'status' => $app->tuitionPost?->status,
+            ],
+        ]);
 
         return Inertia::render('tutor/applications/index', [
             'applications' => $applications,
+            'filters' => $request->only('status', 'search'),
         ]);
     }
 }

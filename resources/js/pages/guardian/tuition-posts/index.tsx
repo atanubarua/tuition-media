@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Eye, Pencil, Trash2, X } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,8 +39,21 @@ const STATUS_STYLES: Record<string, string> = {
 export default function TuitionPostIndex({ posts, filters, statuses }: Props) {
     const [tuitionCode, setTuitionCode] = useState(filters.tuition_code ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    const [isLoading, setIsLoading] = useState(false);
+    const hasMountedRef = useRef(false);
+
+    const clearFilters = () => {
+        setTuitionCode('');
+        setStatus('');
+    };
 
     useEffect(() => {
+        if (!hasMountedRef.current) {
+            hasMountedRef.current = true;
+            return;
+        }
+
+        setIsLoading(true);
         const timeout = setTimeout(() => {
             router.get(
                 '/guardian/tuition-posts',
@@ -47,7 +61,7 @@ export default function TuitionPostIndex({ posts, filters, statuses }: Props) {
                     tuition_code: tuitionCode || undefined,
                     status: status || undefined,
                 },
-                { preserveState: true, replace: true }
+                { preserveState: true, replace: true, onFinish: () => setIsLoading(false) }
             );
         }, 300);
 
@@ -77,7 +91,8 @@ export default function TuitionPostIndex({ posts, filters, statuses }: Props) {
                     </Button>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="flex items-end gap-4">
+                <div className="grid flex-1 gap-4 md:grid-cols-2">
                     <div>
                         <label htmlFor="tuition_code" className="mb-2 block text-sm font-medium">
                             Search by tuition code
@@ -108,6 +123,18 @@ export default function TuitionPostIndex({ posts, filters, statuses }: Props) {
                         </select>
                     </div>
                 </div>
+                    {(tuitionCode || status) && (
+                        <button
+                            type="button"
+                            onClick={clearFilters}
+                            className="mb-0.5 flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border px-3 text-sm text-muted-foreground hover:bg-muted"
+                            title="Clear filters"
+                        >
+                            <X className="h-4 w-4" />
+                            Clear
+                        </button>
+                    )}
+                </div>
 
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="w-full text-sm">
@@ -124,14 +151,21 @@ export default function TuitionPostIndex({ posts, filters, statuses }: Props) {
                             </tr>
                         </thead>
                         <tbody>
-                            {posts.length === 0 && (
+                            {isLoading ? (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <tr key={i} className="border-t">
+                                        {Array.from({ length: 8 }).map((_, j) => (
+                                            <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>
+                                        ))}
+                                    </tr>
+                                ))
+                            ) : posts.length === 0 ? (
                                 <tr>
                                     <td className="px-4 py-6 text-muted-foreground" colSpan={8}>
                                         No tuition post yet.
                                     </td>
                                 </tr>
-                            )}
-                            {posts.map((post) => (
+                            ) : posts.map((post) => (
                                 <tr key={post.id} className="border-t">
                                     <td className="px-4 py-3 font-mono text-xs">{post.tuition_code ?? '-'}</td>
                                     <td className="px-4 py-3">{post.title || `Tuition Post #${post.id}`}</td>

@@ -1,8 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Head, Link, router } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
+import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { dashboard } from '@/routes';
 
 type Application = {
@@ -11,6 +12,14 @@ type Application = {
     expected_salary: number | null;
     created_at: string;
     post: { id: number | null; tuition_code: string | null; title: string | null; status: string | null };
+};
+
+type Props = {
+    applications: {
+        data: Application[];
+        links: { url: string | null; label: string; active: boolean }[];
+    };
+    filters: { status?: string; search?: string };
 };
 
 const STATUS_STYLES: Record<Application['status'], string> = {
@@ -22,137 +31,145 @@ const STATUS_STYLES: Record<Application['status'], string> = {
     hired: 'bg-green-100 text-green-700',
 };
 
-export default function TutorApplicationsIndex({ applications }: { applications: Application[] }) {
-    const [search, setSearch] = useState('');
-    const [statusFilter, setStatusFilter] = useState<'all' | Application['status']>('all');
+export default function TutorApplicationsIndex({ applications, filters }: Props) {
+    const [search, setSearch] = useState(filters.search ?? '');
+    const [statusFilter, setStatusFilter] = useState(filters.status ?? 'all');
+    const [loading, setLoading] = useState(false);
+    const hasMountedRef = useRef(false);
 
-    const filteredApplications = useMemo(() => {
-        const normalizedSearch = search.trim().toLowerCase();
+    useEffect(() => {
+        if (!hasMountedRef.current) {
+            hasMountedRef.current = true;
+            return;
+        }
 
-        return applications.filter((app) => {
-            if (statusFilter !== 'all' && app.status !== statusFilter) {
-                return false;
-            }
+        setLoading(true);
+        const timeout = setTimeout(() => {
+            router.get(
+                '/tutor/applications',
+                {
+                    status: statusFilter !== 'all' ? statusFilter : undefined,
+                    search: search || undefined,
+                },
+                { preserveState: true, replace: true, onFinish: () => setLoading(false) },
+            );
+        }, 300);
 
-            if (normalizedSearch) {
-                const searchable = [
-                    app.post.title ?? '',
-                    app.post.tuition_code ?? '',
-                    app.post.id ? String(app.post.id) : '',
-                ]
-                    .join(' ')
-                    .toLowerCase();
-
-                if (!searchable.includes(normalizedSearch)) {
-                    return false;
-                }
-            }
-
-            return true;
-        });
-    }, [applications, search, statusFilter]);
-
-    const resetFilters = () => {
-        setSearch('');
-        setStatusFilter('all');
-    };
+        return () => clearTimeout(timeout);
+    }, [search, statusFilter]);
 
     return (
         <>
             <Head title="My Applications" />
-            <div className="p-4 md:p-6 space-y-4">
+            <div className="space-y-4 p-4 md:p-6">
                 <h1 className="text-2xl font-semibold">My Applications</h1>
 
-                {applications.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">You haven't applied for any tuitions yet.</p>
-                ) : (
-                    <div className="space-y-4">
-                        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-                            <div className="xl:col-span-3">
-                                <Input
-                                    placeholder="Search by title or tuition code"
-                                    value={search}
-                                    onChange={(event) => setSearch(event.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | Application['status'])}>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="All statuses" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All statuses</SelectItem>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="shortlisted">Shortlisted</SelectItem>
-                                        <SelectItem value="interested">Interested</SelectItem>
-                                        <SelectItem value="not_interested">Not interested</SelectItem>
-                                        <SelectItem value="hired">Hired</SelectItem>
-                                        <SelectItem value="rejected">Rejected</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                <div className="flex items-center gap-3">
+                    <div className="grid flex-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
+                        <div className="xl:col-span-3">
+                            <Input
+                                placeholder="Search by title or tuition code"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
                         </div>
-
-                        <div className="flex justify-end">
-                            <Button variant="outline" onClick={resetFilters}>
-                                Reset Filters
-                            </Button>
+                        <div>
+                            <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="All statuses" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All statuses</SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="shortlisted">Shortlisted</SelectItem>
+                                    <SelectItem value="interested">Interested</SelectItem>
+                                    <SelectItem value="not_interested">Not interested</SelectItem>
+                                    <SelectItem value="hired">Hired</SelectItem>
+                                    <SelectItem value="rejected">Rejected</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
+                    </div>
+                    {(search || statusFilter !== 'all') && (
+                        <button
+                            type="button"
+                            onClick={() => { setSearch(''); setStatusFilter('all'); }}
+                            className="flex h-10 shrink-0 items-center gap-1.5 rounded-md border px-3 text-sm text-muted-foreground hover:bg-muted"
+                            title="Clear filters"
+                        >
+                            <X className="h-4 w-4" />
+                            Clear
+                        </button>
+                    )}
+                </div>
 
-                        <div className="overflow-x-auto rounded-lg border">
-                            <table className="w-full text-sm">
-                                <thead className="bg-muted/40">
-                                    <tr>
-                                        <th className="px-4 py-3 text-left">Tuition</th>
-                                        <th className="px-4 py-3 text-left">Tuition Code</th>
-                                        <th className="px-4 py-3 text-left">Status</th>
-                                        <th className="px-4 py-3 text-left">Expected Salary</th>
-                                        <th className="px-4 py-3 text-left">Applied On</th>
-                                        <th className="px-4 py-3 text-left">Post State</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredApplications.length === 0 ? (
-                                        <tr className="border-t">
-                                            <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
-                                                No applications match your filters.
+                <div className="overflow-x-auto rounded-lg border">
+                    <table className="w-full text-sm">
+                        <thead className="bg-muted/40">
+                            <tr>
+                                <th className="px-4 py-3 text-left">Tuition Code</th>
+                                <th className="px-4 py-3 text-left">Status</th>
+                                <th className="px-4 py-3 text-left">Expected Salary</th>
+                                <th className="px-4 py-3 text-left">Applied On</th>
+                                <th className="px-4 py-3 text-left">Post State</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                Array.from({ length: 8 }).map((_, i) => (
+                                    <tr key={i} className="border-t">
+                                        {Array.from({ length: 5 }).map((_, j) => (
+                                            <td key={j} className="px-4 py-3">
+                                                <Skeleton className="h-4 w-full" />
                                             </td>
-                                        </tr>
-                                    ) : (
-                                        filteredApplications.map((app) => (
-                                            <tr key={app.id} className="border-t">
-                                                <td className="px-4 py-3">
-                                                    {app.post.id && app.post.status === 'published' ? (
-                                                        <Link href={`/tuition-posts/${app.post.id}`} className="font-medium hover:text-blue-600">
-                                                            {app.post.title ?? `Tuition #${app.post.id}`}
-                                                        </Link>
-                                                    ) : (
-                                                        <p className="font-medium">{app.post.title ?? `Tuition #${app.post.id ?? app.id}`}</p>
-                                                    )}
-                                                </td>
-                                                <td className="px-4 py-3 font-mono text-xs">{app.post.tuition_code ?? '-'}</td>
-                                                <td className="px-4 py-3">
-                                                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[app.status]}`}>
-                                                        {app.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {app.expected_salary ? `BDT ${app.expected_salary.toLocaleString()}` : '-'}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {new Date(app.created_at).toLocaleDateString('en-BD', {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        year: 'numeric',
-                                                    })}
-                                                </td>
-                                                <td className="px-4 py-3 capitalize">{app.post.status ?? '-'}</td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                                        ))}
+                                    </tr>
+                                ))
+                            ) : applications.data.length === 0 ? (
+                                <tr className="border-t">
+                                    <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
+                                        No applications found.
+                                    </td>
+                                </tr>
+                            ) : (
+                                applications.data.map((app) => (
+                                    <tr key={app.id} className="border-t">
+                                        <td className="px-4 py-3 font-mono text-xs">{app.post.tuition_code ?? '-'}</td>
+                                        <td className="px-4 py-3">
+                                            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[app.status]}`}>
+                                                {app.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {app.expected_salary ? `BDT ${app.expected_salary.toLocaleString()}` : '-'}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {new Date(app.created_at).toLocaleDateString('en-BD', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                            })}
+                                        </td>
+                                        <td className="px-4 py-3 capitalize">{app.post.status ?? '-'}</td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {applications.links.length > 3 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        {applications.links.map((link, index) => (
+                            <Link
+                                key={`${link.label}-${index}`}
+                                href={link.url ?? '#'}
+                                preserveState
+                                preserveScroll
+                                className={`rounded border px-3 py-1 text-sm ${link.active ? 'bg-primary text-primary-foreground' : 'bg-background'} ${!link.url ? 'pointer-events-none opacity-50' : ''}`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ))}
                     </div>
                 )}
             </div>

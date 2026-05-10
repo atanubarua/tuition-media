@@ -41,8 +41,9 @@ class TuitionApplicationController extends Controller
                 });
             })
             ->latest()
-            ->get()
-            ->map(fn (TuitionApplication $application) => [
+            ->paginate(50)
+            ->withQueryString()
+            ->through(fn (TuitionApplication $application) => [
                 'id' => $application->id,
                 'status' => $application->status,
                 'admin_note' => $application->admin_note,
@@ -83,28 +84,23 @@ class TuitionApplicationController extends Controller
             'filters' => [
                 'status' => $status,
                 'tutor_id' => $tutorId > 0 ? (string) $tutorId : '',
+                'tutor_label' => $tutorId > 0
+                    ? (function () use ($tutorId) {
+                        $tutor = \App\Models\User::find($tutorId, ['id', 'name', 'email']);
+                        return $tutor ? "{$tutor->name} ({$tutor->email})" : '';
+                    })()
+                    : '',
                 'university' => $university,
                 'tuition_code' => $tuitionCode !== '' ? $tuitionCode : '',
             ],
             'statuses' => ['pending', 'shortlisted', 'interested', 'not_interested', 'rejected', 'hired'],
-            'tutors' => User::query()
-                ->where('role', 'tutor')
-                ->whereHas('tuitionApplications')
-                ->orderBy('name')
-                ->get(['id', 'name', 'email'])
-                ->map(fn (User $tutor) => [
-                    'id' => $tutor->id,
-                    'name' => $tutor->name,
-                    'email' => $tutor->email,
-                ]),
-            'universities' => TuitionApplication::query()
-                ->with('tutor.tutorProfile.university:id,name')
-                ->whereHas('tutor.tutorProfile.university')
-                ->get()
-                ->pluck('tutor.tutorProfile.university.name')
-                ->filter()
-                ->unique()
-                ->sort()
+            'universities' => DB::table('tuition_applications')
+                ->join('tutor_profiles', 'tuition_applications.tutor_id', '=', 'tutor_profiles.user_id')
+                ->join('universities', 'tutor_profiles.university_id', '=', 'universities.id')
+                ->whereNotNull('universities.name')
+                ->distinct()
+                ->orderBy('universities.name')
+                ->pluck('universities.name')
                 ->values(),
         ]);
     }
