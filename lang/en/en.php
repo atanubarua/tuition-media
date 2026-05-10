@@ -1,0 +1,100 @@
+﻿<?php
+
+return [
+    'meta_title' => 'Tuition Media - Find Tutors & Tuition Jobs in Bangladesh',
+    'brand' => [
+        'tuition' => 'Tuition',
+        'media' => 'Media',
+    ],
+    'nav' => [
+        'find_tutors' => 'Find Tutors',
+        'tuition_jobs' => 'Tuition Jobs',
+        'dashboard' => 'Dashboard',
+        'log_in' => 'Log in',
+        'log_out' => 'Log out',
+        'register' => 'Register',
+    ],
+    'language' => [
+        'en' => 'EN',
+        'bn' => 'বাংলা',
+    ],
+    'hero' => [
+        'badge' => 'Bangladesh\'s Trusted Tuition Marketplace',
+        'title' => 'Find the Right Tutor for You',
+        'description' => 'Connect with expert tutors across Bangladesh. From primary school to university-level subjects, find the perfect academic mentor today.',
+        'need_tutor' => 'I need a Tutor',
+        'want_teach' => 'I want to Teach',
+        'location_placeholder' => 'Area or District...',
+        'subject_placeholder_tutor' => 'Subject (e.g. Math)',
+        'subject_placeholder_job' => 'Subject or Class',
+        'find_tutors' => 'Find Tutors',
+        'find_tuitions' => 'Find Tuitions',
+        'empty_search_error' => 'Please enter an Area or Subject to begin your search.',
+    ],
+    'stats' => [
+        'jobs' => 'Tuition Jobs',
+        'tutors' => 'Expert Tutors',
+        'districts' => 'Districts Covered',
+    ],
+    'features' => [
+        'title' => 'Why Choose TuitionMedia?',
+        'description' => 'We provide a safe, reliable, and effective platform to connect students with the best educators.',
+        'verified_title' => 'Verified Quality',
+        'verified_description' => 'Tutor profiles are carefully reviewed to ensure academic excellence and safety for your child.',
+        'local_title' => 'Local & Nationwide',
+        'local_description' => 'Find expert tutors in your local neighborhood or connect with top educators online across Bangladesh.',
+        'tailored_title' => 'Tailored Learning',
+        'tailored_description' => 'Whether it\'s one-on-one home tutoring or group batches, find the teaching style that fits best.',
+    ],
+    'jobs_section' => [
+        'title' => 'Recent Tuition Jobs',
+        'description' => 'Latest 6 posts. View all jobs for complete listings.',
+        'view_all' => 'View All Jobs',
+        'none_title' => 'No jobs found',
+        'none_description' => 'There are no tuition posts available at the moment.',
+    ],
+    'card' => [
+        'default_title' => 'Tuition in :subdistrict',
+        'more_count' => '+:count more',
+        'days_per_week' => ':count d/wk',
+        'tutor_suffix' => ':gender Tutor',
+        'salary_negotiable' => 'Negotiable',
+        'levels' => [
+            'primary' => 'Primary',
+            'high_school' => 'High School',
+            'college' => 'College',
+            'honors' => 'Honors',
+        ],
+    ],
+    'how' => [
+        'title' => 'How It Works',
+        'description' => 'A transparent, easy-to-use platform for everyone.',
+        'guardians_title' => 'For Guardians / Students',
+        'guardians_steps' => [
+            'Create a free guardian account',
+            'Post your detailed tuition requirement',
+            'Review applications from qualified tutors',
+            'Select the perfect match for your child',
+        ],
+        'tutors_title' => 'For Tutors',
+        'tutors_steps' => [
+            'Register and build your professional profile',
+            'Browse available tuition jobs in your area',
+            'Apply to positions matching your expertise',
+            'Start teaching and building your career',
+        ],
+    ],
+    'cta' => [
+        'title' => 'Ready to get started?',
+        'description' => 'Join thousands of students and educators building a brighter future.',
+        'create_account' => 'Create Free Account',
+        'sign_in' => 'Sign In',
+    ],
+    'footer' => [
+        'copyright' => '© :year TuitionMedia. All rights reserved.',
+        'terms' => 'Terms',
+        'privacy' => 'Privacy',
+        'contact' => 'Contact',
+    ],
+];
+

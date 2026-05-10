@@ -12,6 +12,20 @@ class HomeController extends Controller
 {
     public function __invoke(Request $request): Response
     {
+        $supportedLocales = ['en', 'bn'];
+        $locale = $request->query('lang');
+
+        if (! is_string($locale) || ! in_array($locale, $supportedLocales, true)) {
+            $locale = $request->session()->get('locale', config('app.locale'));
+        }
+
+        if (! in_array($locale, $supportedLocales, true)) {
+            $locale = config('app.fallback_locale');
+        }
+
+        app()->setLocale($locale);
+        $request->session()->put('locale', $locale);
+
         $posts = TuitionPost::query()
             ->where('status', 'published')
             ->with([
@@ -34,6 +48,8 @@ class HomeController extends Controller
             'canRegister' => \Laravel\Fortify\Features::enabled(\Laravel\Fortify\Features::registration()),
             'posts' => $posts,
             'stats' => $stats,
+            'locale' => $locale,
+            'translations' => trans($locale),
         ]);
     }
 }

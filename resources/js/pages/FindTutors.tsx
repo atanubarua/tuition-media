@@ -115,7 +115,7 @@ function TutorCard({ tutor, onViewProfile }: { tutor: Tutor; onViewProfile: (tut
                             {tutor.name}
                         </h3>
                         {profile.is_verified && (
-                            <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" title="Verified Identity" />
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" aria-label="Verified Identity" />
                         )}
                     </div>
                     

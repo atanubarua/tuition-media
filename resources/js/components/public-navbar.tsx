@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { dashboard, login, logout, register } from '@/routes';
+import { login, logout, register } from '@/routes';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import {
     DropdownMenu,
@@ -76,7 +76,7 @@ export default function PublicNavbar({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-44">
                                 <DropdownMenuItem asChild>
-                                    <Link href={dashboard.url()} className="w-full cursor-pointer">
+                                    <Link href="/dashboard" className="w-full cursor-pointer">
                                         <LayoutDashboard className="h-4 w-4" />
                                         <span>Dashboard</span>
                                         {unread_notifications_count > 0 && (
