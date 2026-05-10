@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Illuminate\Support\Str;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -35,6 +36,12 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $toast = $request->session()->pull('toast');
+
+        if (is_array($toast) && isset($toast['type'], $toast['message'])) {
+            $toast['id'] = (string) Str::uuid();
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -43,7 +50,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
-                'toast' => $request->session()->get('toast'),
+                'toast' => $toast,
             ],
         ];
     }

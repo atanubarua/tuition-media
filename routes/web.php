@@ -39,12 +39,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('admin/tuition-posts', [AdminTuitionPostController::class, 'index'])
         ->middleware(EnsureUserIsAdmin::class)
         ->name('admin.tuition-posts.index');
+    Route::get('admin/tuition-posts/{tuitionPost}', [AdminTuitionPostController::class, 'show'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.tuition-posts.show');
     Route::get('admin/applications', [AdminTuitionApplicationController::class, 'index'])
         ->middleware(EnsureUserIsAdmin::class)
         ->name('admin.applications.index');
     Route::patch('admin/applications/{application}/contact-status', [AdminTuitionApplicationController::class, 'updateContactStatus'])
         ->middleware(EnsureUserIsAdmin::class)
         ->name('admin.applications.contact-status');
+    Route::patch('admin/applications/{application}/commission-payment-status', [AdminTuitionApplicationController::class, 'updateCommissionPaymentStatus'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.applications.commission-payment-status');
     Route::patch('admin/applications/{application}/hire', [AdminTuitionApplicationController::class, 'hire'])
         ->middleware(EnsureUserIsAdmin::class)
         ->name('admin.applications.hire');

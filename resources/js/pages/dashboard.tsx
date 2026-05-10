@@ -20,7 +20,7 @@ type GuardianDashboardData = {
     }>;
     recent_applications: Array<{
         id: number;
-        status: 'pending' | 'shortlisted' | 'rejected' | 'hired';
+        status: 'pending' | 'shortlisted' | 'interested' | 'not_interested' | 'rejected' | 'hired';
         created_at: string;
         post: { id: number | null; title: string | null };
         tutor: { id: number | null; name: string | null };
@@ -36,7 +36,7 @@ type TutorDashboardData = {
     };
     recent_applications: Array<{
         id: number;
-        status: 'pending' | 'shortlisted' | 'rejected' | 'hired';
+        status: 'pending' | 'shortlisted' | 'interested' | 'not_interested' | 'rejected' | 'hired';
         expected_salary: number | null;
         created_at: string;
         post: { id: number | null; title: string | null; status: string | null };
@@ -70,8 +70,7 @@ type AdminDashboardData = {
     }>;
     recent_applications: Array<{
         id: number;
-        status: 'pending' | 'shortlisted' | 'rejected' | 'hired';
-        admin_contact_status: 'new' | 'contacted' | 'interested' | 'not_interested';
+        status: 'pending' | 'shortlisted' | 'interested' | 'not_interested' | 'rejected' | 'hired';
         commission_payment_status: 'unpaid' | 'partial' | 'paid' | null;
         created_at: string;
         post: { id: number; tuition_code: string | null; title: string | null } | null;
@@ -89,15 +88,10 @@ type Props = {
 const STATUS_STYLES = {
     pending: 'bg-yellow-100 text-yellow-700',
     shortlisted: 'bg-blue-100 text-blue-700',
-    rejected: 'bg-red-100 text-red-700',
-    hired: 'bg-green-100 text-green-700',
-};
-
-const CONTACT_STATUS_STYLES = {
-    new: 'bg-slate-100 text-slate-700',
-    contacted: 'bg-indigo-100 text-indigo-700',
     interested: 'bg-emerald-100 text-emerald-700',
     not_interested: 'bg-rose-100 text-rose-700',
+    rejected: 'bg-red-100 text-red-700',
+    hired: 'bg-green-100 text-green-700',
 };
 
 export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, admin_dashboard }: Props) {
@@ -130,24 +124,24 @@ export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, a
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                        <StatCard title="Guardians" value={stats.guardians} />
-                        <StatCard title="Tutors" value={stats.tutors} />
-                        <StatCard title="Tuition Posts" value={stats.tuitionPosts} href="/admin/tuition-posts" />
-                        <StatCard title="Applications" value={stats.applications} href="/admin/applications" />
+                        <StatCard title="Guardians" value={stats.guardians} href="/admin/guardians" colorClassName="bg-sky-50 border-sky-200" />
+                        <StatCard title="Tutors" value={stats.tutors} href="/admin/tutors" colorClassName="bg-emerald-50 border-emerald-200" />
+                        <StatCard title="Tuition Posts" value={stats.tuitionPosts} href="/admin/tuition-posts" colorClassName="bg-violet-50 border-violet-200" />
+                        <StatCard title="Applications" value={stats.applications} href="/admin/applications" colorClassName="bg-amber-50 border-amber-200" />
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                        <StatCard title="Published Posts" value={stats.publishedPosts} href="/admin/tuition-posts" />
-                        <StatCard title="Assigned Posts" value={stats.assignedPosts} href="/admin/tuition-posts" />
-                        <StatCard title="Pending Applications" value={stats.pendingApplications} href="/admin/applications?status=pending" />
-                        <StatCard title="Shortlisted Applications" value={stats.shortlistedApplications} href="/admin/applications?status=shortlisted" />
+                        <StatCard title="Published Posts" value={stats.publishedPosts} href="/admin/tuition-posts?status=published" colorClassName="bg-teal-50 border-teal-200" />
+                        <StatCard title="Assigned Posts" value={stats.assignedPosts} href="/admin/tuition-posts?status=assigned" colorClassName="bg-orange-50 border-orange-200" />
+                        <StatCard title="Pending Applications" value={stats.pendingApplications} href="/admin/applications?status=pending" colorClassName="bg-yellow-50 border-yellow-200" />
+                        <StatCard title="Shortlisted Applications" value={stats.shortlistedApplications} href="/admin/applications?status=shortlisted" colorClassName="bg-blue-50 border-blue-200" />
                     </div>
 
                     <div className="grid gap-4 xl:grid-cols-4">
-                        <StatCard title="Hired Applications" value={stats.hiredApplications} href="/admin/applications?status=hired" />
-                        <StatCard title="Contacted & Interested" value={stats.contactInterested} href="/admin/applications?status=shortlisted" />
-                        <StatCard title="Commission Unpaid" value={stats.commissionUnpaid} href="/admin/commissions" />
-                        <StatCard title="Commission Partial" value={stats.commissionPartial} href="/admin/commissions" />
+                        <StatCard title="Hired Applications" value={stats.hiredApplications} href="/admin/applications?status=hired" colorClassName="bg-green-50 border-green-200" />
+                        <StatCard title="Interested Applications" value={stats.contactInterested} href="/admin/applications?status=interested" colorClassName="bg-cyan-50 border-cyan-200" />
+                        <StatCard title="Commission Unpaid" value={stats.commissionUnpaid} href="/admin/commissions?payment_status=unpaid" colorClassName="bg-rose-50 border-rose-200" />
+                        <StatCard title="Commission Partial" value={stats.commissionPartial} href="/admin/commissions?payment_status=partial" colorClassName="bg-fuchsia-50 border-fuchsia-200" />
                     </div>
 
                     <Card>
@@ -157,7 +151,9 @@ export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, a
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="text-3xl font-semibold">
-                            BDT {stats.commissionDueAmount.toLocaleString()}
+                            <Link href="/admin/commissions" className="hover:text-blue-600">
+                                BDT {stats.commissionDueAmount.toLocaleString()}
+                            </Link>
                         </CardContent>
                     </Card>
 
@@ -216,9 +212,6 @@ export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, a
                                                 {application.post?.tuition_code ?? 'No code'} | {application.post?.title ?? `Post #${application.post?.id ?? '-'}`}
                                             </Link>
                                             <div className="flex gap-2">
-                                                <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${CONTACT_STATUS_STYLES[application.admin_contact_status]}`}>
-                                                    {application.admin_contact_status.replace('_', ' ')}
-                                                </span>
                                                 {application.commission_payment_status && (
                                                     <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium capitalize text-zinc-700">
                                                         {application.commission_payment_status}
@@ -332,14 +325,6 @@ export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, a
                             <h1 className="text-2xl font-semibold">Tutor Portal</h1>
                             <p className="text-sm text-muted-foreground">Track your applications and keep your profile ready for new opportunities.</p>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                            <Button variant="outline" asChild>
-                                <Link href="/tutor/profile/edit">Edit Profile</Link>
-                            </Button>
-                            <Button asChild>
-                                <Link href="/tutor/applications">View All Applications</Link>
-                            </Button>
-                        </div>
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -410,19 +395,31 @@ export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, a
     );
 }
 
-function StatCard({ title, value, href }: { title: string; value: number; href?: string }) {
+function StatCard({
+    title,
+    value,
+    href,
+    colorClassName,
+}: {
+    title: string;
+    value: number;
+    href?: string;
+    colorClassName?: string;
+}) {
+    const isClickable = Boolean(href) && value > 0;
+
     return (
-        <Card>
+        <Card className={colorClassName}>
             <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
             </CardHeader>
             <CardContent className="text-3xl font-semibold">
-                {href ? (
+                {isClickable ? (
                     <Link href={href} className="hover:text-blue-600">
                         {value}
                     </Link>
                 ) : (
-                    value
+                    <span className={href ? 'text-muted-foreground' : ''}>{value}</span>
                 )}
             </CardContent>
         </Card>

@@ -1,21 +1,13 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { dashboard, login, logout, register } from '@/routes';
+import { login, register } from '@/routes';
 import { toast } from 'sonner';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import PublicNavbar from '@/components/public-navbar';
 import {
     BookOpen,
     MapPin,
     Calendar,
     User,
-    ChevronDown,
-    LogOut,
-    LayoutDashboard,
     Search,
     GraduationCap,
     ArrowRight,
@@ -141,19 +133,23 @@ export default function Welcome({
         }
 
         if (searchMode === 'tutor') {
-            // Redirect to Find Tutors page with query params
-            const params = new URLSearchParams();
-            if (location.trim()) params.append('location', location.trim());
-            if (subject.trim()) params.append('subject', subject.trim());
-
-            const queryString = params.toString();
-            window.location.href = `/find-tutors${queryString ? '?' + queryString : ''}`;
+            router.get(
+                '/find-tutors',
+                {
+                    location: location.trim() || undefined,
+                    subject: subject.trim() || undefined,
+                },
+                { preserveScroll: true }
+            );
         } else {
-            const params = new URLSearchParams();
-            if (location.trim()) params.append('location', location.trim());
-            if (subject.trim()) params.append('subject', subject.trim());
-            const queryString = params.toString();
-            window.location.href = `/tuition-jobs${queryString ? '?' + queryString : ''}`;
+            router.get(
+                '/tuition-jobs',
+                {
+                    location: location.trim() || undefined,
+                    subject: subject.trim() || undefined,
+                },
+                { preserveScroll: true }
+            );
         }
     };
 
@@ -161,76 +157,10 @@ export default function Welcome({
         <div className="min-h-screen overflow-x-hidden bg-white font-sans text-slate-900 selection:bg-blue-200 selection:text-blue-900">
             <Head title="Tuition Media – Find Tutors & Tuition Jobs in Bangladesh" />
 
-            {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md transition-all">
-                <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-                    <div className="flex items-center gap-10">
-                        <Link href="/" className="flex items-center gap-2 text-2xl font-bold tracking-tight text-blue-900">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-                                <BookOpen className="h-5 w-5" />
-                            </div>
-                            Tuition<span className="text-amber-500">Media</span>
-                        </Link>
-
-                        <div className="hidden md:flex items-center gap-6">
-                            <Link href="/find-tutors" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition">
-                                Find Tutors
-                            </Link>
-                            <Link href="/tuition-jobs" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition">
-                                Tuition Jobs
-                            </Link>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        {auth.user ? (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <button
-                                        type="button"
-                                        aria-label="Open user menu"
-                                        className="inline-flex h-10 items-center gap-1.5 rounded-full border border-blue-300 bg-white px-2.5 text-blue-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50"
-                                    >
-                                        <User className="h-4 w-4" />
-                                        <span className="hidden max-w-28 truncate text-sm font-semibold sm:inline">
-                                            {auth.user.name}
-                                        </span>
-                                        <ChevronDown className="h-4 w-4" />
-                                    </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44">
-                                    <DropdownMenuItem asChild>
-                                        <Link href={dashboard.url()} className="w-full cursor-pointer">
-                                            <LayoutDashboard className="h-4 w-4" />
-                                            Dashboard
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                        <Link href={logout()} as="button" className="w-full cursor-pointer">
-                                            <LogOut className="h-4 w-4" />
-                                            Log out
-                                        </Link>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        ) : (
-                            <>
-                                <Link href={login()} className="text-sm font-semibold text-slate-600 transition hover:text-blue-600">
-                                    Log in
-                                </Link>
-                                {canRegister && (
-                                    <Link href={register()} className="hidden sm:inline-flex rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-                                        Register Free
-                                    </Link>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-            </nav>
+            <PublicNavbar canRegister={canRegister} position="fixed" maxWidthClass="max-w-6xl" />
 
             {/* Hero */}
-            <section className="relative overflow-hidden bg-slate-50 pt-32 pb-20 lg:pt-40 lg:pb-28">
+            <section className="relative overflow-hidden bg-slate-50 pt-32 pb-10 lg:pt-40 lg:pb-14">
                 {/* Decorative background elements appropriate for education */}
                 <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3">
                     <svg width="404" height="404" fill="none" viewBox="0 0 404 404" aria-hidden="true" className="text-blue-100 opacity-50">
@@ -257,14 +187,11 @@ export default function Welcome({
                 <div className="relative mx-auto max-w-5xl px-4 text-center">
                     <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-700 mb-8">
                         <GraduationCap className="h-4 w-4" />
-                        <span>Bangladesh's Premier Tutoring Platform</span>
+                        <span>Bangladesh’s Trusted Tuition Marketplace</span>
                     </div>
 
                     <h1 className="mb-6 text-5xl font-extrabold tracking-tight text-slate-900 md:text-7xl lg:leading-[1.1]">
-                        Unlock Your Child's <br className="hidden md:block" />
-                        <span className="relative whitespace-nowrap">
-                            <span className="relative text-blue-600">Full Potential</span>
-                        </span>
+                        Find the Right Tutor for You
                     </h1>
 
                     <p className="mx-auto mb-10 max-w-2xl text-lg text-slate-600 md:text-xl">
@@ -321,7 +248,7 @@ export default function Welcome({
             </section>
 
             {/* Stats */}
-            <section className="bg-white border-y border-slate-200 py-10">
+            <section className="bg-white border-y border-slate-200 py-8">
                 <div className="mx-auto max-w-5xl px-4">
                     <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 text-center">
                         <div className="pt-4 sm:pt-0">
@@ -503,7 +430,7 @@ export default function Welcome({
             )}
 
             {/* Footer */}
-            <footer className="bg-slate-900 py-12 text-slate-400">
+            <footer className="bg-slate-900 py-8 text-slate-400">
                 <div className="mx-auto max-w-6xl px-4 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
                         <BookOpen className="h-6 w-6 text-blue-500" />
@@ -522,4 +449,3 @@ export default function Welcome({
         </div>
     );
 }
-

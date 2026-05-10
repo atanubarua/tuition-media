@@ -13,12 +13,14 @@ class CommissionPayment extends Model
         'received_by',
         'note',
         'received_at',
+        'due_on',
     ];
 
     protected function casts(): array
     {
         return [
             'received_at' => 'datetime',
+            'due_on' => 'date',
         ];
     }
 

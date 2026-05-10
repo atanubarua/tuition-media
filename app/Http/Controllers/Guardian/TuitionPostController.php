@@ -19,14 +19,32 @@ class TuitionPostController extends Controller
     {
         $this->ensureGuardian($request);
 
+        $filterStatuses = ['draft', 'published', 'shortlisted', 'assigned', 'completed', 'closed', 'cancelled'];
+
+        $filters = $request->validate([
+            'tuition_code' => ['nullable', 'string', 'max:50'],
+            'status' => ['nullable', 'string', 'in:' . implode(',', $filterStatuses)],
+        ]);
+
         $posts = TuitionPost::query()
             ->where('guardian_id', $request->user()->id)
+            ->when($filters['tuition_code'] ?? null, function ($query, $tuitionCode): void {
+                $query->where('tuition_code', 'like', '%' . trim($tuitionCode) . '%');
+            })
+            ->when($filters['status'] ?? null, function ($query, $status): void {
+                $query->where('status', $status);
+            })
             ->withCount(['students', 'applications'])
             ->latest()
             ->get();
 
         return Inertia::render('guardian/tuition-posts/index', [
             'posts' => $posts,
+            'filters' => [
+                'tuition_code' => $filters['tuition_code'] ?? '',
+                'status' => $filters['status'] ?? '',
+            ],
+            'statuses' => $filterStatuses,
         ]);
     }
 

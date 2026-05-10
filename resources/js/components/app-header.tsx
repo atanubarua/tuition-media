@@ -201,8 +201,8 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                 ))}
                             </div>
                         </div>
-                        <NotificationsMenu />
                         <HeaderUserMenu />
+                        <NotificationsMenu />
                     </div>
                 </div>
             </div>

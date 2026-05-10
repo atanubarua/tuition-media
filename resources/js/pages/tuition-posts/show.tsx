@@ -213,10 +213,7 @@ html.classList.add('dark');
                                     <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
                                     <p className="mt-1 text-sm text-gray-500">📍 {fullLocation}</p>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-2xl font-bold text-green-600">{salaryText(post)}</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">Posted {postedDate}</p>
-                                </div>
+                                <p className="text-xs text-gray-400 mt-1 sm:mt-0">Posted {postedDate}</p>
                             </div>
 
                             {/* Subject pills */}

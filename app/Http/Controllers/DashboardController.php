@@ -47,7 +47,6 @@ class DashboardController extends Controller
                 ->map(fn (TuitionApplication $application) => [
                     'id' => $application->id,
                     'status' => $application->status,
-                    'admin_contact_status' => $application->admin_contact_status ?? 'new',
                     'commission_payment_status' => $application->status === 'hired'
                         ? $application->commission_payment_status
                         : null,
@@ -76,7 +75,7 @@ class DashboardController extends Controller
                         'pendingApplications' => TuitionApplication::where('status', 'pending')->count(),
                         'shortlistedApplications' => TuitionApplication::where('status', 'shortlisted')->count(),
                         'hiredApplications' => TuitionApplication::where('status', 'hired')->count(),
-                        'contactInterested' => TuitionApplication::where('admin_contact_status', 'interested')->count(),
+                        'contactInterested' => TuitionApplication::where('status', 'interested')->count(),
                         'commissionUnpaid' => TuitionApplication::where('status', 'hired')
                             ->where('commission_payment_status', 'unpaid')
                             ->count(),

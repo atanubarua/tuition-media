@@ -1,5 +1,5 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { Head, router } from '@inertiajs/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,30 +22,42 @@ type Application = {
     commission_received_amount: number | null;
     commission_payment_status: 'unpaid' | 'partial' | 'paid' | null;
     commission_due_amount: number;
+    commission_due_date: string | null;
     tuition_amount: number | null;
     post: { id: number; tuition_code: string | null; title: string | null } | null;
-    tutor: { id: number; name: string; email: string } | null;
-    guardian: { id: number; name: string; email: string } | null;
+    tutor: { id: number; name: string; email: string; phone: string | null } | null;
+    guardian: { id: number; name: string; email: string; phone: string | null } | null;
     payment_history: Array<{
         id: number;
         amount: number;
         note: string | null;
         received_at: string;
+        due_on: string | null;
     }>;
 };
 
-export default function AdminCommissionsIndex({ applications }: { applications: Application[] }) {
+type Props = {
+    applications: Application[];
+    filters: { search: string; payment_status: string };
+};
+
+export default function AdminCommissionsIndex({ applications, filters }: Props) {
     const formatDate = (value: string | null) => (value ? new Date(value).toISOString().slice(0, 10) : '-');
     const formatCurrency = (value: number | null | undefined) => `BDT ${value ?? 0}`;
+    const [search, setSearch] = useState(filters.search ?? '');
+    const [paymentStatus, setPaymentStatus] = useState(filters.payment_status ?? '');
+    const hasMounted = useRef(false);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
     const [receivedAmountInput, setReceivedAmountInput] = useState('');
     const [paymentNoteInput, setPaymentNoteInput] = useState('');
+    const [dueDateInput, setDueDateInput] = useState('');
 
     const openPaymentModal = (application: Application) => {
         setSelectedApplication(application);
         setReceivedAmountInput('');
         setPaymentNoteInput('');
+        setDueDateInput(application.commission_due_date ?? '');
         setIsPaymentModalOpen(true);
     };
 
@@ -81,6 +93,26 @@ export default function AdminCommissionsIndex({ applications }: { applications: 
 
         return incomingAmount <= selectedApplication.commission_due_amount;
     }, [incomingAmount, selectedApplication]);
+
+    useEffect(() => {
+        if (!hasMounted.current) {
+            hasMounted.current = true;
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            router.get(
+                '/admin/commissions',
+                {
+                    search: search || undefined,
+                    payment_status: paymentStatus || undefined,
+                },
+                { preserveState: true, replace: true },
+            );
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [search, paymentStatus]);
 
     const paymentStatusBadgeClass = (status: Application['commission_payment_status']) => {
         if (status === 'paid') {
@@ -121,7 +153,11 @@ return 'bg-blue-100 text-blue-800 border-blue-200';
 
         router.patch(
             `/admin/commissions/${selectedApplication.id}/payment`,
-            { received_amount: Math.round(received), note: paymentNoteInput || undefined },
+            {
+                received_amount: Math.round(received),
+                note: paymentNoteInput || undefined,
+                due_date: duePreview !== null && duePreview > 0 ? (dueDateInput || undefined) : undefined,
+            },
             {
                 preserveScroll: true,
                 onSuccess: () => setIsPaymentModalOpen(false),
@@ -138,14 +174,45 @@ return 'bg-blue-100 text-blue-800 border-blue-200';
                     <p className="text-sm text-muted-foreground">Track commission collection from hired placements.</p>
                 </div>
 
+                <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                        <label htmlFor="search" className="mb-2 block text-sm font-medium">
+                            Search
+                        </label>
+                        <Input
+                            id="search"
+                            placeholder="Tutor, guardian, tuition code, title, application ID"
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="payment-status" className="mb-2 block text-sm font-medium">
+                            Payment status
+                        </label>
+                        <select
+                            id="payment-status"
+                            value={paymentStatus}
+                            onChange={(event) => setPaymentStatus(event.target.value)}
+                            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                        >
+                            <option value="">All statuses</option>
+                            <option value="unpaid">Unpaid</option>
+                            <option value="partial">Partial</option>
+                            <option value="paid">Paid</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="w-full text-sm">
                         <thead className="bg-muted/40">
                             <tr>
-                                <th className="px-4 py-3 text-left">Post</th>
                                 <th className="px-4 py-3 text-left">Tuition ID</th>
                                 <th className="px-4 py-3 text-left">Tutor</th>
+                                <th className="px-4 py-3 text-left">Tutor Phone</th>
                                 <th className="px-4 py-3 text-left">Guardian</th>
+                                <th className="px-4 py-3 text-left">Guardian Phone</th>
                                 <th className="px-4 py-3 text-left">Tuition Amount</th>
                                 <th className="px-4 py-3 text-left">Commission</th>
                                 <th className="px-4 py-3 text-left">Received</th>
@@ -158,25 +225,18 @@ return 'bg-blue-100 text-blue-800 border-blue-200';
                         <tbody>
                             {applications.length === 0 && (
                                 <tr>
-                                    <td className="px-4 py-6 text-muted-foreground" colSpan={11}>
+                                    <td className="px-4 py-6 text-muted-foreground" colSpan={12}>
                                         No hired placements yet.
                                     </td>
                                 </tr>
                             )}
                             {applications.map((application) => (
                                 <tr key={application.id} className="border-t">
-                                    <td className="px-4 py-3">
-                                        {application.post ? (
-                                            <Link href={`/tuition-posts/${application.post.id}`} className="font-medium hover:underline">
-                                                {application.post.title ?? `Tuition Post #${application.post.id}`}
-                                            </Link>
-                                        ) : (
-                                            '-'
-                                        )}
-                                    </td>
                                     <td className="px-4 py-3 font-mono text-xs">{application.post?.tuition_code ?? '-'}</td>
                                     <td className="px-4 py-3">{application.tutor?.name ?? '-'}</td>
+                                    <td className="px-4 py-3">{application.tutor?.phone ?? '-'}</td>
                                     <td className="px-4 py-3">{application.guardian?.name ?? '-'}</td>
+                                    <td className="px-4 py-3">{application.guardian?.phone ?? '-'}</td>
                                     <td className="px-4 py-3">
                                         {application.tuition_amount ? formatCurrency(application.tuition_amount) : '-'}
                                     </td>
@@ -231,6 +291,9 @@ return 'bg-blue-100 text-blue-800 border-blue-200';
                             <div className="rounded-md border p-3">
                                 <p className="text-xs text-muted-foreground">Due</p>
                                 <p className="mt-1 font-semibold">{formatCurrency(selectedApplication?.commission_due_amount)}</p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Due date: {selectedApplication?.commission_due_date ? formatDate(selectedApplication.commission_due_date) : '-'}
+                                </p>
                             </div>
                         </div>
 
@@ -261,6 +324,17 @@ return 'bg-blue-100 text-blue-800 border-blue-200';
                                     />
                                 </div>
 
+                                {duePreview !== null && duePreview > 0 && (
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Due Date (optional)</label>
+                                        <Input
+                                            type="date"
+                                            value={dueDateInput}
+                                            onChange={(event) => setDueDateInput(event.target.value)}
+                                        />
+                                    </div>
+                                )}
+
                                 <div className="rounded-md border bg-muted/30 p-3 text-sm">
                                     <p className="font-medium">
                                         Due after this installment: {duePreview !== null ? formatCurrency(duePreview) : '-'}
@@ -283,6 +357,11 @@ return 'bg-blue-100 text-blue-800 border-blue-200';
                                             <p className="text-sm font-medium">+{formatCurrency(payment.amount)}</p>
                                             <p className="text-xs text-muted-foreground">{formatDate(payment.received_at)}</p>
                                             {payment.note && <p className="text-xs text-muted-foreground">{payment.note}</p>}
+                                            {payment.due_on && (
+                                                <p className="text-xs text-muted-foreground">
+                                                    Due follow-up date: {formatDate(payment.due_on)}
+                                                </p>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

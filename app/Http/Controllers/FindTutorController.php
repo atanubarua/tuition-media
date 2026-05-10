@@ -11,11 +11,29 @@ class FindTutorController extends Controller
     public function index(Request $request)
     {
         $query = User::where('role', 'tutor')
+            ->select(['id', 'name', 'gender'])
             ->whereHas('tutorProfile')
             ->with([
-                'tutorProfile.university', 
-                'tutorProfile.subjects', 
-                'tutorProfile.preferredLocations'
+                'tutorProfile' => fn ($q) => $q->select([
+                    'id',
+                    'user_id',
+                    'teachable_levels',
+                    'teachable_mediums',
+                    'experience_months',
+                    'profile_photo',
+                    'bio',
+                    'is_verified',
+                    'university_id',
+                    'department',
+                    'occupation',
+                    'job_title',
+                    'job_organization',
+                    'academic_year',
+                    'intake_year',
+                ]),
+                'tutorProfile.university:id,name',
+                'tutorProfile.subjects:id,name',
+                'tutorProfile.preferredLocations:id,name,type',
             ]);
 
         // Filter by gender
@@ -47,7 +65,40 @@ class FindTutorController extends Controller
             });
         }
 
-        $tutors = $query->latest()->paginate(12)->withQueryString();
+        $tutors = $query->latest()->paginate(12)->withQueryString()
+            ->through(fn (User $tutor) => [
+                'id' => $tutor->id,
+                'name' => $tutor->name,
+                'gender' => $tutor->gender,
+                'tutor_profile' => $tutor->tutorProfile ? [
+                    'id' => $tutor->tutorProfile->id,
+                    'teachable_levels' => $tutor->tutorProfile->teachable_levels,
+                    'teachable_mediums' => $tutor->tutorProfile->teachable_mediums,
+                    'experience_months' => $tutor->tutorProfile->experience_months,
+                    'profile_photo' => $tutor->tutorProfile->profile_photo,
+                    'bio' => $tutor->tutorProfile->bio,
+                    'is_verified' => (bool) $tutor->tutorProfile->is_verified,
+                    'university' => $tutor->tutorProfile->university ? [
+                        'id' => $tutor->tutorProfile->university->id,
+                        'name' => $tutor->tutorProfile->university->name,
+                    ] : null,
+                    'department' => $tutor->tutorProfile->department,
+                    'occupation' => $tutor->tutorProfile->occupation,
+                    'job_title' => $tutor->tutorProfile->job_title,
+                    'job_organization' => $tutor->tutorProfile->job_organization,
+                    'academic_year' => $tutor->tutorProfile->academic_year,
+                    'intake_year' => $tutor->tutorProfile->intake_year,
+                    'subjects' => $tutor->tutorProfile->subjects->map(fn ($subject) => [
+                        'id' => $subject->id,
+                        'name' => $subject->name,
+                    ])->values(),
+                    'preferred_locations' => $tutor->tutorProfile->preferredLocations->map(fn ($location) => [
+                        'id' => $location->id,
+                        'name' => $location->name,
+                        'type' => $location->type,
+                    ])->values(),
+                ] : null,
+            ]);
 
         $universities = \App\Models\University::orderBy('name')->get(['id', 'name']);
 

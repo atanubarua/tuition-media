@@ -1,7 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, Info } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { dashboard } from '@/routes';
 
 type TutorProfile = {
@@ -28,7 +29,7 @@ type Tutor = {
 
 type Application = {
     id: number;
-    status: 'pending' | 'shortlisted' | 'rejected' | 'hired';
+    status: 'pending' | 'shortlisted' | 'interested' | 'not_interested' | 'rejected' | 'hired';
     cover_note: string | null;
     expected_salary: number | null;
     created_at: string;
@@ -37,35 +38,37 @@ type Application = {
 
 type Post = { id: number; title: string | null };
 
-type Tab = 'all' | 'shortlisted' | 'rejected';
+type PaginationLink = { url: string | null; label: string; active: boolean };
+
+type PaginatedApplications = {
+    data: Application[];
+    links: PaginationLink[];
+    current_page: number;
+    last_page: number;
+    from: number | null;
+    to: number | null;
+    total: number;
+};
+
+type Filters = {
+    status: string;
+    search: string;
+    university: string;
+};
 
 const STATUS_STYLES: Record<Application['status'], string> = {
     pending: 'bg-yellow-100 text-yellow-700',
     shortlisted: 'bg-blue-100 text-blue-700',
+    interested: 'bg-emerald-100 text-emerald-700',
+    not_interested: 'bg-rose-100 text-rose-700',
     rejected: 'bg-red-100 text-red-700',
     hired: 'bg-green-100 text-green-700',
 };
 
-const LEVEL_LABELS: Record<string, string> = {
-    primary: 'Primary',
-    high_school: 'High School',
-    college: 'College',
-    honors: 'Honors',
-};
-
-const MEDIUM_LABELS: Record<string, string> = {
-    bangla: 'Bangla Medium',
-    english: 'English Medium',
-    madrasha: 'Madrasha',
-    other: 'Other',
-};
-
-const YEAR_LABELS: Record<number, string> = { 1: '1st Year', 2: '2nd Year', 3: '3rd Year', 4: '4th Year', 5: 'Graduated' };
-
 function experienceLabel(months: number): string {
     if (months === 0) {
-return 'No experience';
-}
+        return 'No experience';
+    }
 
     const y = Math.floor(months / 12);
     const m = months % 12;
@@ -73,281 +76,310 @@ return 'No experience';
     return [y > 0 && `${y}yr`, m > 0 && `${m}mo`].filter(Boolean).join(' ');
 }
 
-function TutorModal({ app, onClose }: { app: Application; onClose: () => void }) {
-    const p = app.tutor.profile;
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-            <div className="absolute inset-0 bg-black/40" />
-            <div
-                className="relative z-10 w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-card border shadow-xl"
-                onClick={(e) => e.stopPropagation()}
-            >
-                {/* Header */}
-                <div className="flex items-start justify-between p-5 border-b">
-                    <div>
-                        <h2 className="text-lg font-semibold">{app.tutor.name}</h2>
-                        <p className="text-sm text-muted-foreground capitalize">{app.tutor.gender ?? '—'}</p>
-                    </div>
-                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">&times;</button>
-                </div>
-
-                <div className="p-5 space-y-5">
-                    {/* University */}
-                    {p && (
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-0.5">University</p>
-                                <p className="font-medium">{p.university ?? '—'}</p>
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-0.5">Department</p>
-                                <p className="font-medium">{p.department ?? '—'}</p>
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-0.5">Academic Year</p>
-                                <p className="font-medium">{p.academic_year ? YEAR_LABELS[p.academic_year] : '—'}</p>
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-0.5">Intake Year</p>
-                                <p className="font-medium">{p.intake_year ?? '—'}</p>
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-0.5">Occupation</p>
-                                <p className="font-medium capitalize">
-                                    {p.occupation === 'employed' && p.job_title
-                                        ? `${p.job_title}${p.job_organization ? ` at ${p.job_organization}` : ''}`
-                                        : (p.occupation ?? '—')}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-0.5">Experience</p>
-                                <p className="font-medium">{experienceLabel(p.experience_months)}</p>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Subjects */}
-                    {p?.subjects && p.subjects.length > 0 && (
-                        <div>
-                            <p className="text-xs text-muted-foreground mb-1.5">Subjects</p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {p.subjects.map((s) => (
-                                    <span key={s} className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-700">{s}</span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Levels & Mediums */}
-                    {p && (
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-1.5">Can Teach</p>
-                                <div className="flex flex-wrap gap-1">
-                                    {p.teachable_levels.map((l) => (
-                                        <span key={l} className="rounded bg-muted px-2 py-0.5 text-xs">{LEVEL_LABELS[l] ?? l}</span>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-1.5">Mediums</p>
-                                <div className="flex flex-wrap gap-1">
-                                    {p.teachable_mediums.map((m) => (
-                                        <span key={m} className="rounded bg-muted px-2 py-0.5 text-xs">{MEDIUM_LABELS[m] ?? m}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Bio */}
-                    {p?.bio && (
-                        <div>
-                            <p className="text-xs text-muted-foreground mb-1">Bio</p>
-                            <p className="text-sm text-muted-foreground whitespace-pre-line">{p.bio}</p>
-                        </div>
-                    )}
-
-                    {/* Cover note */}
-                    {app.cover_note && (
-                        <div>
-                            <p className="text-xs text-muted-foreground mb-1">Cover Note</p>
-                            <p className="text-sm bg-muted/40 rounded-lg px-3 py-2 whitespace-pre-line">{app.cover_note}</p>
-                        </div>
-                    )}
-
-                    {/* Expected salary */}
-                    {app.expected_salary && (
-                        <p className="text-sm">Expected salary: <span className="font-medium">৳{app.expected_salary.toLocaleString()}</span></p>
-                    )}
-
-                    {!p && (
-                        <p className="text-sm text-muted-foreground">This tutor hasn't completed their profile yet.</p>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
+function formatDate(value: string): string {
+    return new Date(value).toISOString().slice(0, 10);
 }
 
 export default function GuardianApplicationsIndex({
     post,
     applications,
+    filters,
+    universities,
 }: {
     post: Post;
-    applications: Application[];
+    applications: PaginatedApplications;
+    filters: Filters;
+    universities: string[];
 }) {
-    const [activeTab, setActiveTab] = useState<Tab>('all');
-    const [universityFilter, setUniversityFilter] = useState<string>('');
+    const [status, setStatus] = useState(filters.status ?? '');
+    const [search, setSearch] = useState(filters.search ?? '');
+    const [university, setUniversity] = useState(filters.university ?? '');
     const [selectedApp, setSelectedApp] = useState<Application | null>(null);
 
-    const universities = [...new Set(
-        applications.map((a) => a.tutor.profile?.university).filter(Boolean) as string[]
-    )].sort();
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            router.get(
+                `/guardian/tuition-posts/${post.id}/applications`,
+                {
+                    status: status || undefined,
+                    search: search || undefined,
+                    university: university || undefined,
+                },
+                { preserveState: true, replace: true }
+            );
+        }, 300);
 
-    const tabFiltered = activeTab === 'all' ? applications : applications.filter((a) => a.status === activeTab);
-    const filtered = universityFilter
-        ? tabFiltered.filter((a) => a.tutor.profile?.university === universityFilter)
-        : tabFiltered;
+        return () => clearTimeout(timeout);
+    }, [status, search, university, post.id]);
 
-    const counts = {
-        all: applications.length,
-        shortlisted: applications.filter((a) => a.status === 'shortlisted').length,
-        rejected: applications.filter((a) => a.status === 'rejected').length,
-    };
-
-    function updateStatus(appId: number, status: string) {
-        router.patch(`/guardian/tuition-posts/${post.id}/applications/${appId}`, { status });
+    function updateStatus(appId: number, nextStatus: 'shortlisted' | 'rejected') {
+        router.patch(`/guardian/tuition-posts/${post.id}/applications/${appId}`, { status: nextStatus }, { preserveScroll: true });
     }
-
-    const tabs: { key: Tab; label: string }[] = [
-        { key: 'all', label: 'All' },
-        { key: 'shortlisted', label: 'Shortlisted' },
-        { key: 'rejected', label: 'Rejected' },
-    ];
 
     return (
         <>
             <Head title="Applications" />
-            {selectedApp && <TutorModal app={selectedApp} onClose={() => setSelectedApp(null)} />}
-            <div className="p-4 md:p-6 space-y-5 max-w-3xl">
-                <div className="flex items-center gap-3">
-                    <Button type="button" variant="outline" size="icon" asChild>
-                        <Link href="/guardian/tuition-posts" aria-label="Back to My Tuition Posts">
-                            <ArrowLeft className="size-4" />
-                        </Link>
-                    </Button>
-                    <h1 className="text-2xl font-semibold">Applications</h1>
-                </div>
-                <p className="text-sm text-muted-foreground -mt-3">
-                    {post.title ?? `Tuition Post #${post.id}`}
-                </p>
-
-                {/* Filters */}
-                <div className="flex flex-wrap items-center gap-3">
-                    <select
-                        className="rounded-md border bg-background px-3 py-1.5 text-sm"
-                        value={universityFilter}
-                        onChange={(e) => setUniversityFilter(e.target.value)}
+            {selectedApp && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSelectedApp(null)}>
+                    <div className="absolute inset-0 bg-black/40" />
+                    <div
+                        className="relative z-10 max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl border bg-card shadow-xl"
+                        onClick={(event) => event.stopPropagation()}
                     >
-                        <option value="">All Universities</option>
-                        {universities.map((u) => (
-                            <option key={u} value={u}>{u}</option>
-                        ))}
-                    </select>
-                    {universityFilter && (
-                        <button
-                            onClick={() => setUniversityFilter('')}
-                            className="text-xs text-muted-foreground hover:text-foreground"
+                        <div className="flex items-start justify-between border-b p-5">
+                            <div>
+                                <h2 className="text-lg font-semibold">{selectedApp.tutor.name}</h2>
+                                <p className="text-sm text-muted-foreground">{selectedApp.tutor.gender ?? '-'}</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedApp(null)}
+                                className="text-xl leading-none text-muted-foreground hover:text-foreground"
+                            >
+                                &times;
+                            </button>
+                        </div>
+
+                        <div className="space-y-5 p-5 text-sm">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-xs text-muted-foreground">University</p>
+                                    <p className="font-medium">{selectedApp.tutor.profile?.university ?? '-'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-muted-foreground">Department</p>
+                                    <p className="font-medium">{selectedApp.tutor.profile?.department ?? '-'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-muted-foreground">Experience</p>
+                                    <p className="font-medium">
+                                        {selectedApp.tutor.profile ? experienceLabel(selectedApp.tutor.profile.experience_months) : '-'}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-muted-foreground">Expected Salary</p>
+                                    <p className="font-medium">
+                                        {selectedApp.expected_salary ? `BDT ${selectedApp.expected_salary.toLocaleString()}` : '-'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {selectedApp.tutor.profile?.subjects && selectedApp.tutor.profile.subjects.length > 0 && (
+                                <div>
+                                    <p className="mb-1.5 text-xs text-muted-foreground">Subjects</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {selectedApp.tutor.profile.subjects.map((subject) => (
+                                            <span key={subject} className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-700">
+                                                {subject}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {selectedApp.tutor.profile?.bio && (
+                                <div>
+                                    <p className="mb-1 text-xs text-muted-foreground">Bio</p>
+                                    <p className="whitespace-pre-line text-muted-foreground">{selectedApp.tutor.profile.bio}</p>
+                                </div>
+                            )}
+
+                            {selectedApp.cover_note && (
+                                <div>
+                                    <p className="mb-1 text-xs text-muted-foreground">Cover Note</p>
+                                    <p className="whitespace-pre-line rounded-lg bg-muted/40 px-3 py-2">{selectedApp.cover_note}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="w-full space-y-5 p-4 md:p-6">
+                <section className="rounded-xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm md:p-5">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Button type="button" variant="outline" size="icon" asChild className="bg-white">
+                            <Link href="/guardian/tuition-posts" aria-label="Back to My Tuition Posts">
+                                <ArrowLeft className="size-4" />
+                            </Link>
+                        </Button>
+                        <div>
+                            <h1 className="text-2xl font-semibold tracking-tight">Applications</h1>
+                            <p className="text-sm text-muted-foreground">{post.title ?? `Tuition Post #${post.id}`}</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 flex items-start gap-3 rounded-lg border border-blue-200/80 bg-blue-50/80 px-3.5 py-3 text-sm text-blue-800">
+                        <Info className="mt-0.5 size-4 shrink-0 text-blue-600" />
+                        <p>
+                            Shortlist up to <span className="font-semibold">5 tutors</span>. Then our admin team will review your shortlisted
+                            tutors and select the best one.
+                        </p>
+                    </div>
+                </section>
+
+                <div className="grid gap-3 md:grid-cols-3">
+                    <div>
+                        <label htmlFor="search" className="mb-2 block text-sm font-medium">
+                            Search tutor
+                        </label>
+                        <Input
+                            id="search"
+                            placeholder="Tutor name"
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="status" className="mb-2 block text-sm font-medium">
+                            Status
+                        </label>
+                        <select
+                            id="status"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            value={status}
+                            onChange={(event) => setStatus(event.target.value)}
                         >
-                            ✕ Clear
-                        </button>
-                    )}
+                            <option value="">All statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="shortlisted">Shortlisted</option>
+                            <option value="interested">Interested</option>
+                            <option value="not_interested">Not interested</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="hired">Hired</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label htmlFor="university" className="mb-2 block text-sm font-medium">
+                            University
+                        </label>
+                        <select
+                            id="university"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            value={university}
+                            onChange={(event) => setUniversity(event.target.value)}
+                        >
+                            <option value="">All universities</option>
+                            {universities.map((u) => (
+                                <option key={u} value={u}>
+                                    {u}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex gap-1 border-b">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.key}
-                            onClick={() => setActiveTab(tab.key)}
-                            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                                activeTab === tab.key
-                                    ? 'border-blue-600 text-blue-600'
-                                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                            }`}
-                        >
-                            {tab.label}
-                            <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-xs ${
-                                activeTab === tab.key ? 'bg-blue-100 text-blue-700' : 'bg-muted text-muted-foreground'
-                            }`}>
-                                {counts[tab.key]}
-                            </span>
-                        </button>
-                    ))}
-                </div>
+                <div className="overflow-x-auto rounded-lg border">
+                    <table className="w-full text-sm">
+                        <thead className="bg-muted/40">
+                            <tr>
+                                <th className="px-4 py-3 text-left">Tutor</th>
+                                <th className="px-4 py-3 text-left">University</th>
+                                <th className="px-4 py-3 text-left">Department</th>
+                                <th className="px-4 py-3 text-left">Experience</th>
+                                <th className="px-4 py-3 text-left">Expected Salary</th>
+                                <th className="px-4 py-3 text-left">Status</th>
+                                <th className="px-4 py-3 text-left">Applied</th>
+                                <th className="px-4 py-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {applications.data.length === 0 && (
+                                <tr>
+                                    <td colSpan={8} className="px-4 py-6 text-muted-foreground">
+                                        No applications found.
+                                    </td>
+                                </tr>
+                            )}
 
-                {/* List */}
-                {filtered.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4">No applications in this category.</p>
-                ) : (
-                    <div className="space-y-4">
-                        {filtered.map((app) => (
-                            <div key={app.id} className="rounded-xl border bg-card p-5 space-y-3">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div>
+                            {applications.data.map((app) => (
+                                <tr key={app.id} className="border-t align-top">
+                                    <td className="px-4 py-3">
                                         <button
+                                            type="button"
                                             onClick={() => setSelectedApp(app)}
-                                            className="font-semibold hover:text-blue-600 hover:underline text-left"
+                                            className="font-medium text-left hover:text-blue-600 hover:underline"
                                         >
                                             {app.tutor.name}
                                         </button>
-                                        <p className="text-xs text-muted-foreground">
-                                            {app.tutor.gender ?? '—'}
-                                            {app.tutor.profile && (
-                                                <> · {app.tutor.profile.university ?? '—'}, {app.tutor.profile.department ?? '—'}</>
-                                            )}
-                                            {app.tutor.profile && (
-                                                <> · {experienceLabel(app.tutor.profile.experience_months)} exp</>
-                                            )}
-                                        </p>
-                                    </div>
-                                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize shrink-0 ${STATUS_STYLES[app.status]}`}>
-                                        {app.status}
-                                    </span>
-                                </div>
+                                        <p className="text-xs text-muted-foreground">{app.tutor.gender ?? '-'}</p>
+                                    </td>
+                                    <td className="px-4 py-3">{app.tutor.profile?.university ?? '-'}</td>
+                                    <td className="px-4 py-3">{app.tutor.profile?.department ?? '-'}</td>
+                                    <td className="px-4 py-3">{app.tutor.profile ? experienceLabel(app.tutor.profile.experience_months) : '-'}</td>
+                                    <td className="px-4 py-3">{app.expected_salary ? `BDT ${app.expected_salary.toLocaleString()}` : '-'}</td>
+                                    <td className="px-4 py-3">
+                                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[app.status]}`}>
+                                            {app.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3">{formatDate(app.created_at)}</td>
+                                    <td className="px-4 py-3">
+                                        {app.status === 'pending' ? (
+                                            <div className="flex min-w-[108px] flex-col gap-2">
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                        if (confirm('Shortlist this application?')) {
+                                                            updateStatus(app.id, 'shortlisted');
+                                                        }
+                                                    }}
+                                                    className="h-9 justify-center border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
+                                                >
+                                                    Shortlist
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                        if (confirm('Reject this application?')) {
+                                                            updateStatus(app.id, 'rejected');
+                                                        }
+                                                    }}
+                                                    className="h-9 justify-center border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
+                                                >
+                                                    Reject
+                                                </Button>
+                                            </div>
+                                        ) : app.status === 'shortlisted' ? (
+                                            <span className="text-xs text-blue-600">Under review by admin team</span>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground">-</span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
 
-                                {app.status === 'shortlisted' && (
-                                        <p className="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2">
-                                            Our team will contact this tutor to confirm availability. We'll get back to you soon.
-                                        </p>
-                                    )}
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <p className="text-sm text-muted-foreground">
+                        Showing {applications.from ?? 0} to {applications.to ?? 0} of {applications.total}
+                    </p>
 
-                                {app.status === 'pending' && (
-                                    <div className="flex flex-wrap gap-2 pt-1">
-                                        <button
-                                            onClick={() => updateStatus(app.id, 'shortlisted')}
-                                            className="rounded-lg border border-blue-500 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50"
-                                        >
-                                            Shortlist
-                                        </button>
-                                        <button
-                                            onClick={() => {
- if (confirm('Reject this application?')) {
-updateStatus(app.id, 'rejected');
-} 
-}}
-                                            className="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50"
-                                        >
-                                            Reject
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                )}
+                    {applications.last_page > 1 && (
+                        <div className="flex flex-wrap gap-2">
+                            {applications.links.map((link, index) => (
+                                <Link
+                                    key={`${link.label}-${index}`}
+                                    href={link.url ?? '#'}
+                                    preserveState
+                                    preserveScroll
+                                    className={`rounded-md border px-3 py-1.5 text-sm ${
+                                        link.active ? 'border-blue-600 bg-blue-50 text-blue-700' : 'hover:bg-muted'
+                                    } ${link.url ? '' : 'pointer-events-none opacity-50'}`}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </>
     );

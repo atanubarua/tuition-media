@@ -1,13 +1,7 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
-import { dashboard, login, logout, register } from '@/routes';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { BookOpen, MapPin, Calendar, User, ChevronDown, LogOut, LayoutDashboard, Search, GraduationCap, Filter } from 'lucide-react';
+import PublicNavbar from '@/components/public-navbar';
+import { MapPin, Calendar, User, Search, GraduationCap, Filter } from 'lucide-react';
 
 type Subject = { id: number; name: string };
 type Student = { id: number; academic_level: string; class_level: string | null; medium: string; subjects: Subject[] };
@@ -101,7 +95,6 @@ export default function TuitionJobsPage({
     filters: { location: string; subject: string; gender: string; level: string; min_salary: number | null; max_days: number | null };
     canRegister?: boolean;
 }) {
-    const { auth } = usePage().props as any;
     const [location, setLocation] = useState(filters.location ?? '');
     const [subject, setSubject] = useState(filters.subject ?? '');
     const [gender, setGender] = useState(filters.gender ?? 'any');
@@ -124,54 +117,7 @@ export default function TuitionJobsPage({
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900">
             <Head title="All Tuition Jobs - Tuition Media" />
-            <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
-                    <Link href="/" className="flex items-center gap-2 text-2xl font-bold tracking-tight text-blue-900">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-                            <BookOpen className="h-5 w-5" />
-                        </div>
-                        Tuition<span className="text-amber-500">Media</span>
-                    </Link>
-                    <div className="flex items-center gap-4">
-                        {auth.user ? (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <button
-                                        type="button"
-                                        aria-label="Open user menu"
-                                        className="inline-flex h-10 items-center gap-1.5 rounded-full border border-blue-300 bg-white px-2.5 text-blue-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50"
-                                    >
-                                        <User className="h-4 w-4" />
-                                        <span className="hidden max-w-28 truncate text-sm font-semibold sm:inline">
-                                            {auth.user.name}
-                                        </span>
-                                        <ChevronDown className="h-4 w-4" />
-                                    </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44">
-                                    <DropdownMenuItem asChild>
-                                        <Link href={dashboard.url()} className="w-full cursor-pointer">
-                                            <LayoutDashboard className="h-4 w-4" />
-                                            Dashboard
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                        <Link href={logout()} as="button" className="w-full cursor-pointer">
-                                            <LogOut className="h-4 w-4" />
-                                            Log out
-                                        </Link>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        ) : (
-                            <>
-                                <Link href={login()} className="text-sm font-semibold text-slate-600 hover:text-blue-600">Log in</Link>
-                                {canRegister && <Link href={register()} className="hidden sm:inline-flex rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">Register Free</Link>}
-                            </>
-                        )}
-                    </div>
-                </div>
-            </nav>
+            <PublicNavbar canRegister={canRegister} active="tuition-jobs" />
 
             <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
                 <h1 className="text-3xl font-extrabold text-slate-900 md:text-4xl">All Tuition Jobs</h1>

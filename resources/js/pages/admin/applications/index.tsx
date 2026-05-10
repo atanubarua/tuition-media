@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useMemo, useState, useEffect } from 'react';
 import Select from 'react-select';
-import { Badge } from '@/components/ui/badge';
+import { CircleDollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -12,11 +12,11 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 type Application = {
     id: number;
-    status: 'pending' | 'shortlisted' | 'rejected' | 'hired';
-    admin_contact_status: 'new' | 'contacted' | 'interested' | 'not_interested' | null;
+    status: 'pending' | 'shortlisted' | 'interested' | 'not_interested' | 'rejected' | 'hired';
     admin_note: string | null;
     hired_at: string | null;
     commission_type: 'fixed' | 'percentage' | null;
@@ -27,7 +27,7 @@ type Application = {
     expected_salary: number | null;
     cover_note: string | null;
     created_at: string;
-    tutor: { id: number; name: string; email: string } | null;
+    tutor: { id: number; name: string; email: string; phone?: string | null; university?: string | null } | null;
     post: {
         id: number;
         tuition_code: string | null;
@@ -36,15 +36,15 @@ type Application = {
         salary_min: number | null;
         salary_max: number | null;
     } | null;
-    guardian: { id: number; name: string; email: string } | null;
+    guardian: { id: number; name: string; email: string; phone?: string | null } | null;
 };
 
 type Props = {
     applications: Application[];
-    filters: { status: string; tutor_id: string; tuition_code: string };
+    filters: { status: string; tutor_id: string; university: string; tuition_code: string };
     statuses: Application['status'][];
-    contactStatuses: Application['admin_contact_status'][];
     tutors: { id: number; name: string; email: string }[];
+    universities: string[];
 };
 
 const SELECT_STYLES = {
@@ -59,15 +59,17 @@ const SELECT_STYLES = {
     input: (base: object) => ({ ...base, color: 'var(--foreground)' }),
 };
 
-export default function AdminApplicationsIndex({ applications, filters, statuses, tutors }: Props) {
+export default function AdminApplicationsIndex({ applications, filters, statuses, tutors, universities }: Props) {
     const formatDate = (value: string) => new Date(value).toISOString().slice(0, 10);
     const [isHireModalOpen, setIsHireModalOpen] = useState(false);
     const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
     const [commissionType, setCommissionType] = useState<'fixed' | 'percentage'>('fixed');
     const [commissionValue, setCommissionValue] = useState('');
     const [commissionBaseAmount, setCommissionBaseAmount] = useState('');
+    const [commissionReceivedAmount, setCommissionReceivedAmount] = useState('');
     const [status, setStatus] = useState(filters.status);
     const [tutorId, setTutorId] = useState(filters.tutor_id ?? '');
+    const [university, setUniversity] = useState(filters.university ?? '');
     const [tuition_code, setTuitionCode] = useState(filters.tuition_code ?? '');
 
     useEffect(() => {
@@ -77,6 +79,7 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                 {
                     status: status || undefined,
                     tutor_id: tutorId || undefined,
+                    university: university || undefined,
                     tuition_code: tuition_code || undefined,
                 },
                 { preserveState: true, replace: true }
@@ -84,21 +87,43 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
         }, 300);
 
         return () => clearTimeout(timeout);
-    }, [status, tutorId, tuition_code]);
+    }, [status, tutorId, university, tuition_code]);
 
-    const updateContactStatus = (applicationId: number, nextStatus: Application['admin_contact_status']) => {
+    const updateApplicationStatus = (
+        applicationId: number,
+        nextStatus: 'shortlisted' | 'rejected' | 'interested' | 'not_interested',
+    ) => {
         router.patch(
             `/admin/applications/${applicationId}/contact-status`,
-            { admin_contact_status: nextStatus },
+            { status: nextStatus },
             { preserveScroll: true },
         );
     };
 
+    const getNextStatusOptions = (currentStatus: Application['status']): Application['status'][] => {
+        if (currentStatus === 'pending') {
+            return ['pending', 'shortlisted', 'rejected'];
+        }
+        if (currentStatus === 'shortlisted') {
+            return ['shortlisted', 'interested', 'not_interested'];
+        }
+        if (currentStatus === 'interested') {
+            return ['interested', 'hired'];
+        }
+
+        return [currentStatus];
+    };
+
     const openHireModal = (application: Application) => {
+        const fallbackBaseAmount =
+            application.expected_salary
+            ?? (application.post?.salary_type === 'fixed' ? application.post.salary_min : null);
+
         setSelectedApplication(application);
         setCommissionType('fixed');
         setCommissionValue('');
-        setCommissionBaseAmount(application.expected_salary ? String(application.expected_salary) : '');
+        setCommissionBaseAmount(fallbackBaseAmount ? String(fallbackBaseAmount) : '');
+        setCommissionReceivedAmount('');
         setIsHireModalOpen(true);
     };
 
@@ -144,36 +169,28 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
         return Math.round((base * value) / 100);
     }, [commissionBaseAmount, commissionType, commissionValue]);
 
-    const statusBadgeClass = (status: Application['status']) => {
+    const statusSelectToneClass = (status: Application['status']) => {
         if (status === 'hired') {
-return 'bg-green-100 text-green-800 border-green-200';
+            return 'border-green-200 text-green-700';
 }
 
         if (status === 'shortlisted') {
-return 'bg-blue-100 text-blue-800 border-blue-200';
+            return 'border-blue-200 text-blue-700';
+}
+
+        if (status === 'interested') {
+            return 'border-emerald-200 text-emerald-700';
+}
+
+        if (status === 'not_interested') {
+            return 'border-rose-200 text-rose-700';
 }
 
         if (status === 'rejected') {
-return 'bg-red-100 text-red-800 border-red-200';
+            return 'border-red-200 text-red-700';
 }
 
-        return 'bg-amber-100 text-amber-800 border-amber-200';
-    };
-
-    const commissionStatusBadgeClass = (commissionStatus: Application['commission_payment_status']) => {
-        if (commissionStatus === 'paid') {
-            return 'bg-green-100 text-green-800 border-green-200';
-        }
-
-        if (commissionStatus === 'partial') {
-            return 'bg-blue-100 text-blue-800 border-blue-200';
-        }
-
-        if (commissionStatus === 'unpaid') {
-            return 'bg-amber-100 text-amber-800 border-amber-200';
-        }
-
-        return 'bg-muted text-muted-foreground border-border';
+        return 'border-amber-200 text-amber-700';
     };
 
     const confirmHire = () => {
@@ -189,10 +206,18 @@ return 'bg-red-100 text-red-800 border-red-200';
             return;
         }
 
-        const payload: { commission_type: 'fixed' | 'percentage'; commission_value: number; commission_base_amount?: number } = {
+        const payload: { commission_type: 'fixed' | 'percentage'; commission_value: number; commission_base_amount?: number; commission_received_amount: number } = {
             commission_type: commissionType,
             commission_value: value,
+            commission_received_amount: 0,
         };
+        const received = Number(commissionReceivedAmount);
+
+        if (Number.isNaN(received) || received <= 0) {
+            alert('Enter a valid received commission amount.');
+
+            return;
+        }
 
         if (commissionType === 'percentage') {
             const base = Number(commissionBaseAmount);
@@ -205,6 +230,15 @@ return 'bg-red-100 text-red-800 border-red-200';
 
             payload.commission_base_amount = Math.round(base);
         }
+
+        const estimatedAmount = derivedCommissionAmount;
+
+        if (estimatedAmount !== null && received > estimatedAmount) {
+            alert('Received amount cannot exceed estimated commission.');
+
+            return;
+        }
+        payload.commission_received_amount = Math.round(received);
 
         router.patch(`/admin/applications/${selectedApplication.id}/hire`, payload, {
             preserveScroll: true,
@@ -222,7 +256,7 @@ return 'bg-red-100 text-red-800 border-red-200';
                     <p className="text-sm text-muted-foreground">All tutor applications across the platform.</p>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-4">
                     <div>
                         <label htmlFor="status" className="mb-2 block text-sm font-medium">
                             Filter by status
@@ -247,6 +281,7 @@ return 'bg-red-100 text-red-800 border-red-200';
                             Filter by tutor
                         </label>
                         <Select
+                            instanceId="admin-applications-tutor-filter"
                             inputId="tutor_id"
                             value={
                                 tutorId
@@ -282,47 +317,54 @@ return 'bg-red-100 text-red-800 border-red-200';
                             onChange={(event) => setTuitionCode(event.target.value)}
                         />
                     </div>
+
+                    <div>
+                        <label htmlFor="university" className="mb-2 block text-sm font-medium">
+                            Filter by university
+                        </label>
+                        <select
+                            id="university"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            value={university}
+                            onChange={(event) => setUniversity(event.target.value)}
+                        >
+                            <option value="">All universities</option>
+                            {universities.map((item) => (
+                                <option key={item} value={item}>
+                                    {item}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="w-full text-sm">
                         <thead className="bg-muted/40">
                             <tr>
-                                <th className="px-4 py-3 text-left">Post</th>
                                 <th className="px-4 py-3 text-left">Tuition ID</th>
                                 <th className="px-4 py-3 text-left">Tutor</th>
+                                <th className="px-4 py-3 text-left">Tutor Phone</th>
+                                <th className="px-4 py-3 text-left">University</th>
                                 <th className="px-4 py-3 text-left">Guardian</th>
-                                <th className="px-4 py-3 text-left">Status</th>
+                                <th className="px-4 py-3 text-left">Guardian Phone</th>
                                 <th className="px-4 py-3 text-left">Contact</th>
                                 <th className="px-4 py-3 text-left">Expected Salary</th>
-                                <th className="px-4 py-3 text-left">Commission</th>
-                                <th className="px-4 py-3 text-left">Commission Status</th>
                                 <th className="px-4 py-3 text-left">Applied</th>
-                                <th className="px-4 py-3 text-left">Actions</th>
+                                <th className="px-4 py-3 text-left">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             {applications.length === 0 && (
                                 <tr>
-                                    <td className="px-4 py-6 text-muted-foreground" colSpan={11}>
+                                    <td className="px-4 py-6 text-muted-foreground" colSpan={10}>
                                         No applications found.
                                     </td>
                                 </tr>
                             )}
                             {applications.map((application) => {
-                                const contactStatus = application.admin_contact_status ?? 'new';
-
                                 return (
                                 <tr key={application.id} className="border-t">
-                                    <td className="px-4 py-3">
-                                        {application.post ? (
-                                            <Link href={`/tuition-posts/${application.post.id}`} className="font-medium hover:underline">
-                                                {application.post.title ?? `Tuition Post #${application.post.id}`}
-                                            </Link>
-                                        ) : (
-                                            '-'
-                                        )}
-                                    </td>
                                     <td className="px-4 py-3 font-mono text-xs">{application.post?.tuition_code ?? '-'}</td>
                                     <td className="px-4 py-3">
                                         {application.tutor ? (
@@ -334,6 +376,8 @@ return 'bg-red-100 text-red-800 border-red-200';
                                             '-'
                                         )}
                                     </td>
+                                    <td className="px-4 py-3">{application.tutor?.phone ?? '-'}</td>
+                                    <td className="px-4 py-3">{application.tutor?.university ?? '-'}</td>
                                     <td className="px-4 py-3">
                                         {application.guardian ? (
                                             <div>
@@ -344,62 +388,65 @@ return 'bg-red-100 text-red-800 border-red-200';
                                             '-'
                                         )}
                                     </td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant="outline" className={statusBadgeClass(application.status)}>
-                                            {application.status}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-4 py-3 capitalize">{contactStatus.replace('_', ' ')}</td>
-                                    <td className="px-4 py-3">
-                                        {application.expected_salary ? `BDT ${application.expected_salary}` : '-'}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {application.commission_amount
-                                            ? `BDT ${application.commission_amount}`
+                                    <td className="px-4 py-3">{application.guardian?.phone ?? '-'}</td>
+                                    <td className="px-4 py-3 capitalize">
+                                        {['interested', 'not_interested'].includes(application.status)
+                                            ? application.status.replace('_', ' ')
                                             : '-'}
                                     </td>
                                     <td className="px-4 py-3">
-                                        <Badge variant="outline" className={commissionStatusBadgeClass(application.commission_payment_status)}>
-                                            {application.commission_payment_status ?? '-'}
-                                        </Badge>
+                                        {application.expected_salary ? `BDT ${application.expected_salary}` : '-'}
                                     </td>
                                     <td className="px-4 py-3">{formatDate(application.created_at)}</td>
                                     <td className="px-4 py-3">
-                                        {application.status === 'hired' ? (
-                                            <span className="text-xs text-green-700">Hired</span>
-                                        ) : (
-                                            <div className="flex flex-wrap gap-2">
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => updateContactStatus(application.id, 'contacted')}
-                                                >
-                                                    Contacted
-                                                </Button>
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => updateContactStatus(application.id, 'interested')}
-                                                >
-                                                    Interested
-                                                </Button>
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => updateContactStatus(application.id, 'not_interested')}
-                                                >
-                                                    Not Interested
-                                                </Button>
-                                                {application.status === 'shortlisted' && contactStatus === 'interested' && (
-                                                    <Button type="button" size="sm" onClick={() => openHireModal(application)}>
-                                                        Hire
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        )}
+                                        <div className="flex items-center gap-2">
+                                            <select
+                                                className={`h-9 min-w-[150px] rounded-md border bg-white px-3 text-sm font-medium capitalize shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 ${statusSelectToneClass(application.status)}`}
+                                                value={application.status}
+                                                onChange={(event) => {
+                                                    const nextStatus = event.target.value as Application['status'];
+
+                                                    if (nextStatus === application.status) {
+                                                        return;
+                                                    }
+
+                                                    if (nextStatus === 'hired' && application.status === 'interested') {
+                                                        openHireModal(application);
+
+                                                        return;
+                                                    }
+
+                                                    if (
+                                                        nextStatus === 'shortlisted' ||
+                                                        nextStatus === 'rejected' ||
+                                                        nextStatus === 'interested' ||
+                                                        nextStatus === 'not_interested'
+                                                    ) {
+                                                        updateApplicationStatus(application.id, nextStatus);
+                                                    }
+                                                }}
+                                            >
+                                                {getNextStatusOptions(application.status).map((option) => (
+                                                    <option key={option} value={option}>
+                                                        {option.replace('_', ' ')}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {application.status === 'hired' && (
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Link
+                                                            href={`/admin/commissions?search=${encodeURIComponent(application.post?.tuition_code ?? String(application.id))}`}
+                                                            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-green-200 text-green-700 transition-colors hover:bg-green-50"
+                                                            aria-label="Manage commission"
+                                                        >
+                                                            <CircleDollarSign className="h-4 w-4" />
+                                                        </Link>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>Manage commission</TooltipContent>
+                                                </Tooltip>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                                 );
@@ -460,6 +507,20 @@ return 'bg-red-100 text-red-800 border-red-200';
                                 />
                             </div>
                         )}
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Received Commission Amount (BDT)</label>
+                            <Input
+                                type="number"
+                                min={1}
+                                step="1"
+                                value={commissionReceivedAmount}
+                                onChange={(event) => setCommissionReceivedAmount(event.target.value)}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Enter partial or full received amount now. Hire will set payment status to partial or paid.
+                            </p>
+                        </div>
 
                         <div className="rounded-md border bg-muted/30 p-3">
                             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

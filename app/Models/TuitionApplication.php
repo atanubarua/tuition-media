@@ -14,7 +14,6 @@ class TuitionApplication extends Model
         'cover_note',
         'expected_salary',
         'status',
-        'admin_contact_status',
         'admin_note',
         'hired_by',
         'hired_at',
@@ -24,6 +23,7 @@ class TuitionApplication extends Model
         'commission_received_amount',
         'commission_payment_status',
         'commission_paid_at',
+        'commission_due_date',
     ];
 
     protected function casts(): array
@@ -32,6 +32,7 @@ class TuitionApplication extends Model
             'hired_at' => 'datetime',
             'commission_value' => 'decimal:2',
             'commission_paid_at' => 'datetime',
+            'commission_due_date' => 'date',
         ];
     }
 

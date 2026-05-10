@@ -1,11 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Post = {
     id: number;
     tuition_code: string | null;
-    title: string | null;
     status: string;
     salary_type: string;
     salary_min: number | null;
@@ -19,22 +19,25 @@ type Post = {
         rejected: number;
         hired: number;
     };
-    guardian: { id: number; name: string; email: string } | null;
+    guardian: { id: number; name: string; email: string; phone?: string | null } | null;
     created_at: string;
 };
 
 type Props = {
-    posts: Post[];
-    filters: { status: string };
+    posts: {
+        data: Post[];
+        links: { url: string | null; label: string; active: boolean }[];
+    };
+    filters: { status: string; tuition_code: string; guardian_name: string };
     statuses: string[];
 };
 
 const STATUS_STYLES: Record<string, string> = {
     draft: 'bg-slate-100 text-slate-700',
-    published: 'bg-emerald-100 text-emerald-700',
+    published: 'bg-sky-100 text-sky-700',
     shortlisted: 'bg-sky-100 text-sky-700',
     assigned: 'bg-amber-100 text-amber-700',
-    completed: 'bg-indigo-100 text-indigo-700',
+    completed: 'bg-emerald-100 text-emerald-700',
     closed: 'bg-zinc-200 text-zinc-700',
     cancelled: 'bg-rose-100 text-rose-700',
 };
@@ -42,18 +45,24 @@ const STATUS_STYLES: Record<string, string> = {
 export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Props) {
     const formatDate = (value: string) => new Date(value).toISOString().slice(0, 10);
     const [status, setStatus] = useState(filters.status);
+    const [tuitionCode, setTuitionCode] = useState(filters.tuition_code);
+    const [guardianName, setGuardianName] = useState(filters.guardian_name);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
             router.get(
                 '/admin/tuition-posts',
-                { status: status || undefined },
+                {
+                    status: status || undefined,
+                    tuition_code: tuitionCode || undefined,
+                    guardian_name: guardianName || undefined,
+                },
                 { preserveState: true, replace: true }
             );
         }, 300);
 
         return () => clearTimeout(timeout);
-    }, [status]);
+    }, [status, tuitionCode, guardianName]);
 
     return (
         <>
@@ -65,31 +74,56 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
                     <p className="text-sm text-muted-foreground">All tuition posts across the platform.</p>
                 </div>
 
-                <div className="max-w-xs">
-                    <label htmlFor="status" className="mb-2 block text-sm font-medium">
-                        Filter by status
-                    </label>
-                    <Input
-                        id="status"
-                        list="tuition-post-statuses"
-                        placeholder="All statuses"
-                        value={status}
-                        onChange={(event) => setStatus(event.target.value)}
-                    />
-                    <datalist id="tuition-post-statuses">
-                        {statuses.map((status) => (
-                            <option key={status} value={status} />
-                        ))}
-                    </datalist>
+                <div className="grid gap-4 md:grid-cols-3">
+                    <div>
+                        <label htmlFor="tuition_code" className="mb-2 block text-sm font-medium">
+                            Filter by tuition code
+                        </label>
+                        <Input
+                            id="tuition_code"
+                            value={tuitionCode}
+                            onChange={(event) => setTuitionCode(event.target.value)}
+                            placeholder="e.g. TIDABC1234"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="guardian_name" className="mb-2 block text-sm font-medium">
+                            Filter by guardian name
+                        </label>
+                        <Input
+                            id="guardian_name"
+                            value={guardianName}
+                            onChange={(event) => setGuardianName(event.target.value)}
+                            placeholder="e.g. Rahim"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="status" className="mb-2 block text-sm font-medium">
+                            Filter by status
+                        </label>
+                        <Select value={status || 'all'} onValueChange={(value) => setStatus(value === 'all' ? '' : value)}>
+                            <SelectTrigger id="status" className="w-full">
+                                <SelectValue placeholder="All statuses" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All statuses</SelectItem>
+                                {statuses.map((itemStatus) => (
+                                    <SelectItem key={itemStatus} value={itemStatus}>
+                                        {itemStatus}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="w-full text-sm">
                         <thead className="bg-muted/40">
                             <tr>
-                                <th className="px-4 py-3 text-left">Title</th>
                                 <th className="px-4 py-3 text-left">Tuition ID</th>
                                 <th className="px-4 py-3 text-left">Guardian</th>
+                                <th className="px-4 py-3 text-left">Guardian Phone</th>
                                 <th className="px-4 py-3 text-left">Status</th>
                                 <th className="px-4 py-3 text-left">Salary</th>
                                 <th className="px-4 py-3 text-left">Students</th>
@@ -98,21 +132,20 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
                             </tr>
                         </thead>
                         <tbody>
-                            {posts.length === 0 && (
+                            {posts.data.length === 0 && (
                                 <tr>
                                     <td className="px-4 py-6 text-muted-foreground" colSpan={8}>
                                         No posts found.
                                     </td>
                                 </tr>
                             )}
-                            {posts.map((post) => (
+                            {posts.data.map((post) => (
                                 <tr key={post.id} className="border-t">
-                                    <td className="px-4 py-3">
-                                        <Link href={`/tuition-posts/${post.id}`} className="font-medium hover:underline">
-                                            {post.title || `Tuition Post #${post.id}`}
+                                    <td className="px-4 py-3 font-mono text-xs">
+                                        <Link href={`/admin/tuition-posts/${post.id}`} className="font-medium hover:underline">
+                                            {post.tuition_code ?? `#${post.id}`}
                                         </Link>
                                     </td>
-                                    <td className="px-4 py-3 font-mono text-xs">{post.tuition_code ?? '-'}</td>
                                     <td className="px-4 py-3">
                                         {post.guardian ? (
                                             <div>
@@ -129,6 +162,7 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
                                             '-'
                                         )}
                                     </td>
+                                    <td className="px-4 py-3">{post.guardian?.phone ?? '-'}</td>
                                     <td className="px-4 py-3">
                                         <span
                                             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-700'}`}
@@ -155,6 +189,21 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
                         </tbody>
                     </table>
                 </div>
+
+                {posts.links.length > 3 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        {posts.links.map((link, index) => (
+                            <Link
+                                key={`${link.label}-${index}`}
+                                href={link.url ?? '#'}
+                                preserveState
+                                preserveScroll
+                                className={`rounded border px-3 py-1 text-sm ${link.active ? 'bg-primary text-primary-foreground' : 'bg-background'} ${!link.url ? 'pointer-events-none opacity-50' : ''}`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
         </>
     );

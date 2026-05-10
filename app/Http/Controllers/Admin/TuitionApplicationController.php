@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CommissionPayment;
 use App\Models\Notification;
 use App\Models\TuitionApplication;
 use App\Models\User;
@@ -19,16 +20,21 @@ class TuitionApplicationController extends Controller
     {
         $status = $request->string('status')->toString();
         $tutorId = $request->integer('tutor_id');
+        $university = trim($request->string('university')->toString());
         $tuitionCode = strtoupper(str_replace('-', '', trim($request->string('tuition_code')->toString())));
 
         $applications = TuitionApplication::query()
             ->with([
-                'tutor:id,name,email',
-                'tuitionPost:id,tuition_code,title,guardian_id',
-                'tuitionPost.guardian:id,name,email',
+                'tutor:id,name,email,phone',
+                'tutor.tutorProfile.university:id,name',
+                'tuitionPost:id,tuition_code,title,guardian_id,salary_type,salary_min,salary_max',
+                'tuitionPost.guardian:id,name,email,phone',
             ])
             ->when($status !== '', fn ($query) => $query->where('status', $status))
             ->when($tutorId > 0, fn ($query) => $query->where('tutor_id', $tutorId))
+            ->when($university !== '', function ($query) use ($university): void {
+                $query->whereHas('tutor.tutorProfile.university', fn ($universityQuery) => $universityQuery->where('name', $university));
+            })
             ->when($tuitionCode !== '', function ($query) use ($tuitionCode) {
                 $query->whereHas('tuitionPost', function ($postQuery) use ($tuitionCode): void {
                     $postQuery->whereRaw('REPLACE(UPPER(tuition_code), "-", "") = ?', [$tuitionCode]);
@@ -39,7 +45,6 @@ class TuitionApplicationController extends Controller
             ->map(fn (TuitionApplication $application) => [
                 'id' => $application->id,
                 'status' => $application->status,
-                'admin_contact_status' => $application->admin_contact_status ?? 'new',
                 'admin_note' => $application->admin_note,
                 'hired_at' => $application->hired_at,
                 'commission_type' => $application->commission_type,
@@ -54,6 +59,8 @@ class TuitionApplicationController extends Controller
                     'id' => $application->tutor->id,
                     'name' => $application->tutor->name,
                     'email' => $application->tutor->email,
+                    'phone' => $application->tutor->phone,
+                    'university' => $application->tutor->tutorProfile?->university?->name,
                 ] : null,
                 'post' => $application->tuitionPost ? [
                     'id' => $application->tuitionPost->id,
@@ -67,6 +74,7 @@ class TuitionApplicationController extends Controller
                     'id' => $application->tuitionPost->guardian->id,
                     'name' => $application->tuitionPost->guardian->name,
                     'email' => $application->tuitionPost->guardian->email,
+                    'phone' => $application->tuitionPost->guardian->phone,
                 ] : null,
             ]);
 
@@ -75,10 +83,10 @@ class TuitionApplicationController extends Controller
             'filters' => [
                 'status' => $status,
                 'tutor_id' => $tutorId > 0 ? (string) $tutorId : '',
+                'university' => $university,
                 'tuition_code' => $tuitionCode !== '' ? $tuitionCode : '',
             ],
-            'statuses' => ['pending', 'shortlisted', 'rejected', 'hired'],
-            'contactStatuses' => ['new', 'contacted', 'interested', 'not_interested'],
+            'statuses' => ['pending', 'shortlisted', 'interested', 'not_interested', 'rejected', 'hired'],
             'tutors' => User::query()
                 ->where('role', 'tutor')
                 ->whereHas('tuitionApplications')
@@ -89,21 +97,93 @@ class TuitionApplicationController extends Controller
                     'name' => $tutor->name,
                     'email' => $tutor->email,
                 ]),
+            'universities' => TuitionApplication::query()
+                ->with('tutor.tutorProfile.university:id,name')
+                ->whereHas('tutor.tutorProfile.university')
+                ->get()
+                ->pluck('tutor.tutorProfile.university.name')
+                ->filter()
+                ->unique()
+                ->sort()
+                ->values(),
         ]);
     }
 
     public function updateContactStatus(Request $request, TuitionApplication $application): RedirectResponse
     {
         $validated = $request->validate([
-            'admin_contact_status' => ['required', Rule::in(['new', 'contacted', 'interested', 'not_interested'])],
+            'status' => ['required', Rule::in(['shortlisted', 'rejected', 'interested', 'not_interested'])],
             'admin_note' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $application->update($validated);
+        $allowedTransitions = [
+            'pending' => ['shortlisted', 'rejected'],
+            'shortlisted' => ['interested', 'not_interested'],
+        ];
+        $currentStatus = $application->status;
+        $nextStatus = $validated['status'];
+
+        if (! isset($allowedTransitions[$currentStatus]) || ! in_array($nextStatus, $allowedTransitions[$currentStatus], true)) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Invalid status transition.',
+            ]);
+        }
+
+        $application->update([
+            'status' => $nextStatus,
+            'admin_note' => $validated['admin_note'] ?? $application->admin_note,
+        ]);
 
         return back()->with('toast', [
             'type' => 'success',
-            'message' => 'Contact status updated.',
+            'message' => 'Application status updated.',
+        ]);
+    }
+
+    public function updateCommissionPaymentStatus(Request $request, TuitionApplication $application): RedirectResponse
+    {
+        $validated = $request->validate([
+            'commission_payment_status' => ['required', Rule::in(['unpaid', 'partial', 'paid'])],
+        ]);
+
+        if ($application->status !== 'hired') {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Only hired applications can update commission payment status.',
+            ]);
+        }
+
+        $total = max(0, (int) ($application->commission_amount ?? 0));
+        $currentReceived = max(0, (int) ($application->commission_received_amount ?? 0));
+        $nextPaymentStatus = $validated['commission_payment_status'];
+        $nextReceivedAmount = $currentReceived;
+
+        if ($nextPaymentStatus === 'unpaid') {
+            $nextReceivedAmount = 0;
+        } elseif ($nextPaymentStatus === 'paid') {
+            $nextReceivedAmount = $total;
+        } elseif ($nextPaymentStatus === 'partial') {
+            if ($total <= 1) {
+                $nextReceivedAmount = $total;
+            } elseif ($currentReceived <= 0 || $currentReceived >= $total) {
+                $nextReceivedAmount = max(1, (int) floor($total / 2));
+            }
+        }
+
+        $application->update([
+            'commission_payment_status' => $nextPaymentStatus,
+            'commission_received_amount' => $nextReceivedAmount,
+            'commission_paid_at' => $nextPaymentStatus === 'paid' ? now() : null,
+            'commission_due_date' => null,
+        ]);
+        $application->tuitionPost?->update([
+            'status' => $nextPaymentStatus === 'paid' ? 'completed' : 'assigned',
+        ]);
+
+        return back()->with('toast', [
+            'type' => 'success',
+            'message' => 'Commission payment status updated.',
         ]);
     }
 
@@ -113,19 +193,13 @@ class TuitionApplicationController extends Controller
             'commission_type' => ['required', Rule::in(['fixed', 'percentage'])],
             'commission_value' => ['required', 'numeric', 'min:0.01'],
             'commission_base_amount' => ['nullable', 'integer', 'min:1'],
+            'commission_received_amount' => ['required', 'integer', 'min:1'],
         ]);
 
-        if ($application->status !== 'shortlisted') {
+        if ($application->status !== 'interested') {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Only shortlisted applications can be hired.',
-            ]);
-        }
-
-        if ($application->admin_contact_status !== 'interested') {
-            return back()->with('toast', [
-                'type' => 'error',
-                'message' => 'Set contact status to interested before hiring.',
+                'message' => 'Only interested applications can be hired.',
             ]);
         }
 
@@ -153,6 +227,12 @@ class TuitionApplicationController extends Controller
                 $commissionAmount = (int) round(($baseAmount * $commissionValue) / 100);
             }
 
+            $receivedAmount = (int) $validated['commission_received_amount'];
+
+            if ($receivedAmount > $commissionAmount) {
+                abort(422, 'Received amount cannot exceed total commission.');
+            }
+
             $alreadyHired = TuitionApplication::where('tuition_post_id', $application->tuition_post_id)
                 ->where('status', 'hired')
                 ->where('id', '!=', $application->id)
@@ -167,13 +247,23 @@ class TuitionApplicationController extends Controller
                 'commission_type' => $validated['commission_type'],
                 'commission_value' => $validated['commission_value'],
                 'commission_amount' => $commissionAmount,
-                'commission_received_amount' => 0,
-                'commission_payment_status' => 'unpaid',
-                'commission_paid_at' => null,
+                'commission_received_amount' => $receivedAmount,
+                'commission_payment_status' => $receivedAmount >= $commissionAmount ? 'paid' : 'partial',
+                'commission_paid_at' => $receivedAmount >= $commissionAmount ? now() : null,
+                'commission_due_date' => null,
+            ]);
+
+            CommissionPayment::create([
+                'tuition_application_id' => $application->id,
+                'amount' => $receivedAmount,
+                'received_by' => $request->user()->id,
+                'note' => 'Initial payment recorded at hiring.',
+                'received_at' => now(),
+                'due_on' => null,
             ]);
 
             $application->tuitionPost?->update([
-                'status' => 'assigned',
+                'status' => $receivedAmount >= $commissionAmount ? 'completed' : 'assigned',
             ]);
 
             Notification::create([

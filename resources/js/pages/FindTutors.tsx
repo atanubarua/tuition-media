@@ -1,19 +1,10 @@
-import { Head, Link, usePage, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState, FormEvent } from 'react';
-import { dashboard, login, logout, register } from '@/routes';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import PublicNavbar from '@/components/public-navbar';
 import {
     BookOpen,
     MapPin,
     User,
-    ChevronDown,
-    LogOut,
-    LayoutDashboard,
     Search,
     GraduationCap,
     CheckCircle2,
@@ -23,7 +14,8 @@ import {
     Star,
     Building2,
     BookMarked,
-    CalendarDays
+    CalendarDays,
+    Loader2
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
@@ -97,7 +89,7 @@ function TutorCard({ tutor, onViewProfile }: { tutor: Tutor; onViewProfile: (tut
 
     return (
         <div
-            className="group flex cursor-pointer flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-md"
+            className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
             onClick={() => onViewProfile(tutor)}
             onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -108,18 +100,18 @@ function TutorCard({ tutor, onViewProfile }: { tutor: Tutor; onViewProfile: (tut
             role="button"
             tabIndex={0}
         >
-            <div className="flex gap-4">
-                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 shadow-sm relative">
+            <div className="flex gap-3">
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 shadow-sm relative">
                     {profile.profile_photo ? (
                         <img src={`/storage/${profile.profile_photo}`} alt={tutor.name} className="h-full w-full object-cover" />
                     ) : (
-                        <span className="text-xl font-bold text-slate-400">{initials}</span>
+                        <span className="text-lg font-bold text-slate-400">{initials}</span>
                     )}
                 </div>
                 
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-slate-900 truncate text-lg group-hover:text-blue-700 transition-colors">
+                        <h3 className="font-bold text-slate-900 truncate text-base group-hover:text-blue-700 transition-colors">
                             {tutor.name}
                         </h3>
                         {profile.is_verified && (
@@ -128,21 +120,21 @@ function TutorCard({ tutor, onViewProfile }: { tutor: Tutor; onViewProfile: (tut
                     </div>
                     
                     {profile.university ? (
-                        <p className="text-sm font-medium text-slate-600 mt-0.5">
+                        <p className="mt-0.5 text-sm font-medium text-slate-600">
                             {profile.university.name}
                         </p>
                     ) : (
-                        <p className="text-sm text-slate-500 mt-0.5 capitalize">{tutor.gender} Tutor</p>
+                        <p className="mt-0.5 text-sm text-slate-500 capitalize">{tutor.gender} Tutor</p>
                     )}
                     
                     {profile.department && (
-                        <p className="text-xs text-slate-500 truncate mt-0.5">{profile.department}</p>
+                        <p className="mt-0.5 truncate text-xs text-slate-500">{profile.department}</p>
                     )}
                 </div>
             </div>
 
             {/* Subjects Tags */}
-            <div className="flex flex-wrap gap-1.5 mt-2">
+            <div className="mt-1 flex flex-wrap gap-1.5">
                 {subjects.slice(0, 3).map((s) => (
                     <span key={s} className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 border border-blue-100">
                         {s}
@@ -155,10 +147,10 @@ function TutorCard({ tutor, onViewProfile }: { tutor: Tutor; onViewProfile: (tut
                 )}
             </div>
 
-            <div className="mt-auto pt-4 border-t border-slate-100 flex flex-col gap-2 text-sm text-slate-500">
+            <div className="mt-auto flex flex-col gap-1.5 border-t border-slate-100 pt-3 text-sm text-slate-500">
                 <div className="flex items-start gap-2">
                     <MapPin className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
-                    <span className="line-clamp-2 leading-tight">
+                    <span className="line-clamp-1 leading-tight">
                         {locations.length > 0 ? locations.join(', ') : 'Any location'}
                     </span>
                 </div>
@@ -172,7 +164,7 @@ function TutorCard({ tutor, onViewProfile }: { tutor: Tutor; onViewProfile: (tut
             
             <button 
                 onClick={() => onViewProfile(tutor)}
-                className="mt-2 w-full rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 transition group-hover:border-blue-400 hover:border-blue-600 hover:text-blue-800"
+                className="mt-1.5 w-full rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition group-hover:border-blue-400 hover:border-blue-600 hover:text-blue-800"
             >
                 View Profile
             </button>
@@ -191,8 +183,6 @@ export default function FindTutors({
     universities: University[];
     canRegister?: boolean;
 }) {
-    const { auth } = usePage().props as any;
-    
     // Local state for the filter form
     const [location, setLocation] = useState(filters.location || '');
     const [subject, setSubject] = useState(filters.subject || '');
@@ -201,6 +191,7 @@ export default function FindTutors({
 
     // Modal state
     const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
+    const [isFiltering, setIsFiltering] = useState(false);
 
     const handleFilterSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -214,6 +205,9 @@ export default function FindTutors({
         router.get('/find-tutors', params, {
             preserveState: true,
             preserveScroll: true,
+            onStart: () => setIsFiltering(true),
+            onError: () => setIsFiltering(false),
+            onFinish: () => setIsFiltering(false),
         });
     };
 
@@ -228,74 +222,16 @@ export default function FindTutors({
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-blue-200 selection:text-blue-900 flex flex-col">
             <Head title="Find Tutors – Tuition Media" />
-
-            {/* Navbar */}
-            <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md transition-all">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
-                    <div className="flex items-center gap-10">
-                        <Link href="/" className="flex items-center gap-2 text-2xl font-bold tracking-tight text-blue-900">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-                                <BookOpen className="h-5 w-5" />
-                            </div>
-                            Tuition<span className="text-amber-500">Media</span>
-                        </Link>
-                        
-                        <div className="hidden md:flex items-center gap-6">
-                            <Link href="/find-tutors" className="text-sm font-bold text-blue-700 transition">
-                                Find Tutors
-                            </Link>
-                            <Link href="/tuition-jobs" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition">
-                                Tuition Jobs
-                            </Link>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        {auth.user ? (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <button
-                                        type="button"
-                                        aria-label="Open user menu"
-                                        className="inline-flex h-10 items-center gap-1.5 rounded-full border border-blue-300 bg-white px-2.5 text-blue-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50"
-                                    >
-                                        <User className="h-4 w-4" />
-                                        <span className="hidden max-w-28 truncate text-sm font-semibold sm:inline">
-                                            {auth.user.name}
-                                        </span>
-                                        <ChevronDown className="h-4 w-4" />
-                                    </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44">
-                                    <DropdownMenuItem asChild>
-                                        <Link href={dashboard.url()} className="w-full cursor-pointer">
-                                            <LayoutDashboard className="h-4 w-4" />
-                                            Dashboard
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                        <Link href={logout()} as="button" className="w-full cursor-pointer">
-                                            <LogOut className="h-4 w-4" />
-                                            Log out
-                                        </Link>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        ) : (
-                            <>
-                                <Link href={login()} className="text-sm font-semibold text-slate-600 transition hover:text-blue-600">
-                                    Log in
-                                </Link>
-                                {canRegister && (
-                                    <Link href={register()} className="hidden sm:inline-flex rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-                                        Register Free
-                                    </Link>
-                                )}
-                            </>
-                        )}
+            {isFiltering && (
+                <div className="fixed inset-0 z-[90] flex items-center justify-center bg-white/75 backdrop-blur-sm">
+                    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-lg">
+                        <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                        <p className="text-sm font-semibold text-slate-700">Applying filters...</p>
                     </div>
                 </div>
-            </nav>
+            )}
+
+            <PublicNavbar canRegister={canRegister} active="find-tutors" />
 
             {/* Page Header */}
             <div className="bg-white border-b border-slate-200 pt-12 pb-12">
@@ -387,9 +323,10 @@ export default function FindTutors({
                             <div className="pt-2 flex flex-col gap-3">
                                 <button
                                     type="submit"
-                                    className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 shadow-sm"
+                                    disabled={isFiltering}
+                                    className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 shadow-sm disabled:cursor-not-allowed disabled:opacity-70"
                                 >
-                                    Apply Filters
+                                    {isFiltering ? 'Applying Filters...' : 'Apply Filters'}
                                 </button>
                                 
                                 {(filters.location || filters.subject || filters.university || filters.gender !== 'any') && (
@@ -452,7 +389,7 @@ export default function FindTutors({
                             </button>
                         </div>
                     ) : (
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-6">
                             {tutors.data.map((tutor) => (
                                 <TutorCard key={tutor.id} tutor={tutor} onViewProfile={setSelectedTutor} />
                             ))}

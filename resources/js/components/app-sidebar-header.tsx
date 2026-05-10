@@ -16,8 +16,8 @@ export function AppSidebarHeader({
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
             <div className="ml-auto flex items-center gap-2">
-                <NotificationsMenu />
                 <HeaderUserMenu />
+                <NotificationsMenu />
             </div>
         </header>
     );
