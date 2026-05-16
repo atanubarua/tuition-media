@@ -19,7 +19,7 @@ class TuitionJobController extends Controller
         $maxDays = $request->integer('max_days');
 
         $posts = TuitionPost::query()
-            ->where('status', 'published')
+            ->whereIn('status', ['published', 'shortlisted'])
             ->with([
                 'students.subjects:id,name',
                 'guardian:id,name',

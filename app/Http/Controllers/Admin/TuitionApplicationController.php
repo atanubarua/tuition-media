@@ -131,6 +131,46 @@ class TuitionApplicationController extends Controller
             'admin_note' => $validated['admin_note'] ?? $application->admin_note,
         ]);
 
+        // Notify guardian about application status change
+        $tuitionPost = $application->tuitionPost;
+        if ($tuitionPost && in_array($nextStatus, ['interested', 'not_interested'], true)) {
+            $statusMessages = [
+                'interested' => 'A shortlisted tutor is interested in your tuition post',
+                'not_interested' => 'A shortlisted tutor is not interested in your tuition post',
+            ];
+
+            Notification::create([
+                'user_id' => $tuitionPost->guardian_id,
+                'type' => $nextStatus,
+                'title' => $statusMessages[$nextStatus],
+                'message' => 'Tutor: ' . $application->tutor->name . ' for "' . ($tuitionPost->title ?? 'your tuition post') . '".',
+                'link' => '/guardian/tuition-posts/' . $tuitionPost->id . '/applications',
+            ]);
+        }
+
+        // Update tuition post status based on application statuses
+        if ($tuitionPost && $tuitionPost->status === 'published') {
+            // Only change from 'published' to 'shortlisted' when applications are being processed
+            $hasActiveApplications = TuitionApplication::where('tuition_post_id', $tuitionPost->id)
+                ->whereIn('status', ['shortlisted', 'interested', 'not_interested'])
+                ->exists();
+
+            if ($hasActiveApplications) {
+                $tuitionPost->update(['status' => 'shortlisted']);
+            }
+        }
+
+        // Revert post to 'published' if all shortlisted candidates are rejected or not interested
+        if ($tuitionPost && $tuitionPost->status === 'shortlisted') {
+            $hasViableCandidates = TuitionApplication::where('tuition_post_id', $tuitionPost->id)
+                ->whereIn('status', ['shortlisted', 'interested'])
+                ->exists();
+
+            if (!$hasViableCandidates) {
+                $tuitionPost->update(['status' => 'published']);
+            }
+        }
+
         return back()->with('toast', [
             'type' => 'success',
             'message' => 'Application status updated.',
@@ -190,6 +230,7 @@ class TuitionApplicationController extends Controller
             'commission_value' => ['required', 'numeric', 'min:0.01'],
             'commission_base_amount' => ['nullable', 'integer', 'min:1'],
             'commission_received_amount' => ['required', 'integer', 'min:1'],
+            'commission_due_date' => ['nullable', 'date', 'after:today'],
         ]);
 
         if ($application->status !== 'interested') {
@@ -246,7 +287,7 @@ class TuitionApplicationController extends Controller
                 'commission_received_amount' => $receivedAmount,
                 'commission_payment_status' => $receivedAmount >= $commissionAmount ? 'paid' : 'partial',
                 'commission_paid_at' => $receivedAmount >= $commissionAmount ? now() : null,
-                'commission_due_date' => null,
+                'commission_due_date' => $receivedAmount >= $commissionAmount ? null : ($validated['commission_due_date'] ?? null),
             ]);
 
             CommissionPayment::create([
@@ -262,6 +303,28 @@ class TuitionApplicationController extends Controller
                 'status' => $receivedAmount >= $commissionAmount ? 'completed' : 'assigned',
             ]);
 
+            // Auto-reject all other applications for this tuition post
+            TuitionApplication::where('tuition_post_id', $application->tuition_post_id)
+                ->where('id', '!=', $application->id)
+                ->whereIn('status', ['pending', 'shortlisted', 'interested', 'not_interested'])
+                ->update(['status' => 'rejected']);
+
+            // Notify rejected applicants
+            $rejectedApplications = TuitionApplication::where('tuition_post_id', $application->tuition_post_id)
+                ->where('id', '!=', $application->id)
+                ->where('status', 'rejected')
+                ->get();
+
+            foreach ($rejectedApplications as $rejectedApp) {
+                Notification::create([
+                    'user_id' => $rejectedApp->tutor_id,
+                    'type' => 'rejected',
+                    'title' => 'Position has been filled',
+                    'message' => 'The tuition post "' . ($application->tuitionPost?->title ?? 'a tuition post') . '" has been filled by another tutor.',
+                    'link' => '/tutor/applications',
+                ]);
+            }
+
             Notification::create([
                 'user_id' => $application->tutor_id,
                 'type' => 'hired',
@@ -269,6 +332,17 @@ class TuitionApplicationController extends Controller
                 'message' => 'You were marked hired for "' . ($application->tuitionPost?->title ?? 'a tuition post') . '".',
                 'link' => '/tutor/applications',
             ]);
+
+            // Notify guardian about hiring
+            if ($application->tuitionPost) {
+                Notification::create([
+                    'user_id' => $application->tuitionPost->guardian_id,
+                    'type' => 'hired',
+                    'title' => 'A tutor has been hired for your post',
+                    'message' => 'Tutor: ' . $application->tutor->name . ' has been hired for "' . ($application->tuitionPost->title ?? 'your tuition post') . '".',
+                    'link' => '/guardian/tuition-posts/' . $application->tuitionPost->id . '/applications',
+                ]);
+            }
         });
 
         return back()->with('toast', [

@@ -228,7 +228,7 @@ export default function TuitionJobsPage({
                                 <div className="inline-flex overflow-hidden rounded-xl border border-slate-200 bg-white">
                                     {posts.links.map((link, i) => (
                                         link.url ? (
-                                            <Link key={i} href={link.url} className={`px-4 py-2 text-sm ${link.active ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-50'}`} dangerouslySetInnerHTML={{ __html: link.label }} />
+                                            <button key={i} onClick={() => { setIsFiltering(true); router.visit(link.url!, { preserveState: true, onFinish: () => setIsFiltering(false) }); }} className={`px-4 py-2 text-sm cursor-pointer ${link.active ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-50'}`} dangerouslySetInnerHTML={{ __html: link.label }} />
                                         ) : (
                                             <span key={i} className="px-4 py-2 text-sm text-slate-400" dangerouslySetInnerHTML={{ __html: link.label }} />
                                         )

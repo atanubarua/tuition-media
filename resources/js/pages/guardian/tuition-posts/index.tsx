@@ -36,6 +36,16 @@ const STATUS_STYLES: Record<string, string> = {
     cancelled: 'bg-rose-100 text-rose-700 border-rose-200',
 };
 
+const STATUS_DESCRIPTIONS: Record<string, string> = {
+    draft: 'Not yet published',
+    published: 'Visible to tutors, accepting applications',
+    shortlisted: 'Admin is reviewing your shortlisted candidates',
+    assigned: 'A tutor has been hired',
+    completed: 'Commission fully paid, job completed',
+    closed: 'Post closed manually',
+    cancelled: 'Post cancelled',
+};
+
 export default function TuitionPostIndex({ posts, filters, statuses }: Props) {
     const [tuitionCode, setTuitionCode] = useState(filters.tuition_code ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
@@ -170,9 +180,18 @@ export default function TuitionPostIndex({ posts, filters, statuses }: Props) {
                                     <td className="px-4 py-3 font-mono text-xs">{post.tuition_code ?? '-'}</td>
                                     <td className="px-4 py-3">{post.title || `Tuition Post #${post.id}`}</td>
                                     <td className="px-4 py-3">
-                                        <Badge variant="outline" className={`${STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-700 border-gray-200'} capitalize`}>
-                                            {post.status}
-                                        </Badge>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <div className="inline-block cursor-help">
+                                                    <Badge variant="outline" className={`${STATUS_STYLES[post.status] ?? 'bg-gray-100 text-gray-700 border-gray-200'} capitalize`}>
+                                                        {post.status}
+                                                    </Badge>
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                {STATUS_DESCRIPTIONS[post.status] ?? post.status}
+                                            </TooltipContent>
+                                        </Tooltip>
                                     </td>
                                     <td className="px-4 py-3">
                                         {post.salary_type === 'fixed' && post.salary_min ? `BDT ${post.salary_min}` : null}

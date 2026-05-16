@@ -12,7 +12,7 @@ class TuitionPostShowController extends Controller
 {
     public function __invoke(TuitionPost $tuitionPost): Response
     {
-        abort_unless($tuitionPost->status === 'published', 404);
+        abort_unless(in_array($tuitionPost->status, ['published', 'shortlisted'], true), 404);
 
         $tuitionPost->load([
             'students.subjects:id,name',

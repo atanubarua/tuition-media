@@ -37,7 +37,7 @@ type Props = {
 const STATUS_STYLES: Record<string, string> = {
     draft: 'bg-slate-100 text-slate-700',
     published: 'bg-sky-100 text-sky-700',
-    shortlisted: 'bg-sky-100 text-sky-700',
+    shortlisted: 'bg-violet-100 text-violet-700',
     assigned: 'bg-amber-100 text-amber-700',
     completed: 'bg-emerald-100 text-emerald-700',
     closed: 'bg-zinc-200 text-zinc-700',

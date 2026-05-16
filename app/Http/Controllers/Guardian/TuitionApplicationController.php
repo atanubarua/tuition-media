@@ -81,7 +81,7 @@ class TuitionApplicationController extends Controller
             ->values();
 
         return Inertia::render('guardian/tuition-posts/applications', [
-            'post' => ['id' => $tuitionPost->id, 'title' => $tuitionPost->title],
+            'post' => ['id' => $tuitionPost->id, 'title' => $tuitionPost->title, 'salary_type' => $tuitionPost->salary_type],
             'applications' => $applications,
             'filters' => [
                 'status' => $status,
@@ -99,12 +99,50 @@ class TuitionApplicationController extends Controller
         abort_unless($application->tuition_post_id === $tuitionPost->id, 403);
 
         $validated = $request->validate([
-            'status' => ['required', 'in:shortlisted,rejected'],
+            'status' => ['required', 'in:pending,shortlisted,rejected'],
         ]);
+
+        $currentStatus = $application->status;
+        $nextStatus = $validated['status'];
+
+        // Define allowed transitions for guardian
+        $allowedTransitions = [
+            'pending' => ['shortlisted', 'rejected'],
+            'shortlisted' => ['pending', 'rejected'], // Allow un-shortlisting back to pending
+        ];
+
+        // Check if transition is allowed
+        if (!isset($allowedTransitions[$currentStatus]) || !in_array($nextStatus, $allowedTransitions[$currentStatus], true)) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Invalid status change. You can only change applications that haven\'t been contacted by admin yet.',
+            ]);
+        }
 
         $application->update($validated);
 
+        // Update tuition post status based on shortlisted applications
+        $hasShortlisted = TuitionApplication::where('tuition_post_id', $tuitionPost->id)
+            ->whereIn('status', ['shortlisted', 'interested', 'not_interested'])
+            ->exists();
+
+        if ($hasShortlisted && $tuitionPost->status === 'published') {
+            $tuitionPost->update(['status' => 'shortlisted']);
+        }
+
+        // Revert post to 'published' if all shortlisted candidates are rejected or not interested
+        if ($tuitionPost->status === 'shortlisted') {
+            $hasViableCandidates = TuitionApplication::where('tuition_post_id', $tuitionPost->id)
+                ->whereIn('status', ['shortlisted', 'interested'])
+                ->exists();
+
+            if (!$hasViableCandidates) {
+                $tuitionPost->update(['status' => 'published']);
+            }
+        }
+
         $statusLabels = [
+            'pending' => 'Your shortlist status has been removed',
             'shortlisted' => 'You have been shortlisted',
             'rejected'    => 'Your application was not selected',
         ];

@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useMemo, useState, useEffect, useRef } from 'react';
 import AsyncSelect from 'react-select/async';
-import { CircleDollarSign, X } from 'lucide-react';
+import { CircleDollarSign, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -70,6 +70,8 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
     const [commissionValue, setCommissionValue] = useState('');
     const [commissionBaseAmount, setCommissionBaseAmount] = useState('');
     const [commissionReceivedAmount, setCommissionReceivedAmount] = useState('');
+    const [commissionDueDate, setCommissionDueDate] = useState('');
+    const [isHiring, setIsHiring] = useState(false);
     const [status, setStatus] = useState(filters.status);
     const [tutorId, setTutorId] = useState(filters.tutor_id ?? '');
     const [tutorOption, setTutorOption] = useState<{ value: string; label: string } | null>(
@@ -154,6 +156,8 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
         setCommissionValue('');
         setCommissionBaseAmount(fallbackBaseAmount ? String(fallbackBaseAmount) : '');
         setCommissionReceivedAmount('');
+        setCommissionDueDate('');
+        setIsHiring(false);
         setIsHireModalOpen(true);
     };
 
@@ -224,7 +228,7 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
     };
 
     const confirmHire = () => {
-        if (!selectedApplication) {
+        if (!selectedApplication || isHiring) {
             return;
         }
 
@@ -236,7 +240,7 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
             return;
         }
 
-        const payload: { commission_type: 'fixed' | 'percentage'; commission_value: number; commission_base_amount?: number; commission_received_amount: number } = {
+        const payload: { commission_type: 'fixed' | 'percentage'; commission_value: number; commission_base_amount?: number; commission_received_amount: number; commission_due_date?: string } = {
             commission_type: commissionType,
             commission_value: value,
             commission_received_amount: 0,
@@ -270,9 +274,23 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
         }
         payload.commission_received_amount = Math.round(received);
 
+        // Add due date if payment is partial
+        if (estimatedAmount !== null && received < estimatedAmount) {
+            if (commissionDueDate) {
+                payload.commission_due_date = commissionDueDate;
+            }
+        }
+
+        setIsHiring(true);
         router.patch(`/admin/applications/${selectedApplication.id}/hire`, payload, {
             preserveScroll: true,
-            onSuccess: () => setIsHireModalOpen(false),
+            onSuccess: () => {
+                setIsHireModalOpen(false);
+                setIsHiring(false);
+            },
+            onError: () => {
+                setIsHiring(false);
+            },
         });
     };
 
@@ -463,7 +481,6 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
 
                                                     if (nextStatus === 'hired' && application.status === 'interested') {
                                                         openHireModal(application);
-
                                                         return;
                                                     }
 
@@ -473,7 +490,21 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                                                         nextStatus === 'interested' ||
                                                         nextStatus === 'not_interested'
                                                     ) {
-                                                        updateApplicationStatus(application.id, nextStatus);
+                                                        const statusLabels: Record<string, string> = {
+                                                            shortlisted: 'Shortlist',
+                                                            rejected: 'Reject',
+                                                            interested: 'Mark as Interested',
+                                                            not_interested: 'Mark as Not Interested',
+                                                        };
+
+                                                        const confirmMessage = `Are you sure you want to ${statusLabels[nextStatus] || 'change status of'} this application?`;
+
+                                                        if (confirm(confirmMessage)) {
+                                                            updateApplicationStatus(application.id, nextStatus);
+                                                        } else {
+                                                            // Reset select to current status if cancelled
+                                                            event.target.value = application.status;
+                                                        }
                                                     }
                                                 }}
                                             >
@@ -590,6 +621,21 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                             </p>
                         </div>
 
+                        {derivedCommissionAmount !== null && Number(commissionReceivedAmount) > 0 && Number(commissionReceivedAmount) < derivedCommissionAmount && (
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Due Date for Remaining Payment (Optional)</label>
+                                <Input
+                                    type="date"
+                                    min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                                    value={commissionDueDate}
+                                    onChange={(event) => setCommissionDueDate(event.target.value)}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Set a due date for when the remaining BDT {derivedCommissionAmount - Number(commissionReceivedAmount)} should be paid.
+                                </p>
+                            </div>
+                        )}
+
                         <div className="rounded-md border bg-muted/30 p-3">
                             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                                 Estimated Admin Commission
@@ -601,11 +647,12 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                     </div>
 
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setIsHireModalOpen(false)}>
+                        <Button type="button" variant="outline" onClick={() => setIsHireModalOpen(false)} disabled={isHiring}>
                             Cancel
                         </Button>
-                        <Button type="button" onClick={confirmHire}>
-                            Confirm Hire
+                        <Button type="button" onClick={confirmHire} disabled={isHiring}>
+                            {isHiring && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isHiring ? 'Hiring...' : 'Confirm Hire'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

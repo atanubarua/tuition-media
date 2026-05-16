@@ -37,7 +37,7 @@ type Application = {
     tutor: Tutor;
 };
 
-type Post = { id: number; title: string | null };
+type Post = { id: number; title: string | null; salary_type: string | null };
 
 type PaginationLink = { url: string | null; label: string; active: boolean };
 
@@ -127,7 +127,7 @@ export default function GuardianApplicationsIndex({
         return () => clearTimeout(timeout);
     }, [status, search, university, post.id]);
 
-    function updateStatus(appId: number, nextStatus: 'shortlisted' | 'rejected') {
+    function updateStatus(appId: number, nextStatus: 'pending' | 'shortlisted' | 'rejected') {
         router.patch(`/guardian/tuition-posts/${post.id}/applications/${appId}`, { status: nextStatus }, { preserveScroll: true });
     }
 
@@ -171,12 +171,14 @@ export default function GuardianApplicationsIndex({
                                         {selectedApp.tutor.profile ? experienceLabel(selectedApp.tutor.profile.experience_months) : '-'}
                                     </p>
                                 </div>
-                                <div>
-                                    <p className="text-xs text-muted-foreground">Expected Salary</p>
-                                    <p className="font-medium">
-                                        {selectedApp.expected_salary ? `BDT ${selectedApp.expected_salary.toLocaleString()}` : '-'}
-                                    </p>
-                                </div>
+                                {post.salary_type !== 'fixed' && (
+                                    <div>
+                                        <p className="text-xs text-muted-foreground">Expected Salary</p>
+                                        <p className="font-medium">
+                                            {selectedApp.expected_salary ? `BDT ${selectedApp.expected_salary.toLocaleString()}` : '-'}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
 
                             {selectedApp.tutor.profile?.subjects && selectedApp.tutor.profile.subjects.length > 0 && (
@@ -307,7 +309,7 @@ export default function GuardianApplicationsIndex({
                                 <th className="px-4 py-3 text-left">University</th>
                                 <th className="px-4 py-3 text-left">Department</th>
                                 <th className="px-4 py-3 text-left">Experience</th>
-                                <th className="px-4 py-3 text-left">Expected Salary</th>
+                                {post.salary_type !== 'fixed' && <th className="px-4 py-3 text-left">Expected Salary</th>}
                                 <th className="px-4 py-3 text-left">Status</th>
                                 <th className="px-4 py-3 text-left">Applied</th>
                                 <th className="px-4 py-3 text-left">Actions</th>
@@ -317,14 +319,14 @@ export default function GuardianApplicationsIndex({
                             {isLoading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <tr key={i} className="border-t">
-                                        {Array.from({ length: 8 }).map((_, j) => (
+                                        {Array.from({ length: post.salary_type !== 'fixed' ? 8 : 7 }).map((_, j) => (
                                             <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>
                                         ))}
                                     </tr>
                                 ))
                             ) : applications.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-4 py-6 text-muted-foreground">
+                                    <td colSpan={post.salary_type !== 'fixed' ? 8 : 7} className="px-4 py-6 text-muted-foreground">
                                         No applications found.
                                     </td>
                                 </tr>
@@ -343,7 +345,7 @@ export default function GuardianApplicationsIndex({
                                     <td className="px-4 py-3">{app.tutor.profile?.university ?? '-'}</td>
                                     <td className="px-4 py-3">{app.tutor.profile?.department ?? '-'}</td>
                                     <td className="px-4 py-3">{app.tutor.profile ? experienceLabel(app.tutor.profile.experience_months) : '-'}</td>
-                                    <td className="px-4 py-3">{app.expected_salary ? `BDT ${app.expected_salary.toLocaleString()}` : '-'}</td>
+                                    {post.salary_type !== 'fixed' && <td className="px-4 py-3">{app.expected_salary ? `BDT ${app.expected_salary.toLocaleString()}` : '-'}</td>}
                                     <td className="px-4 py-3">
                                         <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[app.status]}`}>
                                             {app.status}
@@ -381,7 +383,36 @@ export default function GuardianApplicationsIndex({
                                                 </Button>
                                             </div>
                                         ) : app.status === 'shortlisted' ? (
-                                            <span className="text-xs text-blue-600">Under review by admin team</span>
+                                            <div className="flex min-w-[108px] flex-col gap-2">
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                        if (confirm('Remove from shortlist and move back to pending?')) {
+                                                            updateStatus(app.id, 'pending');
+                                                        }
+                                                    }}
+                                                    className="h-9 justify-center border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-800"
+                                                >
+                                                    Un-shortlist
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                        if (confirm('Reject this application?')) {
+                                                            updateStatus(app.id, 'rejected');
+                                                        }
+                                                    }}
+                                                    className="h-9 justify-center border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
+                                                >
+                                                    Reject
+                                                </Button>
+                                            </div>
+                                        ) : app.status === 'interested' || app.status === 'not_interested' ? (
+                                            <span className="text-xs text-blue-600">Admin contacted tutor</span>
                                         ) : (
                                             <span className="text-xs text-muted-foreground">-</span>
                                         )}

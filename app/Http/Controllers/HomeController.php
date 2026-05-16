@@ -27,7 +27,7 @@ class HomeController extends Controller
         $request->session()->put('locale', $locale);
 
         $posts = TuitionPost::query()
-            ->where('status', 'published')
+            ->whereIn('status', ['published', 'shortlisted'])
             ->with([
                 'students.subjects:id,name',
                 'guardian:id,name',
@@ -40,7 +40,7 @@ class HomeController extends Controller
             ->get();
 
         $stats = [
-            'total_posts' => TuitionPost::where('status', 'published')->count(),
+            'total_posts' => TuitionPost::whereIn('status', ['published', 'shortlisted'])->count(),
             'total_tutors' => DB::table('tutor_profiles')->count(),
         ];
 

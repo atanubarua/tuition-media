@@ -432,10 +432,10 @@ export default function FindTutors({
                                     }
 
                                     return (
-                                        <Link
+                                        <button
                                             key={i}
-                                            href={link.url}
-                                            className={`px-4 py-2 text-sm font-medium transition-colors ${
+                                            onClick={() => { setIsFiltering(true); router.visit(link.url!, { preserveState: true, onFinish: () => setIsFiltering(false) }); }}
+                                            className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${
                                                 link.active 
                                                     ? 'bg-blue-600 text-white' 
                                                     : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'
