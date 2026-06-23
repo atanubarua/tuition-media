@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Settings;
 
 use App\Concerns\ProfileValidationRules;
+use App\Support\BangladeshPhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -18,5 +19,14 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return $this->profileRules($this->user()->id);
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('phone')) {
+            $this->merge([
+                'phone' => BangladeshPhoneNumber::normalize($this->input('phone')),
+            ]);
+        }
     }
 }

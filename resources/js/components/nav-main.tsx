@@ -26,14 +26,25 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                             tooltip={{ children: item.title }}
                             className={
                                 isActive
-                                    ? '!bg-sidebar-border !text-sidebar-foreground font-semibold shadow-sm ring-1 ring-sidebar-ring hover:!bg-sidebar-border relative before:absolute before:left-0 before:top-1/2 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-r before:bg-sidebar-foreground'
+                                    ? 'bg-sidebar-primary/10! text-sidebar-primary! font-semibold hover:bg-sidebar-primary/15! relative before:absolute before:left-0 before:top-1/2 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-r before:bg-sidebar-primary'
                                     : 'text-sidebar-foreground/75 hover:text-sidebar-foreground'
                             }
                         >
-                            <Link href={item.href}>
-                                {item.icon && <item.icon />}
-                                <span>{item.title}</span>
-                            </Link>
+                            {item.newTab ? (
+                                <a
+                                    href={typeof item.href === 'string' ? item.href : item.href.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    {item.icon && <item.icon />}
+                                    <span>{item.title}</span>
+                                </a>
+                            ) : (
+                                <Link href={item.href}>
+                                    {item.icon && <item.icon />}
+                                    <span>{item.title}</span>
+                                </Link>
+                            )}
                         </SidebarMenuButton>
                     </SidebarMenuItem>;
                 })}

@@ -1,8 +1,9 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import type { FormEvent } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReactSelect from 'react-select';
 import InputError from '@/components/input-error';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,7 +20,8 @@ type ProfileShape = {
     department: string;
     academic_year: number | null;
     intake_year: number | null;
-    teachable_levels: string[];
+    teachable_classes: string[];
+    teachable_groups: string[];
     teachable_mediums: string[];
     subject_ids: number[];
     preferred_location_ids: number[];
@@ -27,11 +29,16 @@ type ProfileShape = {
     bio: string;
 };
 
-const ACADEMIC_LEVELS = [
-    { value: 'primary', label: 'Primary (Class 1–5)' },
-    { value: 'high_school', label: 'High School (Class 6–10)' },
-    { value: 'college', label: 'College (Class 11–12)' },
-    { value: 'honors', label: 'Honors / University' },
+const CLASS_OPTIONS = [
+    { value: 'nursery', label: 'Nursery' },
+    { value: 'kg', label: 'KG' },
+    ...Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: `Class ${i + 1}` })),
+];
+
+const GROUP_OPTIONS = [
+    { value: 'science', label: 'Science' },
+    { value: 'commerce', label: 'Commerce' },
+    { value: 'arts', label: 'Arts' },
 ];
 
 const MEDIUMS = [
@@ -70,8 +77,8 @@ const SELECT_STYLES = {
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-        <div className="rounded-xl border bg-card p-6 space-y-5">
-            <h2 className="font-semibold text-base">{title}</h2>
+        <div className="space-y-5 rounded-2xl border bg-card p-6 shadow-sm">
+            <h2 className="text-base font-semibold tracking-tight">{title}</h2>
             {children}
         </div>
     );
@@ -115,7 +122,8 @@ export default function TutorProfileEdit({
         department: profile?.department ?? '',
         academic_year: profile?.academic_year ?? null,
         intake_year: profile?.intake_year ?? null,
-        teachable_levels: profile?.teachable_levels ?? [],
+        teachable_classes: profile?.teachable_classes ?? [],
+        teachable_groups: profile?.teachable_groups ?? [],
         teachable_mediums: profile?.teachable_mediums ?? [],
         subject_ids: profile?.subject_ids ?? [],
         preferred_location_ids: profile?.preferred_location_ids ?? [],
@@ -123,8 +131,8 @@ export default function TutorProfileEdit({
         bio: profile?.bio ?? '',
     });
 
-    const universityOptions = universities.map((u) => ({ value: u.id, label: u.type ? `${u.name} (${u.type})` : u.name }));
-    const subjectOptions = subjects.map((s) => ({ value: s.id, label: s.group_name ? `${s.name} (${s.group_name})` : s.name }));
+    const universityOptions = universities.map((u) => ({ value: u.id, label: u.name }));
+    const subjectOptions = subjects.map((s) => ({ value: s.id, label: s.name }));
     const districtOptions = districts.map((d) => ({ value: d.id, label: d.name }));
     const filteredSubdistricts = selectedDistrictId ? subdistricts.filter((s) => s.district_id === selectedDistrictId) : [];
     const subdistrictOptions = filteredSubdistricts.map((s) => ({ value: s.id, label: s.type ? `${s.name} (${s.type})` : s.name }));
@@ -133,8 +141,8 @@ export default function TutorProfileEdit({
         const months = Number(data.experience_months);
 
         if (!months) {
-return null;
-}
+            return null;
+        }
 
         const y = Math.floor(months / 12);
         const m = months % 12;
@@ -142,10 +150,18 @@ return null;
         return [y > 0 && `${y} yr`, m > 0 && `${m} mo`].filter(Boolean).join(' ');
     })();
 
-    const toggleCheckbox = (field: 'teachable_levels' | 'teachable_mediums', value: string) => {
+    const toggleCheckbox = (field: 'teachable_classes' | 'teachable_groups' | 'teachable_mediums', value: string) => {
         const current = data[field] as string[];
         setData(field, current.includes(value) ? current.filter((v) => v !== value) : [...current, value]);
     };
+
+    const hasSeniorClasses = data.teachable_classes.some((value) => ['9', '10', '11', '12'].includes(value));
+
+    useEffect(() => {
+        if (!hasSeniorClasses && data.teachable_groups.length > 0) {
+            setData('teachable_groups', []);
+        }
+    }, [hasSeniorClasses, data.teachable_groups.length, setData]);
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
@@ -162,8 +178,6 @@ return null;
                 </div>
 
                 <form onSubmit={submit} className="space-y-5">
-
-                    {/* Basic info — all 4 fields in one row */}
                     <SectionCard title="Basic Information">
                         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                             <ReadonlyField label="Name" value={auth.user.name} />
@@ -173,11 +187,12 @@ return null;
                         </div>
                     </SectionCard>
 
-                    {/* Graduation — all 5 fields in one row */}
                     <SectionCard title="Graduation">
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                             <div className="lg:col-span-2">
-                                <Label>University <span className="text-destructive">*</span></Label>
+                                <Label>
+                                    University <span className="text-destructive">*</span>
+                                </Label>
                                 <ReactSelect
                                     instanceId="university"
                                     isClearable
@@ -192,7 +207,9 @@ return null;
                                 <InputError message={errors.university_id} />
                             </div>
                             <div>
-                                <Label>Department <span className="text-destructive">*</span></Label>
+                                <Label>
+                                    Department <span className="text-destructive">*</span>
+                                </Label>
                                 <Input
                                     className="mt-1"
                                     value={data.department}
@@ -202,7 +219,9 @@ return null;
                                 <InputError message={errors.department} />
                             </div>
                             <div>
-                                <Label>Intake Year <span className="text-destructive">*</span></Label>
+                                <Label>
+                                    Intake Year <span className="text-destructive">*</span>
+                                </Label>
                                 <ReactSelect
                                     instanceId="intake-year"
                                     isClearable
@@ -216,7 +235,9 @@ return null;
                                 <InputError message={errors.intake_year} />
                             </div>
                             <div>
-                                <Label>Current Year <span className="text-destructive">*</span></Label>
+                                <Label>
+                                    Current Year <span className="text-destructive">*</span>
+                                </Label>
                                 <select
                                     className="mt-1 h-[38px] w-full rounded-md border bg-background px-3 py-2 text-sm"
                                     value={data.academic_year ?? ''}
@@ -224,7 +245,9 @@ return null;
                                 >
                                     <option value="">Select...</option>
                                     {ACADEMIC_YEARS.map((y) => (
-                                        <option key={y.value} value={y.value}>{y.label}</option>
+                                        <option key={y.value} value={y.value}>
+                                            {y.label}
+                                        </option>
                                     ))}
                                 </select>
                                 <InputError message={errors.academic_year} />
@@ -232,10 +255,11 @@ return null;
                         </div>
                     </SectionCard>
 
-                    {/* Occupation */}
                     <SectionCard title="Occupation">
                         <div>
-                            <Label>Current Status <span className="text-destructive">*</span></Label>
+                            <Label>
+                                Current Status <span className="text-destructive">*</span>
+                            </Label>
                             <div className="mt-2 inline-grid grid-cols-3 rounded-lg border p-1 text-sm font-medium">
                                 {(['student', 'employed', 'other'] as const).map((occ) => (
                                     <button
@@ -253,7 +277,9 @@ return null;
                         {data.occupation === 'employed' && (
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div>
-                                    <Label>Designation <span className="text-destructive">*</span></Label>
+                                    <Label>
+                                        Designation <span className="text-destructive">*</span>
+                                    </Label>
                                     <Input
                                         className="mt-1"
                                         value={data.job_title}
@@ -263,7 +289,9 @@ return null;
                                     <InputError message={errors.job_title} />
                                 </div>
                                 <div>
-                                    <Label>Company / Organization <span className="text-destructive">*</span></Label>
+                                    <Label>
+                                        Company / Organization <span className="text-destructive">*</span>
+                                    </Label>
                                     <Input
                                         className="mt-1"
                                         value={data.job_organization}
@@ -276,47 +304,85 @@ return null;
                         )}
                     </SectionCard>
 
-                    {/* Teaching capability */}
                     <SectionCard title="Teaching Capability">
-                        <div className="grid gap-6 sm:grid-cols-2">
+                        <div className="grid gap-6 lg:grid-cols-2">
                             <div>
-                                <Label>Levels I Can Teach <span className="text-destructive">*</span></Label>
-                                <div className="mt-3 space-y-2.5">
-                                    {ACADEMIC_LEVELS.map((level) => (
-                                        <label key={level.value} className="flex items-center gap-2.5 cursor-pointer text-sm">
-                                            <input
-                                                type="checkbox"
-                                                checked={data.teachable_levels.includes(level.value)}
-                                                onChange={() => toggleCheckbox('teachable_levels', level.value)}
-                                                className="rounded"
+                                <Label>
+                                    Classes I Can Teach <span className="text-destructive">*</span>
+                                </Label>
+                                <div className="mt-3 grid gap-2 rounded-2xl border bg-muted/20 p-4 sm:grid-cols-2">
+                                    {CLASS_OPTIONS.map((level) => (
+                                        <label
+                                            key={level.value}
+                                            className="flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-2 py-1.5 text-sm transition-colors hover:border-border hover:bg-background"
+                                        >
+                                            <Checkbox
+                                                checked={data.teachable_classes.includes(level.value)}
+                                                onCheckedChange={() => toggleCheckbox('teachable_classes', level.value)}
                                             />
-                                            {level.label}
+                                            <span>{level.label}</span>
                                         </label>
                                     ))}
                                 </div>
-                                <InputError message={errors.teachable_levels} />
+                                <InputError message={errors.teachable_classes} />
                             </div>
+
                             <div>
-                                <Label>Mediums <span className="text-destructive">*</span></Label>
-                                <div className="mt-3 space-y-2.5">
-                                    {MEDIUMS.map((medium) => (
-                                        <label key={medium.value} className="flex items-center gap-2.5 cursor-pointer text-sm">
-                                            <input
-                                                type="checkbox"
-                                                checked={data.teachable_mediums.includes(medium.value)}
-                                                onChange={() => toggleCheckbox('teachable_mediums', medium.value)}
-                                                className="rounded"
+                                <div className="flex items-center justify-between gap-3">
+                                    <Label>Groups I Can Teach</Label>
+                                    {!hasSeniorClasses && (
+                                        <span className="text-xs text-muted-foreground">Available after selecting class 9-12</span>
+                                    )}
+                                </div>
+                                <div className={`mt-3 grid gap-2 rounded-2xl border p-4 sm:grid-cols-1 ${hasSeniorClasses ? 'bg-muted/20' : 'bg-muted/10'}`}>
+                                    {GROUP_OPTIONS.map((group) => (
+                                        <label
+                                            key={group.value}
+                                            className={`flex items-center gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors ${
+                                                hasSeniorClasses ? 'cursor-pointer hover:bg-background' : 'cursor-not-allowed opacity-50'
+                                            }`}
+                                        >
+                                            <Checkbox
+                                                checked={data.teachable_groups.includes(group.value)}
+                                                onCheckedChange={() => hasSeniorClasses && toggleCheckbox('teachable_groups', group.value)}
+                                                disabled={!hasSeniorClasses}
                                             />
-                                            {medium.label}
+                                            <span>{group.label}</span>
                                         </label>
                                     ))}
                                 </div>
-                                <InputError message={errors.teachable_mediums} />
+                                <p className="mt-2 text-xs text-muted-foreground">
+                                    Groups are only required when you teach class 9-12.
+                                </p>
+                                <InputError message={errors.teachable_groups} />
                             </div>
                         </div>
 
                         <div>
-                            <Label>Subjects I Can Teach <span className="text-destructive">*</span></Label>
+                            <Label>
+                                Mediums <span className="text-destructive">*</span>
+                            </Label>
+                            <div className="mt-3 grid gap-2 rounded-2xl border bg-muted/20 p-4 sm:grid-cols-2 lg:grid-cols-4">
+                                {MEDIUMS.map((medium) => (
+                                    <label
+                                        key={medium.value}
+                                        className="flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-2 py-1.5 text-sm transition-colors hover:border-border hover:bg-background"
+                                    >
+                                        <Checkbox
+                                            checked={data.teachable_mediums.includes(medium.value)}
+                                            onCheckedChange={() => toggleCheckbox('teachable_mediums', medium.value)}
+                                        />
+                                        <span>{medium.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            <InputError message={errors.teachable_mediums} />
+                        </div>
+
+                        <div>
+                            <Label>
+                                Subjects I Can Teach <span className="text-destructive">*</span>
+                            </Label>
                             <ReactSelect
                                 instanceId="subjects"
                                 isMulti
@@ -332,7 +398,6 @@ return null;
                         </div>
                     </SectionCard>
 
-                    {/* Preferred locations */}
                     <SectionCard title="Preferred Teaching Locations">
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div>
@@ -353,7 +418,9 @@ return null;
                                 />
                             </div>
                             <div>
-                                <Label>Areas (Upazila / Thana) <span className="text-destructive">*</span></Label>
+                                <Label>
+                                    Areas (Upazila / Thana) <span className="text-destructive">*</span>
+                                </Label>
                                 <ReactSelect
                                     instanceId="subdistricts"
                                     isMulti
@@ -371,24 +438,23 @@ return null;
                         </div>
                     </SectionCard>
 
-                    {/* Experience & bio */}
                     <SectionCard title="Experience & Bio">
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div>
-                                <Label>Teaching Experience <span className="text-destructive">*</span></Label>
+                                <Label>
+                                    Teaching Experience <span className="text-muted-foreground">(optional)</span>
+                                </Label>
                                 <div className="mt-1 flex items-center gap-2">
                                     <Input
                                         type="number"
-                                        min={1}
+                                        min={0}
                                         max={600}
                                         value={data.experience_months}
                                         onChange={(e) => setData('experience_months', e.target.value === '' ? '' : Number(e.target.value))}
-                                        placeholder="e.g. 6"
-                                        className="w-28"
+                                        placeholder="Leave blank if you have none"
+                                        className="w-56"
                                     />
-                                    <span className="text-sm text-muted-foreground shrink-0">
-                                        {experienceLabel ?? 'months'}
-                                    </span>
+                                    <span className="text-sm text-muted-foreground shrink-0">{experienceLabel ?? 'months'}</span>
                                 </div>
                                 <InputError message={errors.experience_months} />
                             </div>
@@ -423,7 +489,5 @@ return null;
 }
 
 TutorProfileEdit.layout = {
-    breadcrumbs: [
-        { title: 'My Profile', href: '/tutor/profile/edit' },
-    ],
+    breadcrumbs: [{ title: 'My Profile', href: '/tutor/profile/edit' }],
 };

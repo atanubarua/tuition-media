@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use App\Models\TutorRequest;
 use App\Models\TutorProfile;
 
 #[Fillable(['name', 'phone', 'email', 'role', 'gender', 'password'])]
@@ -52,5 +53,15 @@ class User extends Authenticatable
     public function tuitionPosts(): HasMany
     {
         return $this->hasMany(TuitionPost::class, 'guardian_id');
+    }
+
+    public function tutorRequestsAsGuardian(): HasMany
+    {
+        return $this->hasMany(TutorRequest::class, 'guardian_id');
+    }
+
+    public function tutorRequestsAsTutor(): HasMany
+    {
+        return $this->hasMany(TutorRequest::class, 'tutor_id');
     }
 }

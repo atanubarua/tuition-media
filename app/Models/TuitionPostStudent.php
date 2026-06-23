@@ -13,6 +13,7 @@ class TuitionPostStudent extends Model
         'student_name',
         'academic_level',
         'class_level',
+        'academic_group',
         'honors_subject',
         'medium',
     ];

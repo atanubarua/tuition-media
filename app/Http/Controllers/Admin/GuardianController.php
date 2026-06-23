@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\PasswordValidationRules;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\BangladeshPhoneNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,6 +13,8 @@ use Inertia\Response;
 
 class GuardianController extends Controller
 {
+    use PasswordValidationRules;
+
     public function index(Request $request): Response
     {
         $name = $request->string('name')->toString();
@@ -47,11 +51,28 @@ class GuardianController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $phone = $request->string('phone')->toString();
+        $normalizedPhone = $request->filled('phone') ? BangladeshPhoneNumber::normalize($phone) : null;
+
+        $request->merge([
+            'phone' => $normalizedPhone ?? ($request->filled('phone') ? $phone : null),
+        ]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'phone' => [
+                'nullable',
+                'string',
+                'max:15',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if ($value !== null && BangladeshPhoneNumber::normalize(is_string($value) ? $value : null) === null) {
+                        $fail('Please enter a valid Bangladesh mobile number.');
+                    }
+                },
+                'unique:users,phone',
+            ],
+            'password' => $this->passwordRules(User::ROLE_GUARDIAN),
         ]);
 
         User::create([
@@ -72,11 +93,28 @@ class GuardianController extends Controller
     {
         abort_unless($guardian->role === User::ROLE_GUARDIAN, 404);
 
+        $phone = $request->string('phone')->toString();
+        $normalizedPhone = $request->filled('phone') ? BangladeshPhoneNumber::normalize($phone) : null;
+
+        $request->merge([
+            'phone' => $normalizedPhone ?? ($request->filled('phone') ? $phone : null),
+        ]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$guardian->id],
-            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone,'.$guardian->id],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'phone' => [
+                'nullable',
+                'string',
+                'max:15',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if ($value !== null && BangladeshPhoneNumber::normalize(is_string($value) ? $value : null) === null) {
+                        $fail('Please enter a valid Bangladesh mobile number.');
+                    }
+                },
+                'unique:users,phone,'.$guardian->id,
+            ],
+            'password' => ['nullable', 'string', $this->passwordRuleForRole(User::ROLE_GUARDIAN), 'confirmed'],
         ]);
 
         $guardian->update([

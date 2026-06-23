@@ -1,10 +1,11 @@
-﻿import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import AutocompleteInput from '@/components/autocomplete-input';
 import { login, register } from '@/routes';
 import { toast } from 'sonner';
 import PublicNavbar from '@/components/public-navbar';
+import AppLogoIcon from '@/components/app-logo-icon';
 import {
     BookOpen,
     MapPin,
@@ -17,6 +18,7 @@ import {
     BookMarked,
     Lightbulb,
     ShieldCheck,
+    ChevronDown,
 } from 'lucide-react';
 
 type Subject = { id: number; name: string };
@@ -52,18 +54,12 @@ function str(value: unknown, fallback = ''): string {
 
 function salaryLabel(post: Post, t: WelcomeTranslations, locale: 'en' | 'bn') {
     const negotiable = str(t?.card?.salary_negotiable, 'Negotiable');
-
-    if (post.salary_type === 'negotiable') {
-        return negotiable;
-    }
+    if (post.salary_type === 'negotiable') return negotiable;
 
     const formattedMin = post.salary_min ? `৳${post.salary_min.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}` : null;
     const formattedMax = post.salary_max ? `৳${post.salary_max.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}` : null;
 
-    if (post.salary_type === 'range' && formattedMin && formattedMax) {
-        return `${formattedMin} - ${formattedMax}`;
-    }
-
+    if (post.salary_type === 'range' && formattedMin && formattedMax) return `${formattedMin} - ${formattedMax}`;
     return formattedMin ?? negotiable;
 }
 
@@ -109,7 +105,9 @@ function TuitionCard({ post, t, locale }: { post: Post; t: WelcomeTranslations; 
             <div className="mt-auto pt-4 border-t border-slate-100 flex flex-wrap gap-y-3 gap-x-5 text-sm text-slate-500">
                 <div className="flex items-center gap-1.5 w-full sm:w-auto">
                     <MapPin className="h-4 w-4 text-slate-400" />
-                    <span className="min-w-0 break-words sm:truncate">{post.subdistrict_name}, {post.district_name}</span>
+                    <span className="min-w-0 break-words sm:truncate">
+                        {post.subdistrict_name}, {post.district_name}
+                    </span>
                 </div>
                 <div className="flex items-center gap-1.5 w-full sm:w-auto">
                     <GraduationCap className="h-4 w-4 text-slate-400" />
@@ -132,6 +130,18 @@ function TuitionCard({ post, t, locale }: { post: Post; t: WelcomeTranslations; 
     );
 }
 
+const classOptions = [
+    { value: 'nursery', label: 'Nursery' },
+    { value: 'kg', label: 'KG' },
+    ...Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) })),
+];
+
+const groupOptions = [
+    { value: 'science', label: 'Science' },
+    { value: 'commerce', label: 'Commerce' },
+    { value: 'arts', label: 'Arts' },
+];
+
 export default function Welcome({
     canRegister = true,
     posts = [],
@@ -141,19 +151,21 @@ export default function Welcome({
 }: WelcomeProps) {
     const { auth } = usePage().props as any;
     const [location, setLocation] = useState('');
-    const [subject, setSubject] = useState('');
+    const [classLevel, setClassLevel] = useState('');
+    const [academicGroup, setAcademicGroup] = useState('');
     const [searchMode, setSearchMode] = useState<'tutor' | 'job'>('tutor');
     const [searching, setSearching] = useState(false);
 
     const t = translations ?? {};
     const stepsGuardians: string[] = Array.isArray(t?.how?.guardians_steps) ? t.how.guardians_steps : [];
     const stepsTutors: string[] = Array.isArray(t?.how?.tutors_steps) ? t.how.tutors_steps : [];
+    const shouldShowGroup = ['9', '10', '11', '12'].includes(classLevel);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!location.trim() && !subject.trim()) {
-            toast.error(str(t?.hero?.empty_search_error, 'Please enter an Area or Subject to begin your search.'));
+        if (!location.trim() && !classLevel.trim()) {
+            toast.error(str(t?.hero?.empty_search_error, 'Please enter an Area or Class to begin your search.'));
             return;
         }
 
@@ -164,7 +176,8 @@ export default function Welcome({
             url,
             {
                 location: location.trim() || undefined,
-                subject: subject.trim() || undefined,
+                class_level: classLevel || undefined,
+                academic_group: shouldShowGroup ? academicGroup || undefined : undefined,
             },
             { preserveScroll: true, onFinish: () => setSearching(false) }
         );
@@ -178,11 +191,25 @@ export default function Welcome({
 
             <section className="relative bg-slate-50 pt-32 pb-10 lg:pt-40 lg:pb-14">
                 <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3">
-                    <svg width="404" height="404" fill="none" viewBox="0 0 404 404" aria-hidden="true" className="text-blue-100 opacity-50"><defs><pattern id="85737c0e-0916-41d7-917f-596dc7edfa27" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="4" height="4" fill="currentColor"></rect></pattern></defs><rect width="404" height="404" fill="url(#85737c0e-0916-41d7-917f-596dc7edfa27)"></rect></svg>
+                    <svg width="404" height="404" fill="none" viewBox="0 0 404 404" aria-hidden="true" className="text-blue-100 opacity-50">
+                        <defs>
+                            <pattern id="85737c0e-0916-41d7-917f-596dc7edfa27" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <rect x="0" y="0" width="4" height="4" fill="currentColor"></rect>
+                            </pattern>
+                        </defs>
+                        <rect width="404" height="404" fill="url(#85737c0e-0916-41d7-917f-596dc7edfa27)"></rect>
+                    </svg>
                 </div>
 
                 <div className="absolute left-0 bottom-0 translate-y-1/3 -translate-x-1/3">
-                    <svg width="404" height="404" fill="none" viewBox="0 0 404 404" aria-hidden="true" className="text-amber-100 opacity-50"><defs><pattern id="85737c0e-0916-41d7-917f-596dc7edfa28" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="4" height="4" fill="currentColor"></rect></pattern></defs><rect width="404" height="404" fill="url(#85737c0e-0916-41d7-917f-596dc7edfa28)"></rect></svg>
+                    <svg width="404" height="404" fill="none" viewBox="0 0 404 404" aria-hidden="true" className="text-amber-100 opacity-50">
+                        <defs>
+                            <pattern id="85737c0e-0916-41d7-917f-596dc7edfa28" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <rect x="0" y="0" width="4" height="4" fill="currentColor"></rect>
+                            </pattern>
+                        </defs>
+                        <rect width="404" height="404" fill="url(#85737c0e-0916-41d7-917f-596dc7edfa28)"></rect>
+                    </svg>
                 </div>
 
                 <div className="relative mx-auto max-w-5xl px-4 text-center">
@@ -191,19 +218,35 @@ export default function Welcome({
                         <span>{str(t?.hero?.badge)}</span>
                     </div>
 
-                    <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 md:text-6xl lg:leading-[1.1]">{str(t?.hero?.title)}</h1>
+                    <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 md:text-6xl lg:leading-[1.1]">
+                        {str(t?.hero?.title)}
+                    </h1>
                     <p className="mx-auto mb-10 max-w-2xl text-lg text-slate-600 md:text-xl">{str(t?.hero?.description)}</p>
 
-                    <div className="mx-auto max-w-2xl">
+                    <div className="mx-auto max-w-4xl">
                         <div className="flex justify-center mb-6">
                             <div className="inline-flex rounded-full bg-slate-200/60 p-1 backdrop-blur-sm border border-slate-300/50">
-                                <button onClick={() => setSearchMode('tutor')} className={`rounded-full px-6 py-2.5 text-sm font-bold transition-all ${searchMode === 'tutor' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>{str(t?.hero?.need_tutor)}</button>
-                                <button onClick={() => setSearchMode('job')} className={`rounded-full px-6 py-2.5 text-sm font-bold transition-all ${searchMode === 'job' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>{str(t?.hero?.want_teach)}</button>
+                                <button
+                                    onClick={() => setSearchMode('tutor')}
+                                    className={`rounded-full px-6 py-2.5 text-sm font-bold transition-all ${
+                                        searchMode === 'tutor' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                                    }`}
+                                >
+                                    {str(t?.hero?.need_tutor)}
+                                </button>
+                                <button
+                                    onClick={() => setSearchMode('job')}
+                                    className={`rounded-full px-6 py-2.5 text-sm font-bold transition-all ${
+                                        searchMode === 'job' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                                    }`}
+                                >
+                                    {str(t?.hero?.want_teach)}
+                                </button>
                             </div>
                         </div>
 
-                        <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-2 rounded-2xl bg-white p-3 shadow-xl shadow-blue-900/5 ring-1 ring-slate-200">
-                            <div className="relative flex w-full items-center pl-4 pr-2 border-b md:border-b-0 md:border-r border-slate-200 py-2 md:py-0">
+                        <form onSubmit={handleSearch} className="grid grid-cols-1 gap-2 rounded-3xl bg-white p-3 shadow-xl shadow-blue-900/5 ring-1 ring-slate-200 md:grid-cols-[1.5fr_1.5fr_1.5fr_auto] md:items-stretch">
+                            <div className="relative flex min-w-0 w-full items-center rounded-2xl border border-slate-200 bg-white px-4 py-3 md:rounded-r-none md:border-r-0">
                                 <MapPin className="h-5 w-5 text-slate-400 shrink-0" />
                                 <AutocompleteInput
                                     value={location}
@@ -212,22 +255,59 @@ export default function Welcome({
                                     mapLabel={(s) => s.label}
                                     mapValue={(s) => s.name}
                                     placeholder={str(t?.hero?.location_placeholder)}
-                                    className="w-full bg-transparent px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-base"
+                                    className="w-full min-w-0 bg-transparent px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-base"
                                 />
                             </div>
-                            <div className="relative flex w-full items-center pl-4 pr-2 py-2 md:py-0">
+
+                            <div className="relative flex min-w-0 w-full items-center rounded-2xl border border-slate-200 bg-white px-4 py-3 md:rounded-none md:border-r-0">
+                                <GraduationCap className="h-5 w-5 text-slate-400 shrink-0" />
+                                <select
+                                    value={classLevel}
+                                    onChange={(e) => {
+                                        const next = e.target.value;
+                                        setClassLevel(next);
+                                        if (!['9', '10', '11', '12'].includes(next)) {
+                                            setAcademicGroup('');
+                                        }
+                                    }}
+                                    className="w-full appearance-none bg-transparent px-3 py-2 text-slate-900 focus:outline-none focus:ring-0 border-none text-base"
+                                >
+                                    <option value="">{str(t?.hero?.class_placeholder, 'Select class')}</option>
+                                    {classOptions.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="pointer-events-none absolute right-4 h-4 w-4 text-slate-400" />
+                            </div>
+
+                            <div className="relative flex min-w-0 w-full items-center rounded-2xl border border-slate-200 bg-white px-4 py-3 md:rounded-none md:border-r-0">
                                 <BookOpen className="h-5 w-5 text-slate-400 shrink-0" />
-                                <AutocompleteInput
-                                    value={subject}
-                                    onChange={setSubject}
-                                    fetchUrl={(q) => `/api/subjects?q=${encodeURIComponent(q)}`}
-                                    mapLabel={(s) => s}
-                                    mapValue={(s) => s}
-                                    placeholder={searchMode === 'tutor' ? str(t?.hero?.subject_placeholder_tutor) : str(t?.hero?.subject_placeholder_job)}
-                                    className="w-full bg-transparent px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 border-none text-base"
-                                />
+                                <select
+                                    value={academicGroup}
+                                    onChange={(e) => setAcademicGroup(e.target.value)}
+                                    disabled={!shouldShowGroup}
+                                    className="w-full appearance-none bg-transparent px-3 py-2 text-slate-900 focus:outline-none focus:ring-0 border-none text-base disabled:cursor-not-allowed disabled:text-slate-400"
+                                >
+                                    <option value="">{shouldShowGroup ? str(t?.hero?.group_placeholder, 'Select group') : 'Group 9-12'}</option>
+                                    {groupOptions.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="pointer-events-none absolute right-4 h-4 w-4 text-slate-400" />
                             </div>
-                            <button type="submit" disabled={searching} className="w-full md:w-auto shrink-0 rounded-xl bg-blue-600 px-8 py-4 font-bold text-white transition hover:bg-blue-700 shadow-md hover:shadow-lg mt-2 md:mt-0 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">{searching && <Spinner className="text-white" />}{searchMode === 'tutor' ? str(t?.hero?.find_tutors) : str(t?.hero?.find_tuitions)}</button>
+
+                            <button
+                                type="submit"
+                                disabled={searching}
+                                className="w-full rounded-2xl md:rounded-l-none bg-blue-600 px-6 py-4 font-bold text-white transition hover:bg-blue-700 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap md:self-stretch"
+                            >
+                                {searching && <Spinner className="text-white" />}
+                                {searchMode === 'tutor' ? str(t?.hero?.find_tutors) : str(t?.hero?.find_tuitions)}
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -236,9 +316,18 @@ export default function Welcome({
             <section className="bg-white border-y border-slate-200 py-8">
                 <div className="mx-auto max-w-5xl px-4">
                     <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 text-center">
-                        <div className="pt-4 sm:pt-0"><p className="text-4xl font-extrabold text-blue-700">{stats.total_posts.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}+</p><p className="mt-2 text-sm font-bold text-slate-500 uppercase tracking-wider">{str(t?.stats?.jobs)}</p></div>
-                        <div className="pt-4 sm:pt-0"><p className="text-4xl font-extrabold text-blue-700">{stats.total_tutors.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}+</p><p className="mt-2 text-sm font-bold text-slate-500 uppercase tracking-wider">{str(t?.stats?.tutors)}</p></div>
-                        <div className="pt-4 sm:pt-0"><p className="text-4xl font-extrabold text-blue-700">{(64).toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}</p><p className="mt-2 text-sm font-bold text-slate-500 uppercase tracking-wider">{str(t?.stats?.districts)}</p></div>
+                        <div className="pt-4 sm:pt-0">
+                            <p className="text-4xl font-extrabold text-blue-700">{stats.total_posts.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}+</p>
+                            <p className="mt-2 text-sm font-bold text-slate-500 uppercase tracking-wider">{str(t?.stats?.jobs)}</p>
+                        </div>
+                        <div className="pt-4 sm:pt-0">
+                            <p className="text-4xl font-extrabold text-blue-700">{stats.total_tutors.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}+</p>
+                            <p className="mt-2 text-sm font-bold text-slate-500 uppercase tracking-wider">{str(t?.stats?.tutors)}</p>
+                        </div>
+                        <div className="pt-4 sm:pt-0">
+                            <p className="text-4xl font-extrabold text-blue-700">{(64).toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}</p>
+                            <p className="mt-2 text-sm font-bold text-slate-500 uppercase tracking-wider">{str(t?.stats?.districts)}</p>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -250,9 +339,27 @@ export default function Welcome({
                         <p className="mt-4 text-slate-600 text-lg max-w-2xl mx-auto">{str(t?.features?.description)}</p>
                     </div>
                     <div className="grid gap-8 md:grid-cols-3">
-                        <div className="rounded-2xl bg-white p-8 border border-slate-200 shadow-sm transition hover:-translate-y-1 hover:shadow-md"><div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-600"><ShieldCheck className="h-7 w-7" /></div><h3 className="mb-3 text-xl font-bold text-slate-900">{str(t?.features?.verified_title)}</h3><p className="text-slate-600 leading-relaxed">{str(t?.features?.verified_description)}</p></div>
-                        <div className="rounded-2xl bg-white p-8 border border-slate-200 shadow-sm transition hover:-translate-y-1 hover:shadow-md"><div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-600"><MapPin className="h-7 w-7" /></div><h3 className="mb-3 text-xl font-bold text-slate-900">{str(t?.features?.local_title)}</h3><p className="text-slate-600 leading-relaxed">{str(t?.features?.local_description)}</p></div>
-                        <div className="rounded-2xl bg-white p-8 border border-slate-200 shadow-sm transition hover:-translate-y-1 hover:shadow-md"><div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600"><Lightbulb className="h-7 w-7" /></div><h3 className="mb-3 text-xl font-bold text-slate-900">{str(t?.features?.tailored_title)}</h3><p className="text-slate-600 leading-relaxed">{str(t?.features?.tailored_description)}</p></div>
+                        <div className="rounded-2xl bg-white p-8 border border-slate-200 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                            <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                                <ShieldCheck className="h-7 w-7" />
+                            </div>
+                            <h3 className="mb-3 text-xl font-bold text-slate-900">{str(t?.features?.verified_title)}</h3>
+                            <p className="text-slate-600 leading-relaxed">{str(t?.features?.verified_description)}</p>
+                        </div>
+                        <div className="rounded-2xl bg-white p-8 border border-slate-200 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                            <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
+                                <MapPin className="h-7 w-7" />
+                            </div>
+                            <h3 className="mb-3 text-xl font-bold text-slate-900">{str(t?.features?.local_title)}</h3>
+                            <p className="text-slate-600 leading-relaxed">{str(t?.features?.local_description)}</p>
+                        </div>
+                        <div className="rounded-2xl bg-white p-8 border border-slate-200 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                            <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+                                <Lightbulb className="h-7 w-7" />
+                            </div>
+                            <h3 className="mb-3 text-xl font-bold text-slate-900">{str(t?.features?.tailored_title)}</h3>
+                            <p className="text-slate-600 leading-relaxed">{str(t?.features?.tailored_description)}</p>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -264,17 +371,25 @@ export default function Welcome({
                             <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">{str(t?.jobs_section?.title)}</h2>
                             <p className="mt-2 text-slate-600">{str(t?.jobs_section?.description)}</p>
                         </div>
-                        <Link href="/tuition-jobs" className="inline-flex self-start items-center rounded-full bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-700 border border-blue-100 hover:bg-blue-100">{str(t?.jobs_section?.view_all)}</Link>
+                        <Link href="/tuition-jobs" className="inline-flex self-start items-center rounded-full bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-700 border border-blue-100 hover:bg-blue-100">
+                            {str(t?.jobs_section?.view_all)}
+                        </Link>
                     </div>
 
                     {posts.length === 0 ? (
                         <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 py-24 text-center">
-                            <div className="rounded-full bg-white p-5 shadow-sm mb-5"><Search className="h-8 w-8 text-slate-400" /></div>
+                            <div className="rounded-full bg-white p-5 shadow-sm mb-5">
+                                <Search className="h-8 w-8 text-slate-400" />
+                            </div>
                             <h3 className="text-xl font-bold text-slate-900">{str(t?.jobs_section?.none_title)}</h3>
                             <p className="mt-2 text-slate-600 max-w-sm">{str(t?.jobs_section?.none_description)}</p>
                         </div>
                     ) : (
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{posts.map((post) => (<TuitionCard key={post.id} post={post} t={t} locale={locale} />))}</div>
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {posts.map((post) => (
+                                <TuitionCard key={post.id} post={post} t={t} locale={locale} />
+                            ))}
+                        </div>
                     )}
                 </div>
             </section>
@@ -289,12 +404,46 @@ export default function Welcome({
                     <div className="grid gap-8 lg:grid-cols-2">
                         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm lg:p-12 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-4 -mt-4"></div>
-                            <div className="relative"><div className="mb-8 flex items-center gap-4"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-700"><Users className="h-7 w-7" /></div><h3 className="text-2xl font-bold text-slate-900">{str(t?.how?.guardians_title)}</h3></div><ul className="space-y-6">{stepsGuardians.map((step, i) => (<li key={i} className="flex items-start gap-4"><div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-sm shadow-md">{(i + 1).toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}</div><p className="pt-1 text-slate-700 font-medium">{step}</p></li>))}</ul></div>
+                            <div className="relative">
+                                <div className="mb-8 flex items-center gap-4">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                                        <Users className="h-7 w-7" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-slate-900">{str(t?.how?.guardians_title)}</h3>
+                                </div>
+                                <ul className="space-y-6">
+                                    {stepsGuardians.map((step, i) => (
+                                        <li key={i} className="flex items-start gap-4">
+                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-sm shadow-md">
+                                                {(i + 1).toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}
+                                            </div>
+                                            <p className="pt-1 text-slate-700 font-medium">{step}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         </div>
 
                         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm lg:p-12 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-bl-full -mr-4 -mt-4"></div>
-                            <div className="relative"><div className="mb-8 flex items-center gap-4"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-700"><BookMarked className="h-7 w-7" /></div><h3 className="text-2xl font-bold text-slate-900">{str(t?.how?.tutors_title)}</h3></div><ul className="space-y-6">{stepsTutors.map((step, i) => (<li key={i} className="flex items-start gap-4"><div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white font-bold text-sm shadow-md">{(i + 1).toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}</div><p className="pt-1 text-slate-700 font-medium">{step}</p></li>))}</ul></div>
+                            <div className="relative">
+                                <div className="mb-8 flex items-center gap-4">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                                        <BookMarked className="h-7 w-7" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-slate-900">{str(t?.how?.tutors_title)}</h3>
+                                </div>
+                                <ul className="space-y-6">
+                                    {stepsTutors.map((step, i) => (
+                                        <li key={i} className="flex items-start gap-4">
+                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white font-bold text-sm shadow-md">
+                                                {(i + 1).toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}
+                                            </div>
+                                            <p className="pt-1 text-slate-700 font-medium">{step}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -302,13 +451,27 @@ export default function Welcome({
 
             {!auth.user && canRegister && (
                 <section className="bg-blue-900 py-24 relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-10"><svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)" /></svg></div>
+                    <div className="absolute inset-0 opacity-10">
+                        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
+                                </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#grid)" />
+                        </svg>
+                    </div>
                     <div className="relative mx-auto max-w-4xl px-4 text-center">
                         <h2 className="mb-6 text-4xl font-extrabold text-white md:text-5xl">{str(t?.cta?.title)}</h2>
                         <p className="mb-10 text-xl text-blue-200">{str(t?.cta?.description)}</p>
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
-                            <Link href={register()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-8 py-4 font-bold text-white shadow-lg transition hover:bg-amber-400 hover:-translate-y-1 hover:shadow-xl">{str(t?.cta?.create_account)}<ArrowRight className="h-5 w-5" /></Link>
-                            <Link href={login()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-800 px-8 py-4 font-bold text-white border border-blue-700 transition hover:bg-blue-700">{str(t?.cta?.sign_in)}</Link>
+                            <Link href={register()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-8 py-4 font-bold text-white shadow-lg transition hover:bg-amber-400 hover:-translate-y-1 hover:shadow-xl">
+                                {str(t?.cta?.create_account)}
+                                <ArrowRight className="h-5 w-5" />
+                            </Link>
+                            <Link href={login()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-800 px-8 py-4 font-bold text-white border border-blue-700 transition hover:bg-blue-700">
+                                {str(t?.cta?.sign_in)}
+                            </Link>
                         </div>
                     </div>
                 </section>
@@ -316,16 +479,25 @@ export default function Welcome({
 
             <footer className="bg-slate-900 py-8 text-slate-400">
                 <div className="mx-auto max-w-6xl px-4 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white"><BookOpen className="h-6 w-6 text-blue-500" />{str(t?.brand?.tuition)}<span className="text-amber-500">{str(t?.brand?.media)}</span></div>
+                    <div className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
+                        <AppLogoIcon className="h-8 w-8 rounded-lg" />
+                        {str(t?.brand?.tuition)}
+                        <span className="text-amber-500">{str(t?.brand?.media)}</span>
+                    </div>
                     <p className="text-sm">{replaceVars(str(t?.footer?.copyright), { year: new Date().getFullYear() })}</p>
                     <div className="flex gap-6 text-sm font-medium">
-                        <Link href="#" className="hover:text-white transition">{str(t?.footer?.terms)}</Link>
-                        <Link href="#" className="hover:text-white transition">{str(t?.footer?.privacy)}</Link>
-                        <Link href="#" className="hover:text-white transition">{str(t?.footer?.contact)}</Link>
+                        <Link href="#" className="hover:text-white transition">
+                            {str(t?.footer?.terms)}
+                        </Link>
+                        <Link href="#" className="hover:text-white transition">
+                            {str(t?.footer?.privacy)}
+                        </Link>
+                        <Link href="#" className="hover:text-white transition">
+                            {str(t?.footer?.contact)}
+                        </Link>
                     </div>
                 </div>
             </footer>
         </div>
     );
 }
-

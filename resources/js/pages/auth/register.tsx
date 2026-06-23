@@ -75,15 +75,45 @@ export default function Register() {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="phone">Phone number</Label>
-                                <Input
-                                    id="phone"
-                                    type="tel"
-                                    required
-                                    tabIndex={3}
-                                    autoComplete="tel"
-                                    name="phone"
-                                    placeholder="+8801XXXXXXXXX"
-                                />
+                                <div className="flex rounded-md border border-input focus-within:ring-[3px] focus-within:ring-ring/50">
+                                    <span className="flex items-center border-r border-input bg-muted px-3 text-sm text-muted-foreground">
+                                        +88
+                                    </span>
+                                    <Input
+                                        id="phone"
+                                        type="tel"
+                                        required
+                                        tabIndex={3}
+                                        autoComplete="tel-national"
+                                        inputMode="numeric"
+                                        pattern="01[0-9]{9}"
+                                        minLength={11}
+                                        name="phone"
+                                        placeholder="01812345678"
+                                        title="Enter an 11-digit mobile number starting with 01 (e.g. 01812345678)."
+                                        className="border-0 shadow-none focus-visible:ring-0"
+                                        onInvalid={(event) => {
+                                            event.currentTarget.setCustomValidity(
+                                                'Please enter an 11-digit mobile number starting with 01 (e.g. 01812345678).',
+                                            );
+                                        }}
+                                        onInput={(event) => {
+                                            event.currentTarget.setCustomValidity('');
+                                            const digits = event.currentTarget.value.replace(/\D/g, '');
+                                            const normalized = digits.startsWith('88') && digits.length > 11
+                                                ? digits.slice(-11)
+                                                : digits.startsWith('01')
+                                                    ? digits.slice(0, 11)
+                                                    : digits.startsWith('1')
+                                                        ? `0${digits.slice(0, 10)}`
+                                                        : digits.length > 11
+                                                            ? digits.slice(-11)
+                                                            : digits;
+
+                                            event.currentTarget.value = normalized.slice(0, 11);
+                                        }}
+                                    />
+                                </div>
                                 <InputError message={errors.phone} />
                             </div>
 
@@ -121,6 +151,7 @@ export default function Register() {
                                 <PasswordInput
                                     id="password"
                                     required
+                                    minLength={4}
                                     tabIndex={4}
                                     autoComplete="new-password"
                                     name="password"
@@ -136,6 +167,7 @@ export default function Register() {
                                 <PasswordInput
                                     id="password_confirmation"
                                     required
+                                    minLength={4}
                                     tabIndex={5}
                                     autoComplete="new-password"
                                     name="password_confirmation"

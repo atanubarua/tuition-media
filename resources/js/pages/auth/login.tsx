@@ -35,18 +35,41 @@ export default function Login({
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    required
-                                    autoFocus
-                                    tabIndex={1}
-                                    autoComplete="email"
-                                    placeholder="email@example.com"
-                                />
-                                <InputError message={errors.email} />
+                                <Label htmlFor="phone">Phone number</Label>
+                                <div className="flex rounded-md border border-input focus-within:ring-[3px] focus-within:ring-ring/50">
+                                    <span className="flex items-center border-r border-input bg-muted px-3 text-sm text-muted-foreground">
+                                        +88
+                                    </span>
+                                    <Input
+                                        id="phone"
+                                        type="tel"
+                                        name="phone"
+                                        required
+                                        autoFocus
+                                        tabIndex={1}
+                                        autoComplete="tel-national"
+                                        inputMode="numeric"
+                                        pattern="01[0-9]{9}"
+                                        minLength={11}
+                                        placeholder="01812345678"
+                                        className="border-0 shadow-none focus-visible:ring-0"
+                                        onInput={(event) => {
+                                            const digits = event.currentTarget.value.replace(/\D/g, '');
+                                            const normalized = digits.startsWith('88') && digits.length > 11
+                                                ? digits.slice(-11)
+                                                : digits.startsWith('01')
+                                                    ? digits.slice(0, 11)
+                                                    : digits.startsWith('1')
+                                                        ? `0${digits.slice(0, 10)}`
+                                                        : digits.length > 11
+                                                            ? digits.slice(-11)
+                                                            : digits;
+
+                                            event.currentTarget.value = normalized.slice(0, 11);
+                                        }}
+                                    />
+                                </div>
+                                <InputError message={errors.phone} />
                             </div>
 
                             <div className="grid gap-2">
@@ -117,5 +140,5 @@ export default function Login({
 
 Login.layout = {
     title: 'Log in to your account',
-    description: 'Enter your email and password below to log in',
+    description: 'Enter your phone number and password below to log in',
 };

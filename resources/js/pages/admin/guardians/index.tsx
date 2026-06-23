@@ -301,6 +301,7 @@ export default function AdminGuardiansIndex({ guardians, filters }: Props) {
                             <Input
                                 id="guardian-password"
                                 type="password"
+                                minLength={4}
                                 value={data.password}
                                 onChange={(event) => setData('password', event.target.value)}
                             />
@@ -314,6 +315,7 @@ export default function AdminGuardiansIndex({ guardians, filters }: Props) {
                             <Input
                                 id="guardian-password-confirmation"
                                 type="password"
+                                minLength={4}
                                 value={data.password_confirmation}
                                 onChange={(event) => setData('password_confirmation', event.target.value)}
                             />

@@ -10,6 +10,7 @@ class FindTutorController extends Controller
 {
     public function index(Request $request)
     {
+        $classLevel = trim($request->string('class_level')->toString());
         $query = User::where('role', 'tutor')
             ->select(['id', 'name', 'gender'])
             ->whereHas('tutorProfile')
@@ -18,6 +19,8 @@ class FindTutorController extends Controller
                     'id',
                     'user_id',
                     'teachable_levels',
+                    'teachable_classes',
+                    'teachable_groups',
                     'teachable_mediums',
                     'experience_months',
                     'profile_photo',
@@ -49,11 +52,32 @@ class FindTutorController extends Controller
             });
         }
 
-        // Filter by subject
-        if ($request->filled('subject')) {
-            $subject = $request->subject;
-            $query->whereHas('tutorProfile.subjects', function ($q) use ($subject) {
-                $q->where('name', 'like', "%{$subject}%");
+        if ($classLevel !== '') {
+            $query->whereHas('tutorProfile', function ($profileQuery) use ($classLevel, $request): void {
+                $legacyMap = [
+                    'nursery' => 'primary',
+                    'kg' => 'primary',
+                    '1' => 'primary',
+                    '2' => 'primary',
+                    '3' => 'primary',
+                    '4' => 'primary',
+                    '5' => 'primary',
+                    '6' => 'high_school',
+                    '7' => 'high_school',
+                    '8' => 'high_school',
+                    '9' => 'high_school',
+                    '10' => 'high_school',
+                    '11' => 'college',
+                    '12' => 'college',
+                ];
+
+                $profileQuery->where(function ($q) use ($classLevel, $legacyMap): void {
+                    $q->whereJsonContains('teachable_classes', $classLevel);
+                });
+
+                if (in_array($classLevel, ['9', '10', '11', '12'], true) && $request->filled('academic_group')) {
+                    $profileQuery->whereJsonContains('teachable_groups', $request->string('academic_group')->toString());
+                }
             });
         }
 
@@ -73,6 +97,8 @@ class FindTutorController extends Controller
                 'tutor_profile' => $tutor->tutorProfile ? [
                     'id' => $tutor->tutorProfile->id,
                     'teachable_levels' => $tutor->tutorProfile->teachable_levels,
+                    'teachable_classes' => $tutor->tutorProfile->teachable_classes,
+                    'teachable_groups' => $tutor->tutorProfile->teachable_groups,
                     'teachable_mediums' => $tutor->tutorProfile->teachable_mediums,
                     'experience_months' => $tutor->tutorProfile->experience_months,
                     'profile_photo' => $tutor->tutorProfile->profile_photo,
@@ -108,9 +134,13 @@ class FindTutorController extends Controller
         return Inertia::render('FindTutors', [
             'tutors' => $tutors,
             'universities' => $universities,
+            'divisions'    => \Illuminate\Support\Facades\DB::table('divisions')->select('id', 'name')->orderBy('name')->get(),
+            'districts'    => \Illuminate\Support\Facades\DB::table('districts')->select('id', 'division_id', 'name')->orderBy('name')->get(),
+            'subdistricts' => \Illuminate\Support\Facades\DB::table('subdistricts')->select('id', 'district_id', 'name', 'type')->orderBy('name')->get(),
             'filters' => [
                 'location' => $request->location ?? '',
-                'subject' => $request->subject ?? '',
+                'class_level' => $request->class_level ?? '',
+                'academic_group' => $request->academic_group ?? '',
                 'gender' => $request->gender ?? 'any',
                 'university' => $request->university ?? '',
             ],

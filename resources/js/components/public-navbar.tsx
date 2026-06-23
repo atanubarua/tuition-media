@@ -7,7 +7,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { BookOpen, ChevronDown, LayoutDashboard, LogOut, User } from 'lucide-react';
+import { ChevronDown, LayoutDashboard, LogOut, User } from 'lucide-react';
+import AppLogoIcon from '@/components/app-logo-icon';
 
 type PublicNavbarProps = {
     canRegister?: boolean;
@@ -35,11 +36,16 @@ export default function PublicNavbar({
         <nav className={`${isFixed ? 'fixed top-0 left-0 right-0' : 'sticky top-0'} z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md transition-all`}>
             <div className={`mx-auto flex ${maxWidthClass} items-center justify-between px-4 py-4 lg:px-8`}>
                 <div className="flex items-center gap-10">
-                    <Link href="/" className="flex items-center gap-2 text-2xl font-bold tracking-tight text-blue-900">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-                            <BookOpen className="h-5 w-5" />
+                    <Link href="/" className="flex items-center gap-3 text-blue-900">
+                        <AppLogoIcon className="h-10 w-10 shrink-0 rounded-xl shadow-sm shadow-blue-600/20" />
+                        <div className="flex flex-col leading-none">
+                            <span className="text-lg font-extrabold tracking-tight text-blue-900 sm:text-xl">
+                                Faruqe Sir
+                            </span>
+                            <span className="text-[0.95rem] font-bold tracking-[0.08em] text-amber-500 sm:text-base">
+                                Tuition Media
+                            </span>
                         </div>
-                        Tuition<span className="text-amber-500">Media</span>
                     </Link>
 
                     <div className="hidden md:flex items-center gap-6">

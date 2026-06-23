@@ -23,13 +23,30 @@ class ProfileController extends Controller
             ->with(['subjects:id,name', 'preferredLocations:id,district_id,name,type'])
             ->first();
 
+        $legacyClasses = [
+            'primary' => ['nursery', 'kg', '1', '2', '3', '4', '5'],
+            'high_school' => ['6', '7', '8', '9', '10'],
+            'college' => ['11', '12'],
+            'honors' => [],
+        ];
+
+        $profileData = $profile ? [
+            ...$profile->toArray(),
+            'teachable_classes' => !empty($profile->teachable_classes)
+                ? $profile->teachable_classes
+                : collect($profile->teachable_levels ?? [])
+                    ->flatMap(fn ($level) => $legacyClasses[$level] ?? [])
+                    ->unique()
+                    ->values()
+                    ->all(),
+            'teachable_groups' => $profile->teachable_groups ?? [],
+            'subject_ids' => $profile->subjects->pluck('id')->values(),
+            'preferred_location_ids' => $profile->preferredLocations->pluck('id')->values(),
+        ] : null;
+
         return Inertia::render('tutor/profile/edit', [
             ...$this->formProps(),
-            'profile' => $profile ? [
-                ...$profile->toArray(),
-                'subject_ids' => $profile->subjects->pluck('id')->values(),
-                'preferred_location_ids' => $profile->preferredLocations->pluck('id')->values(),
-            ] : null,
+            'profile' => $profileData,
         ]);
     }
 
@@ -45,17 +62,32 @@ class ProfileController extends Controller
             'department' => ['required', 'string', 'max:100'],
             'academic_year' => ['required', 'integer', 'between:1,5'],
             'intake_year' => ['required', 'integer', 'min:1990', 'max:' . now()->year],
-            'teachable_levels' => ['required', 'array', 'min:1'],
-            'teachable_levels.*' => ['in:primary,high_school,college,honors'],
+            'teachable_classes' => ['required', 'array', 'min:1'],
+            'teachable_classes.*' => ['in:nursery,kg,1,2,3,4,5,6,7,8,9,10,11,12'],
+            'teachable_groups' => ['nullable', 'array'],
+            'teachable_groups.*' => ['in:science,commerce,arts'],
             'teachable_mediums' => ['required', 'array', 'min:1'],
             'teachable_mediums.*' => ['in:bangla,english,madrasha,other'],
             'subject_ids' => ['required', 'array', 'min:1'],
             'subject_ids.*' => ['integer', 'exists:subjects,id'],
             'preferred_location_ids' => ['required', 'array', 'min:1'],
             'preferred_location_ids.*' => ['integer', 'exists:subdistricts,id'],
-            'experience_months' => ['required', 'integer', 'min:1', 'max:600'],
+            'experience_months' => ['nullable', 'integer', 'min:0', 'max:600'],
             'bio' => ['nullable', 'string', 'max:1000'],
+        ], [], [
+            'university_id' => 'university',
         ]);
+
+        if (
+            array_intersect($validated['teachable_classes'], ['9', '10', '11', '12']) !== []
+            && empty($validated['teachable_groups'] ?? [])
+        ) {
+            return back()
+                ->withErrors(['teachable_groups' => 'Select at least one group for classes 9-12.'])
+                ->withInput();
+        }
+
+        $validated['experience_months'] = $validated['experience_months'] ?? 0;
 
         DB::transaction(function () use ($request, $validated): void {
             $profile = TutorProfile::updateOrCreate(

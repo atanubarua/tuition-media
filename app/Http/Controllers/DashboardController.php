@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\TuitionApplication;
 use App\Models\TuitionPost;
+use App\Models\TutorRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -76,6 +79,7 @@ class DashboardController extends Controller
                         'shortlistedApplications' => TuitionApplication::where('status', 'shortlisted')->count(),
                         'hiredApplications' => TuitionApplication::where('status', 'hired')->count(),
                         'contactInterested' => TuitionApplication::where('status', 'interested')->count(),
+                        'tutorRequestsPending' => TutorRequest::where('status', 'pending')->count(),
                         'commissionUnpaid' => TuitionApplication::where('status', 'hired')
                             ->where('commission_payment_status', 'unpaid')
                             ->count(),
@@ -88,6 +92,34 @@ class DashboardController extends Controller
                     ],
                     'recent_posts' => $recentPosts,
                     'recent_applications' => $recentApplications,
+                    'recent_tutor_requests' => TutorRequest::query()
+                        ->with(['guardian:id,name', 'tutor:id,name'])
+                        ->latest()
+                        ->get()
+                        ->groupBy(fn (TutorRequest $requestRow) => $requestRow->request_group_id ?: "legacy-{$requestRow->id}")
+                        ->map(function (Collection $group) {
+                            /** @var TutorRequest $first */
+                            $first = $group->first();
+
+                            return [
+                                'id' => $first->id,
+                                'status' => $first->status,
+                                'subject' => $group->map(fn (TutorRequest $requestRow) => trim('Class ' . ($requestRow->class_level ?? '-') . ($requestRow->academic_group ? " ({$requestRow->academic_group})" : '')))->filter()->join(', '),
+                                'location' => $this->resolveLocationLabel($first->division_id, $first->district_id, $first->subdistrict_id),
+                                'created_at' => $first->created_at,
+                                'guardian' => $first->guardian ? [
+                                    'id' => $first->guardian->id,
+                                    'name' => $first->guardian->name,
+                                ] : null,
+                                'tutor' => $first->tutor ? [
+                                    'id' => $first->tutor->id,
+                                    'name' => $first->tutor->name,
+                                ] : null,
+                            ];
+                        })
+                        ->sortByDesc('created_at')
+                        ->take(6)
+                        ->values(),
                 ],
             ]);
         }
@@ -189,5 +221,18 @@ class DashboardController extends Controller
         return Inertia::render('dashboard', [
             'role' => $role,
         ]);
+    }
+
+    private function resolveLocationLabel(?int $divisionId, ?int $districtId, ?int $subdistrictId): ?string
+    {
+        if (! $divisionId && ! $districtId && ! $subdistrictId) {
+            return null;
+        }
+
+        $division = $divisionId ? DB::table('divisions')->where('id', $divisionId)->value('name') : null;
+        $district = $districtId ? DB::table('districts')->where('id', $districtId)->value('name') : null;
+        $subdistrict = $subdistrictId ? DB::table('subdistricts')->where('id', $subdistrictId)->value('name') : null;
+
+        return collect([$subdistrict, $district, $division])->filter()->implode(', ') ?: null;
     }
 }

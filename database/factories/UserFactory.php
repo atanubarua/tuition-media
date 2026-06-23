@@ -26,7 +26,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'phone' => fake()->unique()->numerify('01#########'),
+            'phone' => '+88'.fake()->unique()->numerify('01#########'),
             'email' => fake()->unique()->safeEmail(),
             'role' => User::ROLE_GUARDIAN,
             'email_verified_at' => now(),

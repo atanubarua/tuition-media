@@ -12,7 +12,8 @@ class TuitionJobController extends Controller
     public function index(Request $request): Response
     {
         $location = trim($request->string('location')->toString());
-        $subject = trim($request->string('subject')->toString());
+        $classLevel = trim($request->string('class_level')->toString());
+        $academicGroup = trim($request->string('academic_group')->toString());
         $gender = trim($request->string('gender')->toString());
         $level = trim($request->string('level')->toString());
         $minSalary = $request->integer('min_salary');
@@ -33,12 +34,14 @@ class TuitionJobController extends Controller
                         ->orWhere('subdistricts.name', 'like', "%{$location}%");
                 });
             })
-            ->when($subject !== '', function ($query) use ($subject): void {
-                $query->where(function ($q) use ($subject): void {
-                    $q->where('tuition_posts.title', 'like', "%{$subject}%")
-                        ->orWhereHas('students.subjects', function ($subjectQuery) use ($subject): void {
-                            $subjectQuery->where('subjects.name', 'like', "%{$subject}%");
-                        });
+            ->when($classLevel !== '', function ($query) use ($classLevel): void {
+                $query->whereHas('students', function ($studentQuery) use ($classLevel): void {
+                    $studentQuery->where('class_level', $classLevel);
+                });
+            })
+            ->when($academicGroup !== '', function ($query) use ($academicGroup): void {
+                $query->whereHas('students', function ($studentQuery) use ($academicGroup): void {
+                    $studentQuery->where('academic_group', $academicGroup);
                 });
             })
             ->when(in_array($gender, ['male', 'female', 'any'], true), function ($query) use ($gender): void {
@@ -72,7 +75,8 @@ class TuitionJobController extends Controller
             'posts' => $posts,
             'filters' => [
                 'location' => $location,
-                'subject' => $subject,
+                'class_level' => $classLevel,
+                'academic_group' => $academicGroup,
                 'gender' => in_array($gender, ['male', 'female', 'any'], true) ? $gender : 'any',
                 'level' => $level,
                 'min_salary' => $minSalary > 0 ? $minSalary : null,

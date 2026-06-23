@@ -2,6 +2,7 @@
 
 namespace App\Concerns;
 
+use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rules\Password;
 
@@ -12,9 +13,9 @@ trait PasswordValidationRules
      *
      * @return array<int, ValidationRule|array<mixed>|string>
      */
-    protected function passwordRules(): array
+    protected function passwordRules(?string $role = null): array
     {
-        return ['required', 'string', Password::default(), 'confirmed'];
+        return ['required', 'string', $this->passwordRuleForRole($role), 'confirmed'];
     }
 
     /**
@@ -25,5 +26,16 @@ trait PasswordValidationRules
     protected function currentPasswordRules(): array
     {
         return ['required', 'string', 'current_password'];
+    }
+
+    /**
+     * Get the password rule for a given role.
+     */
+    protected function passwordRuleForRole(?string $role = null): Password
+    {
+        return match ($role) {
+            User::ROLE_GUARDIAN, User::ROLE_TUTOR => Password::min(4),
+            default => Password::default(),
+        };
     }
 }

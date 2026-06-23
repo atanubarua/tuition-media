@@ -55,6 +55,7 @@ type AdminDashboardData = {
         shortlistedApplications: number;
         hiredApplications: number;
         contactInterested: number;
+        tutorRequestsPending: number;
         commissionUnpaid: number;
         commissionPartial: number;
         commissionDueAmount: number;
@@ -74,6 +75,15 @@ type AdminDashboardData = {
         commission_payment_status: 'unpaid' | 'partial' | 'paid' | null;
         created_at: string;
         post: { id: number; tuition_code: string | null; title: string | null } | null;
+        tutor: { id: number; name: string } | null;
+    }>;
+    recent_tutor_requests: Array<{
+        id: number;
+        status: 'pending' | 'reviewed' | 'approved' | 'rejected' | 'archived';
+        subject: string | null;
+        location: string | null;
+        created_at: string;
+        guardian: { id: number; name: string } | null;
         tutor: { id: number; name: string } | null;
     }>;
 };
@@ -96,7 +106,7 @@ const STATUS_STYLES = {
 
 export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, admin_dashboard }: Props) {
     if (role === 'admin' && admin_dashboard) {
-        const { stats, recent_posts, recent_applications } = admin_dashboard;
+        const { stats, recent_posts, recent_applications, recent_tutor_requests } = admin_dashboard;
 
         return (
             <>
@@ -126,6 +136,7 @@ export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, a
                     <div className="grid gap-4 xl:grid-cols-4">
                         <StatCard title="Hired Applications" value={stats.hiredApplications} href="/admin/applications?status=hired" colorClassName="bg-green-50 border-green-200" />
                         <StatCard title="Interested Applications" value={stats.contactInterested} href="/admin/applications?status=interested" colorClassName="bg-cyan-50 border-cyan-200" />
+                        <StatCard title="Tutor Requests" value={stats.tutorRequestsPending} href="/admin/tutor-requests?status=pending" colorClassName="bg-indigo-50 border-indigo-200" />
                         <StatCard title="Commission Unpaid" value={stats.commissionUnpaid} href="/admin/commissions?payment_status=unpaid" colorClassName="bg-rose-50 border-rose-200" />
                         <StatCard title="Commission Partial" value={stats.commissionPartial} href="/admin/commissions?payment_status=partial" colorClassName="bg-fuchsia-50 border-fuchsia-200" />
                     </div>
@@ -143,7 +154,7 @@ export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, a
                         </CardContent>
                     </Card>
 
-                    <div className="grid gap-4 xl:grid-cols-2">
+                    <div className="grid gap-4 xl:grid-cols-3">
                         <Card>
                             <CardHeader>
                                 <CardTitle>Recent Tuition Posts</CardTitle>
@@ -204,6 +215,33 @@ export default function Dashboard({ role, guardian_dashboard, tutor_dashboard, a
                                                     </span>
                                                 )}
                                             </div>
+                                        </div>
+                                    ))
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Recent Tutor Requests</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {recent_tutor_requests.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">No tutor requests found.</p>
+                                ) : (
+                                    recent_tutor_requests.map((requestRow) => (
+                                        <div key={requestRow.id} className="space-y-2 rounded-md border p-3">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <Link href="/admin/tutor-requests" className="text-sm font-medium hover:text-blue-600">
+                                                    {requestRow.tutor?.name ?? 'Unknown tutor'}
+                                                </Link>
+                                                <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium capitalize text-indigo-700">
+                                                    {requestRow.status}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">
+                                                {requestRow.subject ?? 'No subject'} | {requestRow.location ?? 'No location'} | {requestRow.guardian?.name ?? 'Unknown guardian'}
+                                            </p>
                                         </div>
                                     ))
                                 )}

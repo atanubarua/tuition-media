@@ -18,6 +18,8 @@ class TutorProfile extends Model
         'academic_year',
         'intake_year',
         'teachable_levels',
+        'teachable_classes',
+        'teachable_groups',
         'teachable_mediums',
         'experience_months',
         'bio',
@@ -29,6 +31,8 @@ class TutorProfile extends Model
     {
         return [
             'teachable_levels' => 'array',
+            'teachable_classes' => 'array',
+            'teachable_groups' => 'array',
             'teachable_mediums' => 'array',
             'is_verified' => 'boolean',
         ];

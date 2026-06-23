@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
+use App\Support\BangladeshPhoneNumber;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -15,13 +16,15 @@ class CreateNewUser implements CreatesNewUsers
 
     public function create(array $input): User
     {
+        $input['phone'] = BangladeshPhoneNumber::normalize($input['phone'] ?? null);
+
         $role = $input['role'] ?? User::ROLE_GUARDIAN;
 
         Validator::make($input, [
             ...$this->profileRules(),
             'role' => ['required', Rule::in([User::ROLE_GUARDIAN, User::ROLE_TUTOR])],
             'gender' => [$role === User::ROLE_TUTOR ? 'required' : 'nullable', Rule::in(['male', 'female'])],
-            'password' => $this->passwordRules(),
+            'password' => $this->passwordRules($role),
         ])->validate();
 
         return User::create([

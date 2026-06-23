@@ -82,7 +82,7 @@ class LargeTestDataSeeder extends Seeder
         for ($i = 1; $i <= self::GUARDIANS; $i++) {
             $rows[] = [
                 'name' => "Guardian {$i}",
-                'phone' => sprintf('019%08d', $i),
+                'phone' => '+88'.sprintf('019%08d', $i),
                 'gender' => $i % 2 === 0 ? 'male' : 'female',
                 'email' => "guardian{$i}.stress@example.com",
                 'role' => User::ROLE_GUARDIAN,
@@ -110,7 +110,7 @@ class LargeTestDataSeeder extends Seeder
         for ($i = 1; $i <= self::TUTORS; $i++) {
             $rows[] = [
                 'name' => "Tutor {$i}",
-                'phone' => sprintf('018%08d', $i),
+                'phone' => '+88'.sprintf('018%08d', $i),
                 'gender' => $i % 2 === 0 ? 'male' : 'female',
                 'email' => "tutor{$i}.stress@example.com",
                 'role' => User::ROLE_TUTOR,
@@ -280,12 +280,16 @@ class LargeTestDataSeeder extends Seeder
             $studentCount = random_int(1, 2);
             for ($s = 1; $s <= $studentCount; $s++) {
                 $level = ['primary', 'high_school', 'college', 'honors'][array_rand(['primary', 'high_school', 'college', 'honors'])];
+                $classLevel = $level === 'honors' ? null : (string) random_int(1, 12);
 
                 $studentRows[] = [
                     'tuition_post_id' => $postId,
                     'student_name' => 'Student '.random_int(1000, 999999),
                     'academic_level' => $level,
-                    'class_level' => $level === 'honors' ? null : (string) random_int(1, 12),
+                    'class_level' => $classLevel,
+                    'academic_group' => $classLevel !== null && in_array($classLevel, ['9', '10', '11', '12'], true)
+                        ? ['science', 'commerce', 'arts'][array_rand(['science', 'commerce', 'arts'])]
+                        : null,
                     'honors_subject' => $level === 'honors' ? 'Subject '.random_int(1, 10) : null,
                     'medium' => ['bangla', 'english', 'madrasha'][array_rand(['bangla', 'english', 'madrasha'])],
                     'created_at' => $now,

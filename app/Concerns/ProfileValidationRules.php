@@ -3,6 +3,7 @@
 namespace App\Concerns;
 
 use App\Models\User;
+use App\Support\BangladeshPhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
@@ -60,8 +61,12 @@ trait ProfileValidationRules
         return [
             'required',
             'string',
-            'max:20',
-            'regex:/^[0-9+\\-()\\s]+$/',
+            'max:15',
+            function (string $attribute, mixed $value, \Closure $fail): void {
+                if (BangladeshPhoneNumber::normalize(is_string($value) ? $value : null) === null) {
+                    $fail('Please enter a valid Bangladesh mobile number.');
+                }
+            },
             $userId === null
                 ? Rule::unique(User::class)
                 : Rule::unique(User::class)->ignore($userId),

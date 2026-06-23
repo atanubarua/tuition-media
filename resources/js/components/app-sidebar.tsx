@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, HandCoins, LayoutGrid, Users, UserCircle } from 'lucide-react';
+import { BookOpen, HandCoins, LayoutGrid, Users, UserCircle, MessageSquareMore, FileText, Send, Search } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import {
@@ -33,6 +33,16 @@ export function AppSidebar() {
                       href: '/guardian/tuition-posts',
                       icon: BookOpen,
                   } satisfies NavItem,
+                  {
+                      title: 'All Applications',
+                      href: '/guardian/applications',
+                      icon: FileText,
+                  } satisfies NavItem,
+                  {
+                      title: 'My Tutor Requests',
+                      href: '/guardian/tutor-requests',
+                      icon: Send,
+                  } satisfies NavItem,
               ]
             : []),
          ...(auth.user?.role === 'admin'
@@ -58,6 +68,11 @@ export function AppSidebar() {
                        icon: UserCircle,
                    } satisfies NavItem,
                    {
+                       title: 'Tutor Requests',
+                       href: '/admin/tutor-requests',
+                       icon: MessageSquareMore,
+                   } satisfies NavItem,
+                   {
                        title: 'Commissions',
                        href: '/admin/commissions',
                        icon: HandCoins,
@@ -67,14 +82,20 @@ export function AppSidebar() {
         ...(auth.user?.role === 'tutor'
             ? [
                   {
-                      title: 'My Profile',
-                      href: '/tutor/profile/edit',
-                      icon: UserCircle,
+                      title: 'Browse Tuition Jobs',
+                      href: '/tuition-jobs',
+                      icon: Search,
+                      newTab: true,
                   } satisfies NavItem,
                   {
                       title: 'My Applications',
                       href: '/tutor/applications',
                       icon: BookOpen,
+                  } satisfies NavItem,
+                  {
+                      title: 'My Profile',
+                      href: '/tutor/profile/edit',
+                      icon: UserCircle,
                   } satisfies NavItem,
               ]
             : []),

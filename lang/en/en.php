@@ -132,6 +132,7 @@ return [
         'modal_about' => 'About',
         'modal_education' => 'Education',
         'modal_subjects' => 'Subjects',
+        'modal_levels' => 'Class Levels',
         'modal_not_specified' => 'Not specified',
         'modal_graduated' => 'Graduated :year',
         'modal_year' => 'Year :n',

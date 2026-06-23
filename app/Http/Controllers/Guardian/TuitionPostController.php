@@ -77,6 +77,61 @@ class TuitionPostController extends Controller
         ]);
     }
 
+    public function show(Request $request, TuitionPost $tuitionPost): Response
+    {
+        $this->ensureOwner($request, $tuitionPost);
+
+        $tuitionPost->load([
+            'students.subjects:id,name',
+            'preferredUniversities:id,name',
+        ]);
+
+        $applicationCounts = $tuitionPost->applications()
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $location = collect([
+            DB::table('subdistricts')->where('id', $tuitionPost->subdistrict_id)->value('name'),
+            DB::table('districts')->where('id', $tuitionPost->district_id)->value('name'),
+            DB::table('divisions')->where('id', $tuitionPost->division_id)->value('name'),
+        ])->filter()->implode(', ');
+
+        return Inertia::render('guardian/tuition-posts/show', [
+            'post' => [
+                'id'                          => $tuitionPost->id,
+                'tuition_code'                => $tuitionPost->tuition_code,
+                'title'                       => $tuitionPost->title,
+                'status'                      => $tuitionPost->status,
+                'location'                    => $location ?: null,
+                'address_line'                => $tuitionPost->address_line,
+                'salary_type'                 => $tuitionPost->salary_type,
+                'salary_min'                  => $tuitionPost->salary_min,
+                'salary_max'                  => $tuitionPost->salary_max,
+                'days_per_week'               => $tuitionPost->days_per_week,
+                'preferred_time_slots'        => $tuitionPost->preferred_time_slots ?? [],
+                'duration_months'             => $tuitionPost->duration_months,
+                'tutor_gender_preference'     => $tuitionPost->tutor_gender_preference,
+                'required_experience_months'  => $tuitionPost->required_experience_months,
+                'special_requirements'        => $tuitionPost->special_requirements,
+                'published_at'                => $tuitionPost->published_at?->toDateString(),
+                'created_at'                  => $tuitionPost->created_at->toDateString(),
+                'preferred_universities'      => $tuitionPost->preferredUniversities->map(fn ($u) => $u->name)->values(),
+                'application_counts'          => $applicationCounts,
+                'students'                    => $tuitionPost->students->map(fn ($s) => [
+                    'id'             => $s->id,
+                    'student_name'   => $s->student_name,
+                    'academic_level' => $s->academic_level,
+                    'class_level'    => $s->class_level,
+                    'academic_group' => $s->academic_group,
+                    'honors_subject' => $s->honors_subject,
+                    'medium'         => $s->medium,
+                    'subjects'       => $s->subjects->pluck('name')->values(),
+                ])->values(),
+            ],
+        ]);
+    }
+
     public function edit(Request $request, TuitionPost $tuitionPost): Response
     {
         $this->ensureOwner($request, $tuitionPost);
@@ -181,6 +236,7 @@ class TuitionPostController extends Controller
             'students.*.student_name' => ['nullable', 'string', 'max:255'],
             'students.*.academic_level' => ['required', 'in:primary,high_school,college,honors'],
             'students.*.class_level' => ['nullable', 'string', 'max:20'],
+            'students.*.academic_group' => ['nullable', 'in:science,commerce,arts'],
             'students.*.honors_subject' => ['nullable', 'string', 'max:255'],
             'students.*.medium' => ['required', 'in:bangla,english,madrasha,other'],
             'students.*.subject_ids' => ['required', 'array', 'min:1'],
@@ -261,6 +317,12 @@ class TuitionPostController extends Controller
                     "students.{$index}.class_level" => 'Class level is required for this academic level.',
                 ]);
             }
+
+            if (in_array($student['class_level'] ?? null, ['9', '10', '11', '12'], true) && blank($student['academic_group'] ?? null)) {
+                throw ValidationException::withMessages([
+                    "students.{$index}.academic_group" => 'Group is required for class 9 to 12.',
+                ]);
+            }
         }
 
         return $validated;
@@ -294,6 +356,7 @@ class TuitionPostController extends Controller
                 'student_name' => $studentData['student_name'] ?? '',
                 'academic_level' => $studentData['academic_level'],
                 'class_level' => $studentData['class_level'] ?? null,
+                'academic_group' => $studentData['academic_group'] ?? null,
                 'honors_subject' => $studentData['honors_subject'] ?? null,
                 'medium' => $studentData['medium'],
             ]);

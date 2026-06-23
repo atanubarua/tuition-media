@@ -4,9 +4,11 @@ use App\Http\Controllers\Guardian\ApplicationsController as GuardianAllApplicati
 use App\Http\Controllers\Guardian\TuitionApplicationController as GuardianApplicationController;
 use App\Http\Controllers\Admin\GuardianController as AdminGuardianController;
 use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
+use App\Http\Controllers\Admin\TutorRequestController as AdminTutorRequestController;
 use App\Http\Controllers\Admin\TuitionApplicationController as AdminTuitionApplicationController;
 use App\Http\Controllers\Admin\TuitionPostController as AdminTuitionPostController;
 use App\Http\Controllers\Admin\TutorController as AdminTutorController;
+use App\Http\Controllers\Guardian\TutorRequestController as GuardianTutorRequestController;
 use App\Http\Controllers\Guardian\TuitionPostController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
@@ -57,6 +59,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('admin/applications', [AdminTuitionApplicationController::class, 'index'])
         ->middleware(EnsureUserIsAdmin::class)
         ->name('admin.applications.index');
+    Route::get('admin/applications/best-match', [AdminTuitionApplicationController::class, 'bestMatch'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.applications.best-match');
     Route::patch('admin/applications/{application}/contact-status', [AdminTuitionApplicationController::class, 'updateContactStatus'])
         ->middleware(EnsureUserIsAdmin::class)
         ->name('admin.applications.contact-status');
@@ -78,9 +83,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
      Route::get('admin/tutors/search', [AdminTutorController::class, 'search'])
          ->middleware(EnsureUserIsAdmin::class)
          ->name('admin.tutors.search');
-     Route::get('admin/tutors/{tutor}', [AdminTutorController::class, 'show'])
+    Route::get('admin/tutors/{tutor}', [AdminTutorController::class, 'show'])
          ->middleware(EnsureUserIsAdmin::class)
          ->name('admin.tutors.show');
+    Route::get('admin/tutor-requests', [AdminTutorRequestController::class, 'index'])
+         ->middleware(EnsureUserIsAdmin::class)
+         ->name('admin.tutor-requests.index');
+    Route::patch('admin/tutor-requests/{tutorRequest}', [AdminTutorRequestController::class, 'update'])
+         ->middleware(EnsureUserIsAdmin::class)
+         ->name('admin.tutor-requests.update');
+    Route::patch('admin/tutor-requests/{tutorRequest}/assign', [AdminTutorRequestController::class, 'assign'])
+         ->middleware(EnsureUserIsAdmin::class)
+         ->name('admin.tutor-requests.assign');
      Route::get('admin/guardians', [AdminGuardianController::class, 'index'])
          ->middleware(EnsureUserIsAdmin::class)
          ->name('admin.guardians.index');
@@ -95,7 +109,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->name('admin.guardians.destroy');
 
     Route::resource('guardian/tuition-posts', TuitionPostController::class)
-        ->except(['show'])
         ->names('guardian.tuition-posts');
 
     Route::get('guardian/applications', GuardianAllApplicationsController::class)->name('guardian.applications.all');
@@ -107,9 +120,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('tuition-posts/{tuitionPost}/apply', [TuitionApplicationController::class, 'store'])->name('tuition-posts.apply');
     Route::get('tutor/applications', [TuitionApplicationController::class, 'index'])->name('tutor.applications.index');
+    Route::get('guardian/tutor-requests', [GuardianTutorRequestController::class, 'index'])->name('guardian.tutor-requests.index');
+    Route::post('guardian/tutor-requests', [GuardianTutorRequestController::class, 'store'])->name('guardian.tutor-requests.store');
 
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/mark-read', [NotificationController::class, 'markRead'])->name('notifications.mark-read');
+    Route::get('notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
 });
 
 require __DIR__.'/settings.php';

@@ -306,7 +306,7 @@ export default function TuitionPostShow({
                                         <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
                                             <p className="font-medium mb-1">{tr('profile_incomplete_title')}</p>
                                             <p className="text-xs mb-2">{tr('profile_incomplete_body')}</p>
-                                            <a href="/tutor/profile/edit" className="block w-full rounded-lg bg-amber-500 py-2 text-center text-sm font-semibold text-white hover:bg-amber-600">
+                                            <a href="/tutor/profile/edit" target="_blank" rel="noopener noreferrer" className="block w-full rounded-lg bg-amber-500 py-2 text-center text-sm font-semibold text-white hover:bg-amber-600">
                                                 {tr('complete_profile')}
                                             </a>
                                         </div>

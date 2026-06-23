@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\CommissionPayment;
 use App\Models\Notification;
 use App\Models\TuitionApplication;
+use App\Models\TuitionPost;
 use App\Models\User;
+use App\Support\TutorMatchScorer;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -86,7 +89,8 @@ class TuitionApplicationController extends Controller
                 'tutor_id' => $tutorId > 0 ? (string) $tutorId : '',
                 'tutor_label' => $tutorId > 0
                     ? (function () use ($tutorId) {
-                        $tutor = \App\Models\User::find($tutorId, ['id', 'name', 'email']);
+                        $tutor = User::find($tutorId, ['id', 'name', 'email']);
+
                         return $tutor ? "{$tutor->name} ({$tutor->email})" : '';
                     })()
                     : '',
@@ -102,6 +106,34 @@ class TuitionApplicationController extends Controller
                 ->orderBy('universities.name')
                 ->pluck('universities.name')
                 ->values(),
+        ]);
+    }
+
+    public function bestMatch(Request $request): JsonResponse
+    {
+        $tuitionCode = strtoupper(str_replace('-', '', trim($request->string('tuition_code')->toString())));
+
+        abort_if($tuitionCode === '', 422, 'A tuition code is required.');
+
+        $post = TuitionPost::query()
+            ->with(['students.subjects:id', 'preferredUniversities:id'])
+            ->whereRaw('REPLACE(UPPER(tuition_code), "-", "") = ?', [$tuitionCode])
+            ->first();
+
+        abort_if($post === null, 404, 'Tuition post not found.');
+
+        $applications = TuitionApplication::query()
+            ->where('tuition_post_id', $post->id)
+            ->whereIn('status', ['shortlisted', 'interested'])
+            ->with([
+                'tutor:id,name,gender',
+                'tutor.tutorProfile.subjects:id',
+                'tutor.tutorProfile.preferredLocations:id',
+            ])
+            ->get();
+
+        return response()->json([
+            'results' => TutorMatchScorer::scoreApplications($post, $applications),
         ]);
     }
 
@@ -143,8 +175,8 @@ class TuitionApplicationController extends Controller
                 'user_id' => $tuitionPost->guardian_id,
                 'type' => $nextStatus,
                 'title' => $statusMessages[$nextStatus],
-                'message' => 'Tutor: ' . $application->tutor->name . ' for "' . ($tuitionPost->title ?? 'your tuition post') . '".',
-                'link' => '/guardian/tuition-posts/' . $tuitionPost->id . '/applications',
+                'message' => 'Tutor: '.$application->tutor->name.' for "'.($tuitionPost->title ?? 'your tuition post').'".',
+                'link' => '/guardian/tuition-posts/'.$tuitionPost->id.'/applications',
             ]);
         }
 
@@ -166,7 +198,7 @@ class TuitionApplicationController extends Controller
                 ->whereIn('status', ['shortlisted', 'interested'])
                 ->exists();
 
-            if (!$hasViableCandidates) {
+            if (! $hasViableCandidates) {
                 $tuitionPost->update(['status' => 'published']);
             }
         }
@@ -320,7 +352,7 @@ class TuitionApplicationController extends Controller
                     'user_id' => $rejectedApp->tutor_id,
                     'type' => 'rejected',
                     'title' => 'Position has been filled',
-                    'message' => 'The tuition post "' . ($application->tuitionPost?->title ?? 'a tuition post') . '" has been filled by another tutor.',
+                    'message' => 'The tuition post "'.($application->tuitionPost?->title ?? 'a tuition post').'" has been filled by another tutor.',
                     'link' => '/tutor/applications',
                 ]);
             }
@@ -329,7 +361,7 @@ class TuitionApplicationController extends Controller
                 'user_id' => $application->tutor_id,
                 'type' => 'hired',
                 'title' => 'You have been hired',
-                'message' => 'You were marked hired for "' . ($application->tuitionPost?->title ?? 'a tuition post') . '".',
+                'message' => 'You were marked hired for "'.($application->tuitionPost?->title ?? 'a tuition post').'".',
                 'link' => '/tutor/applications',
             ]);
 
@@ -339,8 +371,8 @@ class TuitionApplicationController extends Controller
                     'user_id' => $application->tuitionPost->guardian_id,
                     'type' => 'hired',
                     'title' => 'A tutor has been hired for your post',
-                    'message' => 'Tutor: ' . $application->tutor->name . ' has been hired for "' . ($application->tuitionPost->title ?? 'your tuition post') . '".',
-                    'link' => '/guardian/tuition-posts/' . $application->tuitionPost->id . '/applications',
+                    'message' => 'Tutor: '.$application->tutor->name.' has been hired for "'.($application->tuitionPost->title ?? 'your tuition post').'".',
+                    'link' => '/guardian/tuition-posts/'.$application->tuitionPost->id.'/applications',
                 ]);
             }
         });

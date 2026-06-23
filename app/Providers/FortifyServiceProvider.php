@@ -4,11 +4,13 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Support\BangladeshPhoneNumber;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -41,6 +43,25 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+        Fortify::authenticateUsing(function (Request $request) {
+            $phone = BangladeshPhoneNumber::normalize($request->input('phone'));
+
+            if ($phone === null) {
+                throw ValidationException::withMessages([
+                    'phone' => __('Please enter a valid Bangladesh mobile number.'),
+                ]);
+            }
+
+            $user = User::query()
+                ->whereIn('phone', BangladeshPhoneNumber::variants($phone))
+                ->first();
+
+            if (! $user || ! password_verify($request->string('password')->toString(), $user->password)) {
+                return null;
+            }
+
+            return $user;
+        });
 
         Fortify::redirects('login', function () {
             return match (request()->user()->role) {
@@ -110,7 +131,9 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+            $phone = BangladeshPhoneNumber::normalize($request->input(Fortify::username()));
+            $identifier = $phone ?? $request->input(Fortify::username());
+            $throttleKey = Str::transliterate(Str::lower($identifier.'|'.$request->ip()));
 
             return Limit::perMinute(5)->by($throttleKey);
         });

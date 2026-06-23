@@ -215,7 +215,7 @@ export default function TuitionPostIndex({ posts, filters, statuses }: Props) {
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <Button variant="ghost" size="icon" asChild>
-                                                        <Link href={`/tuition-posts/${post.id}`}>
+                                                        <Link href={`/guardian/tuition-posts/${post.id}`}>
                                                             <Eye className="size-4" />
                                                         </Link>
                                                     </Button>

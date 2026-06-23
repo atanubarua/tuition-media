@@ -132,6 +132,7 @@ return [
         'modal_about' => 'পরিচিতি',
         'modal_education' => 'শিক্ষা',
         'modal_subjects' => 'বিষয়সমূহ',
+        'modal_levels' => 'শ্রেণি স্তর',
         'modal_not_specified' => 'নির্ধারিত নয়',
         'modal_graduated' => 'পাস :year',
         'modal_year' => ':n বর্ষ',

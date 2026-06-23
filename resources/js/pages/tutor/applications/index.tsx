@@ -134,7 +134,20 @@ export default function TutorApplicationsIndex({ applications, filters }: Props)
                             ) : (
                                 applications.data.map((app) => (
                                     <tr key={app.id} className="border-t">
-                                        <td className="px-4 py-3 font-mono text-xs">{app.post.tuition_code ?? '-'}</td>
+                                        <td className="px-4 py-3 font-mono text-xs">
+                                            {app.post.id ? (
+                                                <a
+                                                    href={`/tuition-posts/${app.post.id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-primary hover:underline"
+                                                >
+                                                    {app.post.tuition_code ?? '-'}
+                                                </a>
+                                            ) : (
+                                                app.post.tuition_code ?? '-'
+                                            )}
+                                        </td>
                                         <td className="px-4 py-3">
                                             <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[app.status]}`}>
                                                 {app.status}

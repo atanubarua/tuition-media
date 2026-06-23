@@ -1,9 +1,10 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { Search, X, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 type Post = {
     id: number;
@@ -78,60 +79,55 @@ export default function AdminTuitionPostsIndex({ posts, filters, statuses }: Pro
                     <p className="text-sm text-muted-foreground">All tuition posts across the platform.</p>
                 </div>
 
-                <div className="flex items-end gap-4">
-                <div className="grid flex-1 gap-4 md:grid-cols-3">
-                    <div>
-                        <label htmlFor="tuition_code" className="mb-2 block text-sm font-medium">
-                            Filter by tuition code
-                        </label>
-                        <Input
-                            id="tuition_code"
-                            value={tuitionCode}
-                            onChange={(event) => setTuitionCode(event.target.value)}
-                            placeholder="e.g. TIDABC1234"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="guardian_name" className="mb-2 block text-sm font-medium">
-                            Filter by guardian name
-                        </label>
-                        <Input
-                            id="guardian_name"
-                            value={guardianName}
-                            onChange={(event) => setGuardianName(event.target.value)}
-                            placeholder="e.g. Rahim"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="status" className="mb-2 block text-sm font-medium">
-                            Filter by status
-                        </label>
-                        <Select value={status || 'all'} onValueChange={(value) => setStatus(value === 'all' ? '' : value)}>
-                            <SelectTrigger id="status" className="w-full">
-                                <SelectValue placeholder="All statuses" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All statuses</SelectItem>
-                                {statuses.map((itemStatus) => (
-                                    <SelectItem key={itemStatus} value={itemStatus}>
-                                        {itemStatus}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-                    {(tuitionCode || guardianName || status) && (
-                        <button
+                <div className="rounded-lg border bg-card p-4">
+                    <div className="flex flex-wrap items-end gap-3">
+                        <div className="relative flex-1 basis-64 min-w-[220px]">
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                id="tuition_code"
+                                value={tuitionCode}
+                                onChange={(event) => setTuitionCode(event.target.value)}
+                                placeholder="Search by tuition code"
+                                className="pl-9"
+                            />
+                        </div>
+                        <div className="relative flex-1 basis-64 min-w-[220px]">
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                id="guardian_name"
+                                value={guardianName}
+                                onChange={(event) => setGuardianName(event.target.value)}
+                                placeholder="Search by guardian name"
+                                className="pl-9"
+                            />
+                        </div>
+                        <div className="w-full sm:w-auto">
+                            <Select value={status || 'all'} onValueChange={(value) => setStatus(value === 'all' ? '' : value)}>
+                                <SelectTrigger id="status" className="w-full min-w-[180px]">
+                                    <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                                    <SelectValue placeholder="All statuses" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All statuses</SelectItem>
+                                    {statuses.map((itemStatus) => (
+                                        <SelectItem key={itemStatus} value={itemStatus}>
+                                            {itemStatus}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <Button
                             type="button"
                             onClick={() => { setTuitionCode(''); setGuardianName(''); setStatus(''); }}
-                            className="mb-0.5 flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border px-3 text-sm text-muted-foreground hover:bg-muted"
+                            variant="outline"
+                            disabled={!tuitionCode && !guardianName && !status}
                             title="Clear filters"
                         >
-                            <X className="h-4 w-4" />
+                            <X className="mr-2 h-4 w-4" />
                             Clear
-                        </button>
-                    )}
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto rounded-lg border">

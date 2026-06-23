@@ -16,6 +16,7 @@ type Student = {
     student_name: string;
     academic_level: '' | 'primary' | 'high_school' | 'college' | 'honors';
     class_level: string;
+    academic_group: '' | 'science' | 'commerce' | 'arts';
     honors_subject: string;
     medium: 'bangla' | 'english' | 'madrasha' | 'other';
     subject_ids: number[];
@@ -83,6 +84,7 @@ const studentSchema = z.object({
     student_name: z.string(),
     academic_level: z.enum(['primary', 'high_school', 'college', 'honors', '']),
     class_level: z.string(),
+    academic_group: z.enum(['science', 'commerce', 'arts', '']),
     honors_subject: z.string(),
     medium: z.enum(['bangla', 'english', 'madrasha', 'other']),
     subject_ids: z.array(z.number()),
@@ -142,6 +144,7 @@ export default function TuitionPostForm({
                 student_name: '',
                 academic_level: '',
                 class_level: '',
+                academic_group: '',
                 honors_subject: '',
                 medium: 'bangla',
                 subject_ids: [],
@@ -156,7 +159,7 @@ export default function TuitionPostForm({
 
     const filteredDistricts = districts.filter((d) => d.division_id === data.division_id);
     const filteredSubdistricts = subdistricts.filter((s) => s.district_id === data.district_id);
-    const subdistrictOptions = filteredSubdistricts.map((s) => ({ value: s.id, label: s.type ? `${s.name} (${s.type})` : s.name }));
+    const subdistrictOptions = filteredSubdistricts.map((s) => ({ value: s.id, label: s.name }));
     const selectedSubdistrict = subdistrictOptions.find((o) => o.value === data.subdistrict_id) ?? null;
 
     const universityOptions = universities.map((u) => ({ value: u.id, label: u.name }));
@@ -232,6 +235,14 @@ export default function TuitionPostForm({
                         code: z.ZodIssueCode.custom,
                         path: ['students', index, 'class_level'],
                         message: 'Class level is required for this academic level.',
+                    });
+                }
+
+                if (['9', '10', '11', '12'].includes(student.class_level) && !student.academic_group.trim()) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        path: ['students', index, 'academic_group'],
+                        message: 'Group is required for class 9 to 12.',
                     });
                 }
 
@@ -374,6 +385,11 @@ export default function TuitionPostForm({
                             <option value="published">Published</option>
                         </select>
                     </div>
+                </div>
+
+                <div>
+                    <h3 className="text-sm font-medium">Tuition Location</h3>
+                    <p className="text-xs text-muted-foreground">Where will the tuition sessions take place?</p>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
@@ -607,6 +623,7 @@ export default function TuitionPostForm({
                                         student_name: '',
                                         academic_level: '',
                                         class_level: '',
+                                        academic_group: '',
                                         honors_subject: '',
                                         medium: 'bangla',
                                         subject_ids: [],
@@ -647,7 +664,7 @@ export default function TuitionPostForm({
                                     <select
                                         className="mt-1 w-full rounded-md border bg-background px-3 py-2 disabled:opacity-60"
                                         value={student.class_level}
-                                        onChange={(e) => updateStudent(index, { class_level: e.target.value })}
+                                        onChange={(e) => updateStudent(index, { class_level: e.target.value, academic_group: '' })}
                                         disabled={student.academic_level === '' || student.academic_level === 'honors'}
                                     >
                                         <option value="">
@@ -664,6 +681,23 @@ export default function TuitionPostForm({
                                     </select>
                                     <InputError message={errors[`students.${index}.class_level`]} />
                                 </div>
+
+                                {['9', '10', '11', '12'].includes(student.class_level) && (
+                                    <div>
+                                        <Label>Group <span className="text-destructive">*</span></Label>
+                                        <select
+                                            className="mt-1 w-full rounded-md border bg-background px-3 py-2"
+                                            value={student.academic_group}
+                                            onChange={(e) => updateStudent(index, { academic_group: e.target.value as Student['academic_group'] })}
+                                        >
+                                            <option value="">Select group</option>
+                                            <option value="science">Science</option>
+                                            <option value="commerce">Commerce</option>
+                                            <option value="arts">Arts</option>
+                                        </select>
+                                        <InputError message={errors[`students.${index}.academic_group`]} />
+                                    </div>
+                                )}
 
                                 <div>
                                     <Label>Medium <span className="text-destructive">*</span></Label>

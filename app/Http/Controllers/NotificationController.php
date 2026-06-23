@@ -30,4 +30,15 @@ class NotificationController extends Controller
 
         return back();
     }
+
+    public function read(Request $request, Notification $notification): RedirectResponse
+    {
+        abort_unless($notification->user_id === $request->user()->id, 403);
+
+        if (is_null($notification->read_at)) {
+            $notification->update(['read_at' => now()]);
+        }
+
+        return redirect($notification->link ?: route('dashboard'));
+    }
 }
