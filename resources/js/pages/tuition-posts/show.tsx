@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import PublicNavbar from '@/components/public-navbar';
+import PublicFooter from '@/components/public-footer';
 
 type Subject = { id: number; name: string };
 
@@ -382,9 +383,14 @@ export default function TuitionPostShow({
                 </div>
             </div>
 
-            <footer className="mt-12 border-t bg-gray-900 py-8 text-center text-sm text-gray-400">
-                <p>© {new Date().getFullYear()} TuitionMedia. {locale === 'bn' ? 'সর্বস্বত্ব সংরক্ষিত।' : 'All rights reserved.'}</p>
-            </footer>
+            <PublicFooter
+                labels={{
+                    name: (translations as any)?.brand?.name,
+                    tuition: (translations as any)?.brand?.tuition,
+                    media: (translations as any)?.brand?.media,
+                    copyright: `© :year Faruqe Sir Tuition Media. ${locale === 'bn' ? 'সর্বস্বত্ব সংরক্ষিত।' : 'All rights reserved.'}`,
+                }}
+            />
 
             {/* Apply modal */}
             <Dialog open={open} onOpenChange={setOpen}>

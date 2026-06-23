@@ -1,27 +1,29 @@
 <?php
 
-use App\Http\Controllers\Guardian\ApplicationsController as GuardianAllApplicationsController;
-use App\Http\Controllers\Guardian\TuitionApplicationController as GuardianApplicationController;
-use App\Http\Controllers\Admin\GuardianController as AdminGuardianController;
 use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
-use App\Http\Controllers\Admin\TutorRequestController as AdminTutorRequestController;
+use App\Http\Controllers\Admin\GuardianController as AdminGuardianController;
 use App\Http\Controllers\Admin\TuitionApplicationController as AdminTuitionApplicationController;
 use App\Http\Controllers\Admin\TuitionPostController as AdminTuitionPostController;
 use App\Http\Controllers\Admin\TutorController as AdminTutorController;
-use App\Http\Controllers\Guardian\TutorRequestController as GuardianTutorRequestController;
-use App\Http\Controllers\Guardian\TuitionPostController;
+use App\Http\Controllers\Admin\TutorRequestController as AdminTutorRequestController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\TuitionPostShowController;
 use App\Http\Controllers\FindTutorController;
-use App\Http\Controllers\TuitionJobController;
+use App\Http\Controllers\Guardian\ApplicationsController as GuardianAllApplicationsController;
+use App\Http\Controllers\Guardian\TuitionApplicationController as GuardianApplicationController;
+use App\Http\Controllers\Guardian\TuitionPostController;
+use App\Http\Controllers\Guardian\TutorRequestController as GuardianTutorRequestController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocationSuggestController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SubjectSuggestController;
+use App\Http\Controllers\TuitionJobController;
+use App\Http\Controllers\TuitionPostShowController;
 use App\Http\Controllers\Tutor\ProfileController;
 use App\Http\Controllers\Tutor\TuitionApplicationController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Bind 'tutor' route parameter to User model with role='tutor'
@@ -35,11 +37,12 @@ Route::bind('guardian', function ($value) {
 });
 
 Route::get('/', HomeController::class)->name('home');
-Route::post('/lang', function (\Illuminate\Http\Request $request) {
+Route::post('/lang', function (Request $request) {
     $locale = $request->input('locale');
     if (in_array($locale, ['en', 'bn'], true)) {
         session(['locale' => $locale]);
     }
+
     return back();
 })->name('lang.switch');
 Route::get('/find-tutors', [FindTutorController::class, 'index'])->name('find-tutors');
@@ -71,42 +74,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('admin/applications/{application}/hire', [AdminTuitionApplicationController::class, 'hire'])
         ->middleware(EnsureUserIsAdmin::class)
         ->name('admin.applications.hire');
-     Route::get('admin/commissions', [AdminCommissionController::class, 'index'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.commissions.index');
-     Route::patch('admin/commissions/{application}/payment', [AdminCommissionController::class, 'updatePayment'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.commissions.payment');
-     Route::get('admin/tutors', [AdminTutorController::class, 'index'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.tutors.index');
-     Route::get('admin/tutors/search', [AdminTutorController::class, 'search'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.tutors.search');
+    Route::get('admin/commissions', [AdminCommissionController::class, 'index'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.commissions.index');
+    Route::patch('admin/commissions/{application}/payment', [AdminCommissionController::class, 'updatePayment'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.commissions.payment');
+    Route::get('admin/tutors', [AdminTutorController::class, 'index'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.tutors.index');
+    Route::get('admin/tutors/search', [AdminTutorController::class, 'search'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.tutors.search');
     Route::get('admin/tutors/{tutor}', [AdminTutorController::class, 'show'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.tutors.show');
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.tutors.show');
     Route::get('admin/tutor-requests', [AdminTutorRequestController::class, 'index'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.tutor-requests.index');
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.tutor-requests.index');
     Route::patch('admin/tutor-requests/{tutorRequest}', [AdminTutorRequestController::class, 'update'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.tutor-requests.update');
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.tutor-requests.update');
     Route::patch('admin/tutor-requests/{tutorRequest}/assign', [AdminTutorRequestController::class, 'assign'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.tutor-requests.assign');
-     Route::get('admin/guardians', [AdminGuardianController::class, 'index'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.guardians.index');
-     Route::post('admin/guardians', [AdminGuardianController::class, 'store'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.guardians.store');
-     Route::put('admin/guardians/{guardian}', [AdminGuardianController::class, 'update'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.guardians.update');
-     Route::delete('admin/guardians/{guardian}', [AdminGuardianController::class, 'destroy'])
-         ->middleware(EnsureUserIsAdmin::class)
-         ->name('admin.guardians.destroy');
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.tutor-requests.assign');
+    Route::get('admin/guardians', [AdminGuardianController::class, 'index'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.guardians.index');
+    Route::post('admin/guardians', [AdminGuardianController::class, 'store'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.guardians.store');
+    Route::put('admin/guardians/{guardian}', [AdminGuardianController::class, 'update'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.guardians.update');
+    Route::delete('admin/guardians/{guardian}', [AdminGuardianController::class, 'destroy'])
+        ->middleware(EnsureUserIsAdmin::class)
+        ->name('admin.guardians.destroy');
 
     Route::resource('guardian/tuition-posts', TuitionPostController::class)
         ->names('guardian.tuition-posts');
@@ -126,6 +129,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/mark-read', [NotificationController::class, 'markRead'])->name('notifications.mark-read');
     Route::get('notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+
+    Route::post('push/subscribe', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
+    Route::delete('push/subscribe', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
 });
 
 require __DIR__.'/settings.php';

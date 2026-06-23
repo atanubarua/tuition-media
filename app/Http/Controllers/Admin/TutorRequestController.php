@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\TuitionApplication;
 use App\Models\TuitionPost;
 use App\Models\TuitionPostStudent;
@@ -21,8 +22,8 @@ class TutorRequestController extends Controller
 {
     public function index(Request $request): Response
     {
-        $status   = $request->string('status')->toString();
-        $tutor    = trim($request->string('tutor')->toString());
+        $status = $request->string('status')->toString();
+        $tutor = trim($request->string('tutor')->toString());
         $guardian = trim($request->string('guardian')->toString());
         $location = trim($request->string('location')->toString());
 
@@ -50,24 +51,22 @@ class TutorRequestController extends Controller
                 'created_at',
             ])
             ->when($status !== '', fn ($q) => $q->where('status', $status))
-            ->when($tutor !== '', fn ($q) => $q->whereHas('tutor', fn ($u) =>
-                $u->where('name', 'like', "%{$tutor}%")
-                  ->orWhere('phone', 'like', "%{$tutor}%")
+            ->when($tutor !== '', fn ($q) => $q->whereHas('tutor', fn ($u) => $u->where('name', 'like', "%{$tutor}%")
+                ->orWhere('phone', 'like', "%{$tutor}%")
             ))
-            ->when($guardian !== '', fn ($q) => $q->whereHas('guardian', fn ($u) =>
-                $u->where('name', 'like', "%{$guardian}%")
-                  ->orWhere('phone', 'like', "%{$guardian}%")
+            ->when($guardian !== '', fn ($q) => $q->whereHas('guardian', fn ($u) => $u->where('name', 'like', "%{$guardian}%")
+                ->orWhere('phone', 'like', "%{$guardian}%")
             ))
             ->when($location !== '', function ($q) use ($location) {
                 $like = "%{$location}%";
                 $subdistrictIds = DB::table('subdistricts')->where('name', 'like', $like)->pluck('id');
-                $districtIds    = DB::table('districts')->where('name', 'like', $like)->pluck('id');
-                $divisionIds    = DB::table('divisions')->where('name', 'like', $like)->pluck('id');
+                $districtIds = DB::table('districts')->where('name', 'like', $like)->pluck('id');
+                $divisionIds = DB::table('divisions')->where('name', 'like', $like)->pluck('id');
 
                 $q->where(function ($inner) use ($subdistrictIds, $districtIds, $divisionIds) {
                     $inner->whereIn('subdistrict_id', $subdistrictIds)
-                          ->orWhereIn('district_id', $districtIds)
-                          ->orWhereIn('division_id', $divisionIds);
+                        ->orWhereIn('district_id', $districtIds)
+                        ->orWhereIn('division_id', $divisionIds);
                 });
             })
             ->latest()
@@ -132,8 +131,8 @@ class TutorRequestController extends Controller
         return Inertia::render('admin/tutor-requests/index', [
             'requests' => $requests,
             'filters' => [
-                'status'   => $status,
-                'tutor'    => $tutor,
+                'status' => $status,
+                'tutor' => $tutor,
                 'guardian' => $guardian,
                 'location' => $location,
             ],
@@ -213,7 +212,7 @@ class TutorRequestController extends Controller
             foreach ($groupRequests as $index => $groupRequest) {
                 TuitionPostStudent::create([
                     'tuition_post_id' => $tuitionPost->id,
-                    'student_name' => 'Student ' . ($index + 1),
+                    'student_name' => 'Student '.($index + 1),
                     'academic_level' => $this->mapAcademicLevel((string) $groupRequest->class_level),
                     'class_level' => $groupRequest->class_level,
                     'academic_group' => $groupRequest->academic_group,
@@ -248,6 +247,17 @@ class TutorRequestController extends Controller
             return $tuitionPost;
         });
 
+        // Notify the guardian that their requested tutor has been assigned
+        // (emergency push event). The assigned post has status 'assigned', so
+        // this does not trigger the 'new_tuition_post' admin push.
+        Notification::create([
+            'user_id' => $leadRequest->guardian_id,
+            'type' => 'tutor_request_assigned',
+            'title' => 'Your requested tutor has been assigned',
+            'message' => 'A tutor has been assigned for your request "'.$tuitionPost->title.'".',
+            'link' => '/guardian/tuition-posts/'.$tuitionPost->id.'/applications',
+        ]);
+
         return to_route('admin.applications.index', [
             'tuition_code' => $tuitionPost->tuition_code,
         ])->with('toast', [
@@ -270,7 +280,7 @@ class TutorRequestController extends Controller
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, TutorRequest>
+     * @return Collection<int, TutorRequest>
      */
     private function loadGroupRequests(TutorRequest $tutorRequest): Collection
     {
@@ -301,37 +311,37 @@ class TutorRequestController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, TutorRequest>  $groupRequests
+     * @param  Collection<int, TutorRequest>  $groupRequests
      */
     private function buildTuitionTitle(Collection $groupRequests): string
     {
         $parts = $groupRequests->map(function (TutorRequest $request): string {
-            $label = 'Class ' . ($request->class_level ?? '-');
+            $label = 'Class '.($request->class_level ?? '-');
 
             if ($request->academic_group) {
-                $label .= ' ' . $request->academic_group;
+                $label .= ' '.$request->academic_group;
             }
 
             return $label;
         })->filter()->values();
 
-        return 'Tutor Request - ' . $parts->implode(', ');
+        return 'Tutor Request - '.$parts->implode(', ');
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, TutorRequest>  $groupRequests
+     * @param  Collection<int, TutorRequest>  $groupRequests
      */
     private function buildSpecialRequirements(Collection $groupRequests): ?string
     {
         $lines = $groupRequests->map(function (TutorRequest $request): string {
-            $line = 'Class ' . ($request->class_level ?? '-');
+            $line = 'Class '.($request->class_level ?? '-');
 
             if ($request->academic_group) {
-                $line .= ' (' . $request->academic_group . ')';
+                $line .= ' ('.$request->academic_group.')';
             }
 
             if ($request->message) {
-                $line .= ': ' . $request->message;
+                $line .= ': '.$request->message;
             }
 
             return $line;

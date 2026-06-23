@@ -29,9 +29,14 @@ class AppServiceProvider extends ServiceProvider
 
         Inertia::share('unread_notifications_count', function () {
             $user = auth()->user();
-            if (! $user) return 0;
+            if (! $user) {
+                return 0;
+            }
+
             return Notification::where('user_id', $user->id)->whereNull('read_at')->count();
         });
+
+        Inertia::share('vapid_public_key', fn () => config('webpush.public_key'));
 
         Inertia::share('locale', function () {
             return session('locale', config('app.locale'));
@@ -39,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
 
         Inertia::share('translations', function () {
             $locale = session('locale', config('app.locale'));
+
             return trans($locale);
         });
 

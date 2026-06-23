@@ -5,7 +5,7 @@ import AutocompleteInput from '@/components/autocomplete-input';
 import { login, register } from '@/routes';
 import { toast } from 'sonner';
 import PublicNavbar from '@/components/public-navbar';
-import AppLogoIcon from '@/components/app-logo-icon';
+import PublicFooter from '@/components/public-footer';
 import {
     BookOpen,
     MapPin,
@@ -477,27 +477,17 @@ export default function Welcome({
                 </section>
             )}
 
-            <footer className="bg-slate-900 py-8 text-slate-400">
-                <div className="mx-auto max-w-6xl px-4 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
-                        <AppLogoIcon className="h-8 w-8 rounded-lg" />
-                        {str(t?.brand?.tuition)}
-                        <span className="text-amber-500">{str(t?.brand?.media)}</span>
-                    </div>
-                    <p className="text-sm">{replaceVars(str(t?.footer?.copyright), { year: new Date().getFullYear() })}</p>
-                    <div className="flex gap-6 text-sm font-medium">
-                        <Link href="#" className="hover:text-white transition">
-                            {str(t?.footer?.terms)}
-                        </Link>
-                        <Link href="#" className="hover:text-white transition">
-                            {str(t?.footer?.privacy)}
-                        </Link>
-                        <Link href="#" className="hover:text-white transition">
-                            {str(t?.footer?.contact)}
-                        </Link>
-                    </div>
-                </div>
-            </footer>
+            <PublicFooter
+                labels={{
+                    name: str(t?.brand?.name),
+                    tuition: str(t?.brand?.tuition),
+                    media: str(t?.brand?.media),
+                    copyright: str(t?.footer?.copyright),
+                    terms: str(t?.footer?.terms),
+                    privacy: str(t?.footer?.privacy),
+                    contact: str(t?.footer?.contact),
+                }}
+            />
         </div>
     );
 }

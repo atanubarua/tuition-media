@@ -19,6 +19,7 @@ import { useState } from 'react';
 import ReactSelect from 'react-select';
 import AutocompleteInput from '@/components/autocomplete-input';
 import PublicNavbar from '@/components/public-navbar';
+import PublicFooter from '@/components/public-footer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -535,7 +536,7 @@ export default function FindTutors({
                             </button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-6">
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
                             {tutors.data.map((tutor) => (
                                 <TutorCard key={tutor.id} tutor={tutor} onViewProfile={openProfileModal} t={t} />
                             ))}
@@ -574,148 +575,169 @@ export default function FindTutors({
             {/* Tutor Profile Modal */}
             <Dialog open={!!selectedTutor} onOpenChange={(open) => !open && setSelectedTutor(null)}>
                 {selectedTutor && (
-                    <DialogContent className="w-[94vw] max-w-3xl rounded-2xl bg-white p-0 shadow-2xl sm:rounded-[1.25rem]">
+                    <DialogContent className="flex max-h-[88vh] w-[94vw] max-w-3xl flex-col overflow-hidden rounded-2xl bg-white p-0 shadow-2xl sm:rounded-[1.25rem]">
                         <DialogHeader className="sr-only">
                             <DialogTitle>{selectedTutor.name}</DialogTitle>
                             <DialogDescription>Tutor profile details</DialogDescription>
                         </DialogHeader>
 
-                        <div className="max-h-[88vh] overflow-y-auto overflow-x-hidden bg-slate-50">
-                            <div className="grid gap-0">
-                                <aside className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-b from-slate-100 to-slate-200 p-6 text-slate-900 sm:p-8">
-                                    <div className="absolute -top-16 -right-10 h-36 w-36 rounded-full bg-slate-300/40 blur-2xl" />
-                                    <div className="absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-slate-400/30 blur-2xl" />
-                                    <div className="relative">
-                                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
-                                            <div className="h-24 w-24 overflow-hidden rounded-2xl border border-blue-200 bg-white ring-4 ring-blue-100 shrink-0">
-                                                {selectedTutor.tutor_profile.profile_photo ? (
-                                                    <img src={`/storage/${selectedTutor.tutor_profile.profile_photo}`} alt={selectedTutor.name} className="h-full w-full object-cover" />
-                                                ) : (
-                                                    <div className="flex h-full w-full items-center justify-center text-3xl font-extrabold tracking-wide">
-                                                        {selectedTutor.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <h2 className="text-3xl font-black leading-tight tracking-tight sm:text-[2rem] sm:leading-tight" title={selectedTutor.name}>
+                        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+                            <header className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white sm:p-8">
+                                <div className="absolute -top-16 -right-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+                                <div className="absolute -bottom-16 -left-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+                                <div className="relative">
+                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
+                                        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-white ring-4 ring-white/30 shadow-lg">
+                                            {selectedTutor.tutor_profile.profile_photo ? (
+                                                <img src={`/storage/${selectedTutor.tutor_profile.profile_photo}`} alt={selectedTutor.name} className="h-full w-full object-cover" />
+                                            ) : (
+                                                <div className="flex h-full w-full items-center justify-center text-3xl font-extrabold tracking-wide text-blue-700">
+                                                    {selectedTutor.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h2 className="text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl" title={selectedTutor.name}>
                                                 {selectedTutor.name}
                                             </h2>
-                                        </div>
-                                        <div className={`mt-6 grid gap-3 ${isGraduated(selectedTutor.tutor_profile.academic_year) ? 'sm:grid-cols-2' : ''}`}>
-                                            {isGraduated(selectedTutor.tutor_profile.academic_year) && (
-                                                <div className="rounded-xl border border-slate-300 bg-white/90 p-3">
-                                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">{str(t?.find_tutors?.modal_experience, 'Experience')}</p>
-                                                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                                            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                                                {selectedTutor.tutor_profile.is_verified && (
+                                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold text-white ring-1 ring-white/25">
+                                                        <CheckCircle2 className="h-3.5 w-3.5" />
+                                                        {str(t?.find_tutors?.modal_verified, 'Verified')}
+                                                    </span>
+                                                )}
+                                                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold capitalize text-white ring-1 ring-white/25">
+                                                    <User className="h-3.5 w-3.5" />
+                                                    {selectedTutor.gender}
+                                                </span>
+                                                {isGraduated(selectedTutor.tutor_profile.academic_year) && (
+                                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold text-white ring-1 ring-white/25">
+                                                        <GraduationCap className="h-3.5 w-3.5" />
                                                         {selectedTutor.tutor_profile.experience_months
                                                             ? replaceVars(str(t?.find_tutors?.modal_experience_value, ':years years :months months'), { years: Math.floor(selectedTutor.tutor_profile.experience_months / 12), months: selectedTutor.tutor_profile.experience_months % 12 })
                                                             : str(t?.find_tutors?.new_tutor, 'New Tutor')}
-                                                    </p>
-                                                </div>
-                                            )}
-                                            <div className="rounded-xl border border-slate-300 bg-white/90 p-3">
-                                                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">{str(t?.find_tutors?.modal_gender, 'Gender')}</p>
-                                                <p className="mt-1 text-sm font-semibold text-slate-800">
-                                                    <span className="inline-flex items-center gap-1.5"><User className="h-3.5 w-3.5" />{selectedTutor.gender}</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        {selectedTutor.tutor_profile.occupation === 'employed' && (
-                                            <div className="mt-3 rounded-xl border border-slate-300 bg-white/90 p-3">
-                                                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">{str(t?.find_tutors?.modal_employment, 'Employment')}</p>
-                                                <div className="mt-2 space-y-1.5 text-sm font-semibold text-slate-800">
-                                                    <p className="flex items-start gap-2 leading-snug">
-                                                        <User className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
-                                                        <span>{selectedTutor.tutor_profile.job_title || 'Employee'}</span>
-                                                    </p>
-                                                    <p className="flex items-start gap-2 leading-snug">
-                                                        <Building2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
-                                                        <span>{selectedTutor.tutor_profile.job_organization || str(t?.find_tutors?.modal_not_specified, 'Not specified')}</span>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </aside>
-
-                                <div className="min-w-0 bg-white p-6 sm:p-8">
-                                    <div className="space-y-6">
-                                        {selectedTutor.tutor_profile.bio && (
-                                            <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                                                <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_about, 'About')}</h3>
-                                                <p className="mt-3 text-sm leading-7 text-slate-700">{selectedTutor.tutor_profile.bio}</p>
-                                            </section>
-                                        )}
-                                        <section className="space-y-4">
-                                            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                                                <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_education, 'Education')}</h3>
-                                                <p className="mt-3 text-lg font-bold leading-7 text-slate-900" title={selectedTutor.tutor_profile.university?.name || str(t?.find_tutors?.modal_not_specified, 'Not specified')}>
-                                                    {selectedTutor.tutor_profile.university?.name || str(t?.find_tutors?.modal_not_specified, 'Not specified')}
-                                                </p>
-                                                {selectedTutor.tutor_profile.department && (
-                                                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-medium text-slate-600">
-                                                        <span className="inline-flex items-center gap-1.5" title={selectedTutor.tutor_profile.department}>
-                                                            <BookMarked className="h-3.5 w-3.5 text-slate-500" />{selectedTutor.tutor_profile.department}
-                                                        </span>
-                                                        <span className="inline-flex items-center gap-1.5">
-                                                            <CalendarDays className="h-3.5 w-3.5 text-slate-500" />
-                                                            {isGraduated(selectedTutor.tutor_profile.academic_year)
-                                                                ? graduatedYearLabel(selectedTutor.tutor_profile.intake_year, t)
-                                                                : currentYearLabel(selectedTutor.tutor_profile.academic_year, t)}
-                                                        </span>
-                                                    </div>
+                                                    </span>
                                                 )}
                                             </div>
-                                            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                                <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_subjects, 'Subjects')}</h3>
-                                                <div className="mt-2.5 flex flex-wrap gap-1.5">
-                                                    {selectedTutor.tutor_profile.subjects.map((s) => (
-                                                        <span key={s.id} className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-800">{s.name}</span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                                <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_levels, 'Class Levels')}</h3>
-                                                <div className="mt-2.5 flex flex-wrap gap-1.5">
-                                                    {selectedTutor.tutor_profile.teachable_classes?.length ? (
-                                                        selectedTutor.tutor_profile.teachable_classes.map((level) => (
-                                                            <Badge key={level} variant="secondary" className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-50">
-                                                                {classLabel(level)}
-                                                            </Badge>
-                                                        ))
-                                                    ) : (
-                                                        <p className="text-sm text-slate-500">{str(t?.find_tutors?.modal_not_specified, 'Not specified')}</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                                <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_groups, 'Groups')}</h3>
-                                                <div className="mt-2.5 flex flex-wrap gap-1.5">
-                                                    {selectedTutor.tutor_profile.teachable_groups?.length ? (
-                                                        selectedTutor.tutor_profile.teachable_groups.map((group) => (
-                                                            <Badge key={group} variant="secondary" className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-800 hover:bg-blue-50">
-                                                                {group}
-                                                            </Badge>
-                                                        ))
-                                                    ) : (
-                                                        <p className="text-sm text-slate-500">{str(t?.find_tutors?.modal_not_specified, 'Not specified')}</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </section>
-                                    </div>
-
-                                    <div className="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-end">
-                                        <Button type="button" variant="outline" onClick={() => setSelectedTutor(null)}>
-                                            {str(t?.find_tutors?.modal_close, 'Close')}
-                                        </Button>
-                                        {auth?.user?.role === 'guardian' ? (
-                                            <Button type="button" onClick={openRequestModal} className="bg-blue-600 text-white hover:bg-blue-700">
-                                                Request Tutor
-                                            </Button>
-                                        ) : (
-                                            <div className="text-sm text-slate-500">Log in as a guardian to request this tutor.</div>
-                                        )}
+                                        </div>
                                     </div>
                                 </div>
+                            </header>
+
+                            <div className="min-w-0 space-y-6 p-6 sm:p-8">
+                                {selectedTutor.tutor_profile.bio && (
+                                    <section>
+                                        <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_about, 'About')}</h3>
+                                        <p className="mt-2 text-sm leading-7 text-slate-700">{selectedTutor.tutor_profile.bio}</p>
+                                    </section>
+                                )}
+
+                                <section className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+                                    <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_education, 'Education')}</h3>
+                                    <p className="mt-2 text-lg font-bold leading-7 text-slate-900" title={selectedTutor.tutor_profile.university?.name || str(t?.find_tutors?.modal_not_specified, 'Not specified')}>
+                                        {selectedTutor.tutor_profile.university?.name || str(t?.find_tutors?.modal_not_specified, 'Not specified')}
+                                    </p>
+                                    {selectedTutor.tutor_profile.department && (
+                                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-medium text-slate-600">
+                                            <span className="inline-flex items-center gap-1.5" title={selectedTutor.tutor_profile.department}>
+                                                <BookMarked className="h-3.5 w-3.5 text-slate-500" />{selectedTutor.tutor_profile.department}
+                                            </span>
+                                            <span className="inline-flex items-center gap-1.5">
+                                                <CalendarDays className="h-3.5 w-3.5 text-slate-500" />
+                                                {isGraduated(selectedTutor.tutor_profile.academic_year)
+                                                    ? graduatedYearLabel(selectedTutor.tutor_profile.intake_year, t)
+                                                    : currentYearLabel(selectedTutor.tutor_profile.academic_year, t)}
+                                            </span>
+                                        </div>
+                                    )}
+                                </section>
+
+                                {selectedTutor.tutor_profile.occupation === 'employed' && (
+                                    <section className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+                                        <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_employment, 'Employment')}</h3>
+                                        <div className="mt-2 space-y-1.5 text-sm font-semibold text-slate-800">
+                                            <p className="flex items-start gap-2 leading-snug">
+                                                <User className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
+                                                <span>{selectedTutor.tutor_profile.job_title || 'Employee'}</span>
+                                            </p>
+                                            <p className="flex items-start gap-2 leading-snug">
+                                                <Building2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
+                                                <span>{selectedTutor.tutor_profile.job_organization || str(t?.find_tutors?.modal_not_specified, 'Not specified')}</span>
+                                            </p>
+                                        </div>
+                                    </section>
+                                )}
+
+                                {selectedTutor.tutor_profile.preferred_locations.length > 0 && (
+                                    <section className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+                                        <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_locations, 'Preferred Locations')}</h3>
+                                        <div className="mt-2.5 flex flex-wrap gap-1.5">
+                                            {selectedTutor.tutor_profile.preferred_locations.map((loc) => (
+                                                <span key={loc.id} className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-800">
+                                                    <MapPin className="h-3 w-3" />{loc.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+
+                                <div className="space-y-6">
+                                    <section className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+                                        <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_subjects, 'Subjects')}</h3>
+                                        <div className="mt-2.5 flex flex-wrap gap-1.5">
+                                            {selectedTutor.tutor_profile.subjects.map((s) => (
+                                                <span key={s.id} className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-800">{s.name}</span>
+                                            ))}
+                                        </div>
+                                    </section>
+                                    <section className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+                                        <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_levels, 'Class Levels')}</h3>
+                                        <div className="mt-2.5 flex flex-wrap gap-1.5">
+                                            {selectedTutor.tutor_profile.teachable_classes?.length ? (
+                                                selectedTutor.tutor_profile.teachable_classes.map((level) => (
+                                                    <Badge key={level} variant="secondary" className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-50">
+                                                        {classLabel(level)}
+                                                    </Badge>
+                                                ))
+                                            ) : (
+                                                <p className="text-sm text-slate-500">{str(t?.find_tutors?.modal_not_specified, 'Not specified')}</p>
+                                            )}
+                                        </div>
+                                    </section>
+                                    <section className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+                                        <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{str(t?.find_tutors?.modal_groups, 'Groups')}</h3>
+                                        <div className="mt-2.5 flex flex-wrap gap-1.5">
+                                            {selectedTutor.tutor_profile.teachable_groups?.length ? (
+                                                selectedTutor.tutor_profile.teachable_groups.map((group) => (
+                                                    <Badge key={group} variant="secondary" className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-800 hover:bg-blue-50">
+                                                        {group}
+                                                    </Badge>
+                                                ))
+                                            ) : (
+                                                <p className="text-sm text-slate-500">{str(t?.find_tutors?.modal_not_specified, 'Not specified')}</p>
+                                            )}
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-3 border-t border-slate-200 bg-white px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+                            {auth?.user?.role === 'guardian' ? (
+                                <span className="hidden sm:block" />
+                            ) : (
+                                <p className="text-sm text-slate-500">Log in as a guardian to request this tutor.</p>
+                            )}
+                            <div className="flex gap-3 sm:justify-end">
+                                <Button type="button" variant="outline" onClick={() => setSelectedTutor(null)}>
+                                    {str(t?.find_tutors?.modal_close, 'Close')}
+                                </Button>
+                                {auth?.user?.role === 'guardian' && (
+                                    <Button type="button" onClick={openRequestModal} className="bg-blue-600 text-white hover:bg-blue-700">
+                                        Request Tutor
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </DialogContent>
@@ -883,22 +905,17 @@ export default function FindTutors({
                 )}
             </Dialog>
 
-            <footer className="bg-slate-900 py-12 text-slate-400 mt-auto">
-                <div className="mx-auto max-w-7xl px-4 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
-                        <BookOpen className="h-6 w-6 text-blue-500" />
-                        Tuition<span className="text-amber-500">Media</span>
-                    </div>
-                    <p className="text-sm">
-                        {replaceVars(str(t?.find_tutors?.footer_copyright, '© :year TuitionMedia. All rights reserved.'), { year: new Date().getFullYear() })}
-                    </p>
-                    <div className="flex gap-6 text-sm font-medium">
-                        <Link href="#" className="hover:text-white transition">{str(t?.find_tutors?.footer_terms, 'Terms')}</Link>
-                        <Link href="#" className="hover:text-white transition">{str(t?.find_tutors?.footer_privacy, 'Privacy')}</Link>
-                        <Link href="#" className="hover:text-white transition">{str(t?.find_tutors?.footer_contact, 'Contact')}</Link>
-                    </div>
-                </div>
-            </footer>
+            <PublicFooter
+                labels={{
+                    name: str(t?.brand?.name),
+                    tuition: str(t?.brand?.tuition),
+                    media: str(t?.brand?.media),
+                    copyright: str(t?.find_tutors?.footer_copyright),
+                    terms: str(t?.find_tutors?.footer_terms),
+                    privacy: str(t?.find_tutors?.footer_privacy),
+                    contact: str(t?.find_tutors?.footer_contact),
+                }}
+            />
         </div>
     );
 }

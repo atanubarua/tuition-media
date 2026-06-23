@@ -17,6 +17,7 @@ declare module '@inertiajs/core' {
             sidebarOpen: boolean;
             unread_notifications_count: number;
             latest_notifications: SharedNotification[];
+            vapid_public_key: string | null;
             [key: string]: unknown;
         };
     }

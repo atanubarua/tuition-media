@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import PublicNavbar from '@/components/public-navbar';
+import PublicFooter from '@/components/public-footer';
 import AutocompleteInput from '@/components/autocomplete-input';
 import { MapPin, Calendar, User, Search, GraduationCap, Filter, Loader2, ChevronDown, BookOpen } from 'lucide-react';
 
@@ -334,6 +335,18 @@ export default function TuitionJobsPage({
                     </main>
                 </div>
             </div>
+
+            <PublicFooter
+                labels={{
+                    name: str(t?.brand?.name),
+                    tuition: str(t?.brand?.tuition),
+                    media: str(t?.brand?.media),
+                    copyright: str(t?.footer?.copyright),
+                    terms: str(t?.footer?.terms),
+                    privacy: str(t?.footer?.privacy),
+                    contact: str(t?.footer?.contact),
+                }}
+            />
         </div>
     );
 }

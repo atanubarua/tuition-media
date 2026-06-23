@@ -367,7 +367,7 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                                 <Button
                                     type="button"
                                     onClick={runBestMatch}
-                                    disabled={!filters.tuition_code || analyzing}
+                                    disabled={!filters.tuition_code || applications.data.length === 0 || analyzing}
                                     className="gap-2 bg-linear-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700"
                                 >
                                     {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -377,6 +377,9 @@ export default function AdminApplicationsIndex({ applications, filters, statuses
                         </TooltipTrigger>
                         {!filters.tuition_code && (
                             <TooltipContent>Filter by a tuition ID to analyze candidates.</TooltipContent>
+                        )}
+                        {filters.tuition_code && applications.data.length === 0 && (
+                            <TooltipContent>No applications to analyze.</TooltipContent>
                         )}
                     </Tooltip>
                 </div>

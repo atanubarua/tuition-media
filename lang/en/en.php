@@ -3,6 +3,7 @@
 return [
     'meta_title' => 'Tuition Media - Find Tutors & Tuition Jobs in Bangladesh',
     'brand' => [
+        'name' => 'Faruqe Sir',
         'tuition' => 'Tuition',
         'media' => 'Media',
     ],
@@ -91,7 +92,7 @@ return [
         'sign_in' => 'Sign In',
     ],
     'footer' => [
-        'copyright' => '© :year TuitionMedia. All rights reserved.',
+        'copyright' => '© :year Faruqe Sir Tuition Media. All rights reserved.',
         'terms' => 'Terms',
         'privacy' => 'Privacy',
         'contact' => 'Contact',
@@ -133,11 +134,13 @@ return [
         'modal_education' => 'Education',
         'modal_subjects' => 'Subjects',
         'modal_levels' => 'Class Levels',
+        'modal_verified' => 'Verified',
+        'modal_locations' => 'Preferred Locations',
         'modal_not_specified' => 'Not specified',
         'modal_graduated' => 'Graduated :year',
         'modal_year' => 'Year :n',
         'modal_close' => 'Close',
-        'footer_copyright' => '© :year TuitionMedia. All rights reserved.',
+        'footer_copyright' => '© :year Faruqe Sir Tuition Media. All rights reserved.',
         'footer_terms' => 'Terms',
         'footer_privacy' => 'Privacy',
         'footer_contact' => 'Contact',

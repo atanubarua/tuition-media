@@ -3,15 +3,17 @@
 namespace App\Http\Controllers\Guardian;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\Subject;
 use App\Models\TuitionPost;
 use App\Models\University;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class TuitionPostController extends Controller
 {
@@ -23,13 +25,13 @@ class TuitionPostController extends Controller
 
         $filters = $request->validate([
             'tuition_code' => ['nullable', 'string', 'max:50'],
-            'status' => ['nullable', 'string', 'in:' . implode(',', $filterStatuses)],
+            'status' => ['nullable', 'string', 'in:'.implode(',', $filterStatuses)],
         ]);
 
         $posts = TuitionPost::query()
             ->where('guardian_id', $request->user()->id)
             ->when($filters['tuition_code'] ?? null, function ($query, $tuitionCode): void {
-                $query->where('tuition_code', 'like', '%' . trim($tuitionCode) . '%');
+                $query->where('tuition_code', 'like', '%'.trim($tuitionCode).'%');
             })
             ->when($filters['status'] ?? null, function ($query, $status): void {
                 $query->where('status', $status);
@@ -60,7 +62,7 @@ class TuitionPostController extends Controller
         $this->ensureGuardian($request);
         $validated = $this->validatePayload($request);
 
-        DB::transaction(function () use ($request, $validated): void {
+        $post = DB::transaction(function () use ($request, $validated): TuitionPost {
             $post = TuitionPost::create([
                 'guardian_id' => $request->user()->id,
                 ...$this->extractPostData($validated),
@@ -69,7 +71,24 @@ class TuitionPostController extends Controller
 
             $this->syncStudents($post, $validated['students']);
             $post->preferredUniversities()->sync($validated['preferred_university_ids'] ?? []);
+
+            return $post;
         });
+
+        // Notify admins of a newly published tuition post (emergency push event).
+        if ($post->status === 'published') {
+            $adminIds = User::query()->where('role', User::ROLE_ADMIN)->pluck('id');
+
+            foreach ($adminIds as $adminId) {
+                Notification::create([
+                    'user_id' => $adminId,
+                    'type' => 'new_tuition_post',
+                    'title' => 'New tuition post published',
+                    'message' => $request->user()->name.' posted "'.($post->title ?? $post->tuition_code).'".',
+                    'link' => '/admin/tuition-posts',
+                ]);
+            }
+        }
 
         return to_route('guardian.tuition-posts.index')->with('toast', [
             'type' => 'success',
@@ -99,34 +118,34 @@ class TuitionPostController extends Controller
 
         return Inertia::render('guardian/tuition-posts/show', [
             'post' => [
-                'id'                          => $tuitionPost->id,
-                'tuition_code'                => $tuitionPost->tuition_code,
-                'title'                       => $tuitionPost->title,
-                'status'                      => $tuitionPost->status,
-                'location'                    => $location ?: null,
-                'address_line'                => $tuitionPost->address_line,
-                'salary_type'                 => $tuitionPost->salary_type,
-                'salary_min'                  => $tuitionPost->salary_min,
-                'salary_max'                  => $tuitionPost->salary_max,
-                'days_per_week'               => $tuitionPost->days_per_week,
-                'preferred_time_slots'        => $tuitionPost->preferred_time_slots ?? [],
-                'duration_months'             => $tuitionPost->duration_months,
-                'tutor_gender_preference'     => $tuitionPost->tutor_gender_preference,
-                'required_experience_months'  => $tuitionPost->required_experience_months,
-                'special_requirements'        => $tuitionPost->special_requirements,
-                'published_at'                => $tuitionPost->published_at?->toDateString(),
-                'created_at'                  => $tuitionPost->created_at->toDateString(),
-                'preferred_universities'      => $tuitionPost->preferredUniversities->map(fn ($u) => $u->name)->values(),
-                'application_counts'          => $applicationCounts,
-                'students'                    => $tuitionPost->students->map(fn ($s) => [
-                    'id'             => $s->id,
-                    'student_name'   => $s->student_name,
+                'id' => $tuitionPost->id,
+                'tuition_code' => $tuitionPost->tuition_code,
+                'title' => $tuitionPost->title,
+                'status' => $tuitionPost->status,
+                'location' => $location ?: null,
+                'address_line' => $tuitionPost->address_line,
+                'salary_type' => $tuitionPost->salary_type,
+                'salary_min' => $tuitionPost->salary_min,
+                'salary_max' => $tuitionPost->salary_max,
+                'days_per_week' => $tuitionPost->days_per_week,
+                'preferred_time_slots' => $tuitionPost->preferred_time_slots ?? [],
+                'duration_months' => $tuitionPost->duration_months,
+                'tutor_gender_preference' => $tuitionPost->tutor_gender_preference,
+                'required_experience_months' => $tuitionPost->required_experience_months,
+                'special_requirements' => $tuitionPost->special_requirements,
+                'published_at' => $tuitionPost->published_at?->toDateString(),
+                'created_at' => $tuitionPost->created_at->toDateString(),
+                'preferred_universities' => $tuitionPost->preferredUniversities->map(fn ($u) => $u->name)->values(),
+                'application_counts' => $applicationCounts,
+                'students' => $tuitionPost->students->map(fn ($s) => [
+                    'id' => $s->id,
+                    'student_name' => $s->student_name,
                     'academic_level' => $s->academic_level,
-                    'class_level'    => $s->class_level,
+                    'class_level' => $s->class_level,
                     'academic_group' => $s->academic_group,
                     'honors_subject' => $s->honors_subject,
-                    'medium'         => $s->medium,
-                    'subjects'       => $s->subjects->pluck('name')->values(),
+                    'medium' => $s->medium,
+                    'subjects' => $s->subjects->pluck('name')->values(),
                 ])->values(),
             ],
         ]);

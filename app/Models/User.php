@@ -12,8 +12,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use App\Models\TutorRequest;
-use App\Models\TutorProfile;
 
 #[Fillable(['name', 'phone', 'email', 'role', 'gender', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
@@ -23,7 +21,9 @@ class User extends Authenticatable
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     public const ROLE_ADMIN = 'admin';
+
     public const ROLE_GUARDIAN = 'guardian';
+
     public const ROLE_TUTOR = 'tutor';
 
     /**
@@ -63,5 +63,10 @@ class User extends Authenticatable
     public function tutorRequestsAsTutor(): HasMany
     {
         return $this->hasMany(TutorRequest::class, 'tutor_id');
+    }
+
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
     }
 }

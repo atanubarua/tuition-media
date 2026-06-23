@@ -1,0 +1,23 @@
+{
+    "name": "Tuition Media",
+    "short_name": "Tuition Media",
+    "description": "Bangladesh tuition marketplace connecting guardians with tutors.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "icons": [
+        {
+            "src": "/favicon.svg?v=2",
+            "type": "image/svg+xml",
+            "sizes": "any",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/apple-touch-icon.png?v=2",
+            "type": "image/png",
+            "sizes": "180x180"
+        }
+    ]
+}

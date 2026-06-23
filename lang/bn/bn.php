@@ -3,6 +3,7 @@
 return [
     'meta_title' => 'Tuition Media - বাংলাদেশে টিউটর ও টিউশন জব খুঁজুন',
     'brand' => [
+        'name' => 'Faruqe Sir',
         'tuition' => 'Tuition',
         'media' => 'Media',
     ],
@@ -91,7 +92,7 @@ return [
         'sign_in' => 'সাইন ইন',
     ],
     'footer' => [
-        'copyright' => '© :year TuitionMedia. সর্বস্বত্ব সংরক্ষিত।',
+        'copyright' => '© :year Faruqe Sir Tuition Media. সর্বস্বত্ব সংরক্ষিত।',
         'terms' => 'শর্তাবলি',
         'privacy' => 'গোপনীয়তা',
         'contact' => 'যোগাযোগ',
@@ -133,11 +134,13 @@ return [
         'modal_education' => 'শিক্ষা',
         'modal_subjects' => 'বিষয়সমূহ',
         'modal_levels' => 'শ্রেণি স্তর',
+        'modal_verified' => 'যাচাইকৃত',
+        'modal_locations' => 'পছন্দের এলাকা',
         'modal_not_specified' => 'নির্ধারিত নয়',
         'modal_graduated' => 'পাস :year',
         'modal_year' => ':n বর্ষ',
         'modal_close' => 'বন্ধ করুন',
-        'footer_copyright' => '© :year TuitionMedia. সর্বস্বত্ব সংরক্ষিত।',
+        'footer_copyright' => '© :year Faruqe Sir Tuition Media. সর্বস্বত্ব সংরক্ষিত।',
         'footer_terms' => 'শর্তাবলি',
         'footer_privacy' => 'গোপনীয়তা',
         'footer_contact' => 'যোগাযোগ',

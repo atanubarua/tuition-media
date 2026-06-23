@@ -41,3 +41,12 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+// Register the service worker that handles background push notifications.
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+            // Registration failures are non-fatal; push simply stays unavailable.
+        });
+    });
+}

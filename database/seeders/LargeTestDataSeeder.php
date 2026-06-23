@@ -235,7 +235,7 @@ class LargeTestDataSeeder extends Seeder
             $publishedAt = $status === 'published' || $status === 'assigned' || $status === 'completed' ? $now->copy()->subDays(random_int(1, 120)) : null;
 
             $rows[] = [
-                'tuition_code' => sprintf('TIDSTR%08d', $i),
+                'tuition_code' => sprintf('TID%08d', $i),
                 'guardian_id' => $guardianIds[array_rand($guardianIds)],
                 'title' => 'Need Home Tutor #'.$i,
                 'division_id' => $loc['division_id'],

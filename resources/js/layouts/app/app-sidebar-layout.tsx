@@ -2,6 +2,7 @@ import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import { PushPrompt } from '@/components/push-prompt';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import type { AppLayoutProps } from '@/types';
 
@@ -16,6 +17,7 @@ export default function AppSidebarLayout({
             <AppSidebar />
             <AppContent variant="sidebar" className="overflow-x-hidden">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
+                <PushPrompt />
                 {children}
             </AppContent>
         </AppShell>
