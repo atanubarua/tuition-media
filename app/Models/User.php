@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -53,6 +54,11 @@ class User extends Authenticatable
     public function tuitionPosts(): HasMany
     {
         return $this->hasMany(TuitionPost::class, 'guardian_id');
+    }
+
+    public function savedTuitionPosts(): BelongsToMany
+    {
+        return $this->belongsToMany(TuitionPost::class, 'tutor_saved_posts')->withTimestamps();
     }
 
     public function tutorRequestsAsGuardian(): HasMany

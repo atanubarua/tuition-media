@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     BookOpen,
     CheckCircle2,
@@ -11,6 +11,7 @@ import {
     MapPin,
     Plus,
     Search,
+    Sparkles,
     Trash2,
     User,
 } from 'lucide-react';
@@ -18,8 +19,8 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 import ReactSelect from 'react-select';
 import AutocompleteInput from '@/components/autocomplete-input';
-import PublicNavbar from '@/components/public-navbar';
 import PublicFooter from '@/components/public-footer';
+import PublicNavbar from '@/components/public-navbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -95,26 +96,46 @@ function isGraduated(academicYear: number | null) {
 
 function currentYearLabel(academicYear: number | null, t: T) {
     const year = Number(academicYear);
-    if (!year || year < 1 || year > 4) return str(t?.find_tutors?.modal_not_specified, 'Not specified');
+
+    if (!year || year < 1 || year > 4) {
+return str(t?.find_tutors?.modal_not_specified, 'Not specified');
+}
+
     return replaceVars(str(t?.find_tutors?.modal_year, 'Year :n'), { n: year });
 }
 
 function graduatedYearLabel(intakeYear: number | null, t: T) {
-    if (!intakeYear) return str(t?.find_tutors?.modal_not_specified, 'Not specified');
+    if (!intakeYear) {
+return str(t?.find_tutors?.modal_not_specified, 'Not specified');
+}
+
     return replaceVars(str(t?.find_tutors?.modal_graduated, 'Graduated :year'), { year: intakeYear + 4 });
 }
 
 function classLabel(level: string) {
-    if (level === 'nursery') return 'Nursery';
-    if (level === 'kg') return 'KG';
+    if (level === 'nursery') {
+return 'Nursery';
+}
+
+    if (level === 'kg') {
+return 'KG';
+}
+
     return `Class ${level}`;
 }
+
+type MatchReasons = {
+    in_area: boolean;
+    subjects: number;
+    class_match: boolean;
+};
 
 type Tutor = {
     id: number;
     name: string;
     gender: string;
     tutor_profile: TutorProfile;
+    match_reasons?: MatchReasons | null;
 };
 
 type PaginatedTutors = {
@@ -146,17 +167,44 @@ const SELECT_STYLES = {
     input: (base: object) => ({ ...base, color: '#1e293b' }),
 };
 
+function matchReasonLabels(reasons: MatchReasons, t: T): string[] {
+    const labels: string[] = [];
+
+    if (reasons.in_area) {
+        labels.push(str(t?.find_tutors?.reason_in_area, 'In your area'));
+    }
+
+    if (reasons.subjects === 1) {
+        labels.push(str(t?.find_tutors?.reason_subject, 'Matches 1 subject'));
+    } else if (reasons.subjects > 1) {
+        labels.push(
+            replaceVars(str(t?.find_tutors?.reason_subjects, 'Matches :count subjects'), { count: reasons.subjects }),
+        );
+    }
+
+    if (reasons.class_match) {
+        labels.push(str(t?.find_tutors?.reason_class, 'Teaches your class'));
+    }
+
+    return labels;
+}
+
 function TutorCard({ tutor, onViewProfile, t }: { tutor: Tutor; onViewProfile: (tutor: Tutor) => void; t: T }) {
     const profile = tutor.tutor_profile;
     const subjects = profile.subjects.map(s => s.name);
     const locations = profile.preferred_locations.map(l => l.name);
     const initials = tutor.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    const reasonLabels = tutor.match_reasons ? matchReasonLabels(tutor.match_reasons, t) : [];
 
     return (
         <div
             className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
             onClick={() => onViewProfile(tutor)}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onViewProfile(tutor); } }}
+            onKeyDown={(e) => {
+ if (e.key === 'Enter' || e.key === ' ') {
+ e.preventDefault(); onViewProfile(tutor); 
+} 
+}}
             role="button"
             tabIndex={0}
         >
@@ -183,6 +231,17 @@ function TutorCard({ tutor, onViewProfile, t }: { tutor: Tutor; onViewProfile: (
                     {profile.department && <p className="mt-0.5 truncate text-xs text-slate-500">{profile.department}</p>}
                 </div>
             </div>
+
+            {reasonLabels.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                    {reasonLabels.map((label) => (
+                        <span key={label} className="inline-flex items-center gap-1 rounded-full bg-blue-600/10 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700">
+                            <Sparkles className="h-3 w-3" />
+                            {label}
+                        </span>
+                    ))}
+                </div>
+            )}
 
             <div className="mt-1 flex flex-wrap gap-1.5">
                 {subjects.slice(0, 3).map((s) => (
@@ -229,6 +288,8 @@ export default function FindTutors({
     divisions,
     districts,
     subdistricts,
+    personalized = false,
+    showPostNudge = false,
     canRegister = true,
 }: {
     tutors: PaginatedTutors;
@@ -237,6 +298,8 @@ export default function FindTutors({
     divisions: LocationOption[];
     districts: LocationOption[];
     subdistricts: LocationOption[];
+    personalized?: boolean;
+    showPostNudge?: boolean;
     canRegister?: boolean;
 }) {
     const { auth, translations: t } = usePage().props as any;
@@ -290,33 +353,64 @@ export default function FindTutors({
         setFormErrors({});
     };
 
-    const clearError = (key: string) => setFormErrors(prev => { const n = { ...prev }; delete n[key]; return n; });
+    const clearError = (key: string) => setFormErrors(prev => {
+ const n = { ...prev }; delete n[key];
+
+ return n; 
+});
 
     const validateForm = (): Record<string, string> => {
         const errors: Record<string, string> = {};
 
-        if (districtId && !divisionId) errors.division_id = 'Please select a division first.';
-        if (subdistrictId && !districtId) errors.district_id = 'Please select a district first.';
-        if (!divisionId) errors.division_id = 'Division is required.';
-        if (!districtId) errors.district_id = 'District is required.';
-        if (!subdistrictId) errors.subdistrict_id = 'Area is required.';
+        if (districtId && !divisionId) {
+errors.division_id = 'Please select a division first.';
+}
+
+        if (subdistrictId && !districtId) {
+errors.district_id = 'Please select a district first.';
+}
+
+        if (!divisionId) {
+errors.division_id = 'Division is required.';
+}
+
+        if (!districtId) {
+errors.district_id = 'District is required.';
+}
+
+        if (!subdistrictId) {
+errors.subdistrict_id = 'Area is required.';
+}
 
         students.forEach((s, i) => {
-            if (!s.class_level) errors[`students.${i}.class_level`] = 'Class level is required.';
+            if (!s.class_level) {
+errors[`students.${i}.class_level`] = 'Class level is required.';
+}
+
             if (NEEDS_GROUP.includes(s.class_level) && !s.academic_group) {
                 errors[`students.${i}.academic_group`] = 'Academic group is required for this class.';
             }
-            if (s.message.length > 2000) errors[`students.${i}.message`] = 'Message must not exceed 2000 characters.';
+
+            if (s.message.length > 2000) {
+errors[`students.${i}.message`] = 'Message must not exceed 2000 characters.';
+}
         });
 
         return errors;
     };
 
     const submitTutorRequest = () => {
-        if (!selectedTutor || isSubmittingRequest) return;
+        if (!selectedTutor || isSubmittingRequest) {
+return;
+}
 
         const errors = validateForm();
-        if (Object.keys(errors).length > 0) { setFormErrors(errors); return; }
+
+        if (Object.keys(errors).length > 0) {
+ setFormErrors(errors);
+
+ return; 
+}
 
         setIsSubmittingRequest(true);
         router.post('/guardian/tutor-requests', {
@@ -331,8 +425,12 @@ export default function FindTutors({
             })),
         }, {
             preserveScroll: true,
-            onSuccess: () => { setIsSubmittingRequest(false); closeRequestModal(); },
-            onError: (errs) => { setFormErrors(errs); setIsSubmittingRequest(false); },
+            onSuccess: () => {
+ setIsSubmittingRequest(false); closeRequestModal(); 
+},
+            onError: (errs) => {
+ setFormErrors(errs); setIsSubmittingRequest(false); 
+},
             onFinish: () => setIsSubmittingRequest(false),
         });
     };
@@ -340,11 +438,27 @@ export default function FindTutors({
     const handleFilterSubmit = (e: FormEvent) => {
         e.preventDefault();
         const params: Record<string, string> = {};
-        if (location.trim()) params.location = location.trim();
-        if (classLevel) params.class_level = classLevel;
-        if (classLevel && NEEDS_GROUP.includes(classLevel) && academicGroup) params.academic_group = academicGroup;
-        if (university.trim()) params.university = university.trim();
-        if (gender !== 'any') params.gender = gender;
+
+        if (location.trim()) {
+params.location = location.trim();
+}
+
+        if (classLevel) {
+params.class_level = classLevel;
+}
+
+        if (classLevel && NEEDS_GROUP.includes(classLevel) && academicGroup) {
+params.academic_group = academicGroup;
+}
+
+        if (university.trim()) {
+params.university = university.trim();
+}
+
+        if (gender !== 'any') {
+params.gender = gender;
+}
+
         router.get('/find-tutors', params, {
             preserveState: true,
             preserveScroll: true,
@@ -377,10 +491,10 @@ export default function FindTutors({
 
             <PublicNavbar canRegister={canRegister} active="find-tutors" />
 
-            <div className="bg-white border-b border-slate-200 pt-12 pb-12">
+            <div className="bg-white border-b border-slate-200 pt-8 pb-7">
                 <div className="mx-auto max-w-7xl px-4 lg:px-8">
-                    <h1 className="text-3xl font-extrabold text-slate-900 md:text-4xl">{str(t?.find_tutors?.heading, 'Find the Perfect Tutor')}</h1>
-                    <p className="mt-3 text-lg text-slate-600">
+                    <h1 className="text-2xl font-extrabold text-slate-900 md:text-3xl">{str(t?.find_tutors?.heading, 'Find the Perfect Tutor')}</h1>
+                    <p className="mt-2 text-base text-slate-600">
                         {replaceVars(str(t?.find_tutors?.subheading, 'Browse through our directory of :count qualified and verified educators across Bangladesh.'), { count: tutors.total })}
                     </p>
                 </div>
@@ -442,7 +556,9 @@ export default function FindTutors({
                                     <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <select
                                         value={classLevel}
-                                        onChange={(e) => { setClassLevel(e.target.value); setAcademicGroup(''); }}
+                                        onChange={(e) => {
+ setClassLevel(e.target.value); setAcademicGroup(''); 
+}}
                                         className="w-full rounded-xl border border-slate-300 pl-10 py-2.5 text-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 appearance-none bg-white"
                                     >
                                         <option value="">Any Class</option>
@@ -505,6 +621,22 @@ export default function FindTutors({
                 </aside>
 
                 <main className="flex-1">
+                    {personalized && (
+                        <div className="mb-5 flex items-center gap-2">
+                            <Sparkles className="h-5 w-5 text-blue-600" />
+                            <h2 className="text-lg font-bold text-slate-900">
+                                {str(t?.find_tutors?.recommended_heading, 'Recommended for you')}
+                            </h2>
+                        </div>
+                    )}
+
+                    {showPostNudge && (
+                        <div className="mb-5 flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3 text-sm text-slate-600">
+                            <Sparkles className="h-4 w-4 shrink-0 text-blue-500" />
+                            <span>{str(t?.find_tutors?.post_nudge, 'Post a tuition requirement to see tutors matched to you.')}</span>
+                        </div>
+                    )}
+
                     {(filters.location || filters.class_level || filters.university || filters.gender !== 'any') && (
                         <div className="mb-6 flex flex-wrap gap-2 items-center text-sm">
                             <span className="text-slate-500">{str(t?.find_tutors?.showing_results_for, 'Showing results for:')}</span>
@@ -548,6 +680,7 @@ export default function FindTutors({
                             <div className="inline-flex rounded-xl shadow-sm border border-slate-200 overflow-hidden bg-white">
                                 {tutors.links.map((link, i) => {
                                     const isLast = i === tutors.links.length - 1;
+
                                     if (!link.url) {
                                         return (
                                             <span
@@ -557,10 +690,13 @@ export default function FindTutors({
                                             />
                                         );
                                     }
+
                                     return (
                                         <button
                                             key={i}
-                                            onClick={() => { setIsFiltering(true); router.visit(link.url!, { preserveState: true, onFinish: () => setIsFiltering(false) }); }}
+                                            onClick={() => {
+ setIsFiltering(true); router.visit(link.url!, { preserveState: true, onFinish: () => setIsFiltering(false) }); 
+}}
                                             className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${link.active ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'} ${!isLast ? 'border-r border-slate-200' : ''}`}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                         />
@@ -764,7 +900,9 @@ export default function FindTutors({
                                         <label className="text-sm font-medium text-slate-700">Division</label>
                                         <select
                                             value={divisionId}
-                                            onChange={(e) => { setDivisionId(Number(e.target.value)); setDistrictId(0); setSubdistrictId(0); clearError('division_id'); clearError('district_id'); }}
+                                            onChange={(e) => {
+ setDivisionId(Number(e.target.value)); setDistrictId(0); setSubdistrictId(0); clearError('division_id'); clearError('district_id'); 
+}}
                                             className={`w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 ${formErrors.division_id ? 'border-red-400' : 'border-slate-300'}`}
                                         >
                                             <option value={0}>Any division</option>
@@ -776,7 +914,9 @@ export default function FindTutors({
                                         <label className="text-sm font-medium text-slate-700">District</label>
                                         <select
                                             value={districtId}
-                                            onChange={(e) => { setDistrictId(Number(e.target.value)); setSubdistrictId(0); clearError('district_id'); }}
+                                            onChange={(e) => {
+ setDistrictId(Number(e.target.value)); setSubdistrictId(0); clearError('district_id'); 
+}}
                                             disabled={!divisionId}
                                             className={`w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 disabled:opacity-60 ${formErrors.district_id ? 'border-red-400' : 'border-slate-300'}`}
                                         >
@@ -796,7 +936,9 @@ export default function FindTutors({
                                             }}
                                             options={subdistrictOptions}
                                             value={subdistrictOptions.find(o => o.value === subdistrictId) ?? null}
-                                            onChange={(opt) => { setSubdistrictId(opt?.value ?? 0); clearError('subdistrict_id'); }}
+                                            onChange={(opt) => {
+ setSubdistrictId(opt?.value ?? 0); clearError('subdistrict_id'); 
+}}
                                             placeholder={!districtId ? 'Select district first' : 'Search area...'}
                                             isDisabled={!districtId}
                                             isClearable
@@ -842,7 +984,9 @@ export default function FindTutors({
                                                     <label className="text-sm font-medium text-slate-700">Class Level <span className="text-red-500">*</span></label>
                                                     <select
                                                         value={student.class_level}
-                                                        onChange={(e) => { updateStudent(index, { class_level: e.target.value, academic_group: '' }); clearError(`students.${index}.class_level`); clearError(`students.${index}.academic_group`); }}
+                                                        onChange={(e) => {
+ updateStudent(index, { class_level: e.target.value, academic_group: '' }); clearError(`students.${index}.class_level`); clearError(`students.${index}.academic_group`); 
+}}
                                                         className={`w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 ${formErrors[`students.${index}.class_level`] ? 'border-red-400' : 'border-slate-300'}`}
                                                     >
                                                         <option value="">Select class</option>
@@ -857,7 +1001,9 @@ export default function FindTutors({
                                                         <label className="text-sm font-medium text-slate-700">Academic Group <span className="text-red-500">*</span></label>
                                                         <select
                                                             value={student.academic_group}
-                                                            onChange={(e) => { updateStudent(index, { academic_group: e.target.value }); clearError(`students.${index}.academic_group`); }}
+                                                            onChange={(e) => {
+ updateStudent(index, { academic_group: e.target.value }); clearError(`students.${index}.academic_group`); 
+}}
                                                             className={`w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 ${formErrors[`students.${index}.academic_group`] ? 'border-red-400' : 'border-slate-300'}`}
                                                         >
                                                             <option value="">Select group</option>
@@ -875,7 +1021,9 @@ export default function FindTutors({
                                                 <label className="text-sm font-medium text-slate-700">Message</label>
                                                 <textarea
                                                     value={student.message}
-                                                    onChange={(e) => { updateStudent(index, { message: e.target.value }); clearError(`students.${index}.message`); }}
+                                                    onChange={(e) => {
+ updateStudent(index, { message: e.target.value }); clearError(`students.${index}.message`); 
+}}
                                                     rows={3}
                                                     className={`w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 ${formErrors[`students.${index}.message`] ? 'border-red-400' : 'border-slate-300'}`}
                                                     placeholder="Any specific requirements for this student..."

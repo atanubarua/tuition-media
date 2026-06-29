@@ -20,6 +20,7 @@ use App\Http\Controllers\SubjectSuggestController;
 use App\Http\Controllers\TuitionJobController;
 use App\Http\Controllers\TuitionPostShowController;
 use App\Http\Controllers\Tutor\ProfileController;
+use App\Http\Controllers\Tutor\SavedTuitionPostController;
 use App\Http\Controllers\Tutor\TuitionApplicationController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Models\User;
@@ -122,6 +123,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('tutor/profile', [ProfileController::class, 'update'])->name('tutor.profile.update');
 
     Route::post('tuition-posts/{tuitionPost}/apply', [TuitionApplicationController::class, 'store'])->name('tuition-posts.apply');
+    Route::post('tuition-posts/{tuitionPost}/save', [SavedTuitionPostController::class, 'store'])->name('tutor.saved-posts.store');
+    Route::delete('tuition-posts/{tuitionPost}/save', [SavedTuitionPostController::class, 'destroy'])->name('tutor.saved-posts.destroy');
     Route::get('tutor/applications', [TuitionApplicationController::class, 'index'])->name('tutor.applications.index');
     Route::get('guardian/tutor-requests', [GuardianTutorRequestController::class, 'index'])->name('guardian.tutor-requests.index');
     Route::post('guardian/tutor-requests', [GuardianTutorRequestController::class, 'store'])->name('guardian.tutor-requests.store');

@@ -11,9 +11,15 @@ import {
     BookOpen,
     Clock,
     X,
+    Sparkles,
+    Heart,
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
+import {
+    store as savePost,
+    destroy as unsavePost,
+} from '@/actions/App/Http/Controllers/Tutor/SavedTuitionPostController';
 import AutocompleteInput from '@/components/autocomplete-input';
 import PublicFooter from '@/components/public-footer';
 import PublicNavbar from '@/components/public-navbar';
@@ -26,6 +32,12 @@ type Student = {
     medium: string;
     subjects: Subject[];
 };
+type MatchReasons = {
+    in_area: boolean;
+    subjects: number;
+    class_match: boolean;
+};
+
 type Post = {
     id: number;
     title: string | null;
@@ -38,6 +50,7 @@ type Post = {
     tutor_gender_preference: string;
     published_at: string;
     students: Student[];
+    match_reasons?: MatchReasons;
 };
 
 type PaginatedPosts = {
@@ -127,7 +140,53 @@ function classLabel(value: string | null, t: T) {
     return str(t?.card?.class_level, `Class ${value}`).replace(':level', value);
 }
 
-function TuitionCard({ post, t }: { post: Post; t: T }) {
+function matchReasonLabels(reasons: MatchReasons, t: T): string[] {
+    const labels: string[] = [];
+
+    if (reasons.in_area) {
+        labels.push(str(t?.tuition_jobs?.reason_in_area, 'In your area'));
+    }
+
+    if (reasons.subjects === 1) {
+        labels.push(str(t?.tuition_jobs?.reason_subject, 'Matches 1 subject'));
+    } else if (reasons.subjects > 1) {
+        labels.push(
+            replaceVars(
+                str(
+                    t?.tuition_jobs?.reason_subjects,
+                    'Matches :count subjects',
+                ),
+                { count: reasons.subjects },
+            ),
+        );
+    }
+
+    if (reasons.class_match) {
+        labels.push(str(t?.tuition_jobs?.reason_class, 'Teaches this class'));
+    }
+
+    return labels;
+}
+
+function TuitionCard({
+    post,
+    t,
+    showReasons = false,
+    saveable = false,
+    saved = false,
+    onToggleSave,
+}: {
+    post: Post;
+    t: T;
+    showReasons?: boolean;
+    saveable?: boolean;
+    saved?: boolean;
+    onToggleSave?: (post: Post) => void;
+}) {
+    const reasonLabels =
+        showReasons && post.match_reasons
+            ? matchReasonLabels(post.match_reasons, t)
+            : [];
     const allSubjects = [
         ...new Set(
             post.students.flatMap((s) => s.subjects.map((sub) => sub.name)),
@@ -149,7 +208,7 @@ function TuitionCard({ post, t }: { post: Post; t: T }) {
             href={`/tuition-posts/${post.id}`}
             className="group flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-md"
         >
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-3">
                 <h3 className="line-clamp-2 leading-snug font-bold text-slate-900 transition-colors group-hover:text-blue-700">
                     {post.title ||
                         replaceVars(
@@ -160,10 +219,58 @@ function TuitionCard({ post, t }: { post: Post; t: T }) {
                             { subdistrict: post.subdistrict_name },
                         )}
                 </h3>
-                <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                    {salaryLabel(post, t)}
-                </span>
+                <div className="flex shrink-0 items-center gap-2">
+                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+                        {salaryLabel(post, t)}
+                    </span>
+                    {saveable && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onToggleSave?.(post);
+                            }}
+                            aria-pressed={saved}
+                            aria-label={
+                                saved
+                                    ? str(
+                                          t?.tuition_jobs?.unsave,
+                                          'Remove from saved',
+                                      )
+                                    : str(t?.tuition_jobs?.save, 'Save job')
+                            }
+                            title={
+                                saved
+                                    ? str(
+                                          t?.tuition_jobs?.unsave,
+                                          'Remove from saved',
+                                      )
+                                    : str(t?.tuition_jobs?.save, 'Save job')
+                            }
+                            className="rounded-full p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-500"
+                        >
+                            <Heart
+                                className={`h-5 w-5 ${saved ? 'fill-rose-500 text-rose-500' : ''}`}
+                            />
+                        </button>
+                    )}
+                </div>
             </div>
+
+            {reasonLabels.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                    {reasonLabels.map((label) => (
+                        <span
+                            key={label}
+                            className="inline-flex items-center gap-1 rounded-full bg-blue-600/10 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700"
+                        >
+                            <Sparkles className="h-3 w-3" />
+                            {label}
+                        </span>
+                    ))}
+                </div>
+            )}
 
             <div className="flex flex-wrap gap-2">
                 {allSubjects.slice(0, 3).map((s) => (
@@ -307,13 +414,18 @@ const classesByLevel: Record<string, string[]> = {
     honors: [],
 };
 
-
 export default function TuitionJobsPage({
     posts,
+    tab = 'recent',
+    tabsAvailable = false,
+    savedIds = [],
     filters,
     canRegister = true,
 }: {
     posts: PaginatedPosts;
+    tab?: 'best' | 'recent' | 'saved';
+    tabsAvailable?: boolean;
+    savedIds?: number[];
     filters: {
         location: string;
         class_level: string;
@@ -326,6 +438,33 @@ export default function TuitionJobsPage({
     canRegister?: boolean;
 }) {
     const { translations: t } = usePage().props as any;
+    const [savedSet, setSavedSet] = useState<Set<number>>(
+        () => new Set(savedIds),
+    );
+
+    const toggleSave = (post: Post) => {
+        const isSaved = savedSet.has(post.id);
+        setSavedSet((prev) => {
+            const next = new Set(prev);
+
+            if (isSaved) {
+                next.delete(post.id);
+            } else {
+                next.add(post.id);
+            }
+
+            return next;
+        });
+
+        const action = isSaved ? unsavePost(post.id) : savePost(post.id);
+        router.visit(action.url, {
+            method: action.method,
+            preserveScroll: true,
+            preserveState: true,
+            only: ['posts', 'savedIds'],
+        });
+    };
+
     const [location, setLocation] = useState(filters.location ?? '');
     const [classLevel, setClassLevel] = useState(filters.class_level ?? '');
     const [academicGroup, setAcademicGroup] = useState(
@@ -347,7 +486,9 @@ export default function TuitionJobsPage({
     // Class options cascade from the selected Academic Level; show all when 'Any'.
     const visibleClassOptions =
         level && classesByLevel[level]
-            ? classOptions.filter((o) => classesByLevel[level].includes(o.value))
+            ? classOptions.filter((o) =>
+                  classesByLevel[level].includes(o.value),
+              )
             : classOptions;
 
     const onClassChange = (next: string) => {
@@ -369,7 +510,10 @@ export default function TuitionJobsPage({
     };
 
     const navigate = (params: Record<string, string | number | undefined>) => {
-        router.get('/tuition-jobs', params, {
+        // Always send the active tab explicitly — the server default differs by role,
+        // so omitting it (e.g. for 'recent') would bounce an eligible tutor back to 'best'.
+        const merged = { tab, ...params };
+        router.get('/tuition-jobs', merged, {
             preserveState: true,
             preserveScroll: true,
             onStart: () => setIsFiltering(true),
@@ -378,19 +522,43 @@ export default function TuitionJobsPage({
         });
     };
 
+    const currentFilterParams = (): Record<
+        string,
+        string | number | undefined
+    > => ({
+        location: location.trim() || undefined,
+        class_level: classLevel || undefined,
+        academic_group: shouldShowGroup
+            ? academicGroup || undefined
+            : undefined,
+        gender: gender !== 'any' ? gender : undefined,
+        level: level || undefined,
+        min_salary: minSalary.trim() || undefined,
+        max_days: maxDays.trim() || undefined,
+    });
+
     const onSubmit = (e: FormEvent) => {
         e.preventDefault();
-        navigate({
-            location: location.trim() || undefined,
-            class_level: classLevel || undefined,
-            academic_group: shouldShowGroup
-                ? academicGroup || undefined
-                : undefined,
-            gender: gender !== 'any' ? gender : undefined,
-            level: level || undefined,
-            min_salary: minSalary.trim() || undefined,
-            max_days: maxDays.trim() || undefined,
-        });
+        navigate(currentFilterParams());
+    };
+
+    const selectTab = (nextTab: 'best' | 'recent' | 'saved') => {
+        if (nextTab === tab) {
+            return;
+        }
+
+        navigate({ ...currentFilterParams(), tab: nextTab });
+    };
+
+    const resetFilters = () => {
+        setLocation('');
+        setClassLevel('');
+        setAcademicGroup('');
+        setGender('any');
+        setLevel('');
+        setMinSalary('');
+        setMaxDays('');
+        navigate({});
     };
 
     const removeFilter = (key: string) => {
@@ -474,12 +642,12 @@ export default function TuitionJobsPage({
             )}
             <PublicNavbar canRegister={canRegister} active="tuition-jobs" />
 
-            <div className="border-b border-slate-200 bg-white pt-12 pb-12">
+            <div className="border-b border-slate-200 bg-white pt-8 pb-7">
                 <div className="mx-auto max-w-7xl px-4 lg:px-8">
-                    <h1 className="text-3xl font-extrabold text-slate-900 md:text-4xl">
+                    <h1 className="text-2xl font-extrabold text-slate-900 md:text-3xl">
                         {str(t?.tuition_jobs?.heading, 'All Tuition Jobs')}
                     </h1>
-                    <p className="mt-3 text-lg text-slate-600">
+                    <p className="mt-2 text-base text-slate-600">
                         {str(
                             t?.tuition_jobs?.subheading,
                             'Browse all available tuition posts with tutor-focused filters.',
@@ -601,7 +769,9 @@ export default function TuitionJobsPage({
                                             <select
                                                 value={classLevel}
                                                 onChange={(e) =>
-                                                    onClassChange(e.target.value)
+                                                    onClassChange(
+                                                        e.target.value,
+                                                    )
                                                 }
                                                 disabled={classDisabled}
                                                 className="w-full min-w-0 appearance-none rounded-xl border border-slate-300 bg-white px-4 py-2.5 pr-10 pl-10 text-sm disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
@@ -765,17 +935,56 @@ export default function TuitionJobsPage({
                                 >
                                     {str(t?.tuition_jobs?.apply, 'Apply')}
                                 </button>
-                                <Link
-                                    href="/tuition-jobs"
-                                    className="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+                                <button
+                                    type="button"
+                                    onClick={resetFilters}
+                                    disabled={!hasActiveFilters}
+                                    className="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
                                 >
                                     {str(t?.tuition_jobs?.reset, 'Reset')}
-                                </Link>
+                                </button>
                             </div>
                         </form>
                     </aside>
 
                     <main className="min-w-0 flex-1">
+                        {tabsAvailable && (
+                            <div className="mb-6 flex gap-1 border-b border-slate-200">
+                                {(
+                                    [
+                                        [
+                                            'best',
+                                            t?.tuition_jobs?.tab_best,
+                                            'Best matches',
+                                        ],
+                                        [
+                                            'recent',
+                                            t?.tuition_jobs?.tab_recent,
+                                            'Most recent',
+                                        ],
+                                        [
+                                            'saved',
+                                            t?.tuition_jobs?.tab_saved,
+                                            'Saved jobs',
+                                        ],
+                                    ] as const
+                                ).map(([key, label, fallback]) => (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        onClick={() => selectTab(key)}
+                                        className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-semibold transition ${
+                                            tab === key
+                                                ? 'border-blue-600 text-blue-700'
+                                                : 'border-transparent text-slate-500 hover:text-slate-800'
+                                        }`}
+                                    >
+                                        {str(label, fallback)}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
                         {hasActiveFilters && (
                             <div className="mb-5 flex flex-wrap items-center gap-2">
                                 <span className="text-sm text-slate-500">
@@ -861,21 +1070,35 @@ export default function TuitionJobsPage({
                         {posts.data.length === 0 ? (
                             <div className="mt-6 flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white py-20 text-center">
                                 <div className="mb-5 rounded-full border border-slate-100 bg-slate-50 p-5 shadow-sm">
-                                    <Search className="h-8 w-8 text-slate-400" />
+                                    {tab === 'saved' ? (
+                                        <Heart className="h-8 w-8 text-slate-400" />
+                                    ) : (
+                                        <Search className="h-8 w-8 text-slate-400" />
+                                    )}
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900">
-                                    {str(
-                                        t?.tuition_jobs?.no_posts_title,
-                                        'No tuition posts found',
-                                    )}
+                                    {tab === 'saved'
+                                        ? str(
+                                              t?.tuition_jobs?.saved_empty,
+                                              "You haven't saved any jobs yet.",
+                                          )
+                                        : str(
+                                              t?.tuition_jobs?.no_posts_title,
+                                              'No tuition posts found',
+                                          )}
                                 </h3>
                                 <p className="mt-2 max-w-sm text-slate-600">
-                                    {str(
-                                        t?.tuition_jobs?.no_posts,
-                                        'No tuition posts found for your search.',
-                                    )}
+                                    {tab === 'saved'
+                                        ? str(
+                                              t?.tuition_jobs?.saved_empty_hint,
+                                              'Tap the heart on any tuition post to save it for later.',
+                                          )
+                                        : str(
+                                              t?.tuition_jobs?.no_posts,
+                                              'No tuition posts found for your search.',
+                                          )}
                                 </p>
-                                {hasActiveFilters && (
+                                {hasActiveFilters && tab !== 'saved' && (
                                     <Link
                                         href="/tuition-jobs"
                                         className="mt-6 font-semibold text-blue-600 hover:text-blue-700"
@@ -894,6 +1117,10 @@ export default function TuitionJobsPage({
                                         key={post.id}
                                         post={post}
                                         t={t}
+                                        showReasons={tab === 'best'}
+                                        saveable={tabsAvailable}
+                                        saved={savedSet.has(post.id)}
+                                        onToggleSave={toggleSave}
                                     />
                                 ))}
                             </div>
